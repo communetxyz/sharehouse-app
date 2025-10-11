@@ -64,7 +64,7 @@ export function CommuneInfo({ commune, members }: CommuneInfoProps) {
             ShareHouse brings the spirit of Japanese communal living to the blockchain. All chores rotate automatically
             based on the configured schedule, ensuring fair distribution of responsibilities.
           </p>
-          <p>Built on Gnosis Chain with Citizen Wallet integration for seamless crypto interactions.</p>
+          <p>Built on Gnosis Chain with WalletConnect integration for seamless wallet interactions.</p>
         </CardContent>
       </Card>
     </div>

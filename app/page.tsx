@@ -129,7 +129,7 @@ export default function HomePage() {
               <div className="space-y-2">
                 <h3 className="text-xl font-serif text-charcoal">Join with Your Wallet</h3>
                 <p className="text-charcoal/70 leading-relaxed">
-                  Connect your Citizen Wallet, deposit any required collateral, and become a member.
+                  Connect your wallet using WalletConnect, deposit any required collateral, and become a member.
                 </p>
               </div>
             </div>
@@ -185,7 +185,7 @@ export default function HomePage() {
               <div className="text-lg font-sans tracking-wide text-cream">ShareHouse</div>
             </div>
             <div className="text-sm text-center md:text-right">
-              <p>Built on Gnosis Chain with Citizen Wallet</p>
+              <p>Built on Gnosis Chain with WalletConnect</p>
               <p className="text-cream/50 mt-1">Harmonious living, powered by blockchain</p>
             </div>
           </div>
