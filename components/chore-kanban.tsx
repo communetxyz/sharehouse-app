@@ -36,6 +36,21 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
     return `Every ${days} days`
   }
 
+  const formatPeriodDate = (periodStart: number, periodEnd: number) => {
+    const start = new Date(periodStart * 1000)
+    const end = new Date(periodEnd * 1000)
+
+    // If same day, just show the day
+    if (start.toDateString() === end.toDateString()) {
+      return start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+    }
+
+    // If different days, show range
+    const startStr = start.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    const endStr = end.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    return `${startStr} - ${endStr}`
+  }
+
   return (
     <div className="grid md:grid-cols-3 gap-6">
       {/* Assigned to Me */}
@@ -59,7 +74,7 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
                       <Badge variant="outline" className="border-sage/30 text-sage">
                         {getFrequencyLabel(chore.frequency)}
                       </Badge>
-                      <span>Period {chore.periodNumber}</span>
+                      <span>{formatPeriodDate(chore.periodStart, chore.periodEnd)}</span>
                     </div>
                   </div>
                   <Button
@@ -108,7 +123,7 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
                       <Badge variant="outline" className="border-charcoal/20">
                         {getFrequencyLabel(chore.frequency)}
                       </Badge>
-                      <span>Period {chore.periodNumber}</span>
+                      <span>{formatPeriodDate(chore.periodStart, chore.periodEnd)}</span>
                     </div>
                   </div>
                   <p className="text-xs text-charcoal/60">
@@ -142,7 +157,7 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
                       <Badge variant="outline" className="border-sage/30 text-sage">
                         {getFrequencyLabel(chore.frequency)}
                       </Badge>
-                      <span>Period {chore.periodNumber}</span>
+                      <span>{formatPeriodDate(chore.periodStart, chore.periodEnd)}</span>
                     </div>
                   </div>
                   <p className="text-xs text-charcoal/60">
