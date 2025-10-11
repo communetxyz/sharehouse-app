@@ -85,6 +85,8 @@ export function useJoinCommune() {
         functionName: "memberRegistry",
       })) as `0x${string}`
 
+      console.log("[v0] Member registry address:", memberRegistryAddress)
+
       const isUsed = await provider.readContract({
         address: memberRegistryAddress,
         abi: MEMBER_REGISTRY_ABI,
@@ -92,11 +94,12 @@ export function useJoinCommune() {
         args: [BigInt(communeId), BigInt(nonce)],
       })
 
+      console.log("[v0] Is nonce used:", isUsed)
+
       if (isUsed) {
         throw new Error("This invite has already been used or expired")
       }
 
-      // Fetch commune statistics
       const stats: any = await provider.readContract({
         address: COMMUNE_OS_ADDRESS as `0x${string}`,
         abi: COMMUNE_OS_ABI,
@@ -104,17 +107,38 @@ export function useJoinCommune() {
         args: [BigInt(communeId)],
       })
 
+      console.log("[v0] Raw commune stats from contract:", stats)
+
+      if (!stats) {
+        throw new Error("No data returned from contract")
+      }
+
+      if (!stats.commune) {
+        console.error("[v0] Stats structure:", Object.keys(stats))
+        throw new Error("Invalid commune data structure returned from contract")
+      }
+
+      const communeInfo = stats.commune
+      console.log("[v0] Commune info:", communeInfo)
+
+      if (!communeInfo.name) {
+        throw new Error("Commune name is missing from contract data")
+      }
+
       setCommuneData({
-        id: stats.commune.id.toString(),
-        name: stats.commune.name,
-        creator: stats.commune.creator,
-        collateralRequired: stats.commune.collateralRequired,
-        collateralAmount: (Number(stats.commune.collateralAmount) / 1e18).toString(),
-        memberCount: stats.memberCount.toString(),
-        choreCount: stats.choreCount.toString(),
-        expenseCount: stats.expenseCount.toString(),
+        id: communeInfo.id?.toString() || communeId,
+        name: communeInfo.name || "Unknown Commune",
+        creator: communeInfo.creator || "0x0",
+        collateralRequired: communeInfo.collateralRequired || false,
+        collateralAmount: communeInfo.collateralAmount ? (Number(communeInfo.collateralAmount) / 1e18).toString() : "0",
+        memberCount: stats.memberCount?.toString() || "0",
+        choreCount: stats.choreCount?.toString() || "0",
+        expenseCount: stats.expenseCount?.toString() || "0",
       })
+
+      console.log("[v0] Successfully set commune data")
     } catch (err: any) {
+      console.error("[v0] Validation error:", err)
       setError(err.message || "Failed to validate invite")
       setCommuneData(null)
     } finally {
