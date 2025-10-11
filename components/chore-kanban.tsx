@@ -17,9 +17,11 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
   const { markComplete, isMarking } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
 
-  const assignedToMe = chores.filter((c) => c.isAssignedToUser && !c.completed)
-  const notStarted = chores.filter((c) => !c.isAssignedToUser && !c.completed)
-  const completed = chores.filter((c) => c.completed)
+  const sortByDate = (a: ChoreInstance, b: ChoreInstance) => a.periodStart - b.periodStart
+
+  const assignedToMe = chores.filter((c) => c.isAssignedToUser && !c.completed).sort(sortByDate)
+  const notStarted = chores.filter((c) => !c.isAssignedToUser && !c.completed).sort(sortByDate)
+  const completed = chores.filter((c) => c.completed).sort(sortByDate)
 
   const handleComplete = async (chore: ChoreInstance) => {
     setCompletingId(chore.scheduleId.toString())
