@@ -21,10 +21,22 @@ export function useCommuneData() {
     }
 
     try {
-      // Get current month start and end timestamps
       const now = new Date()
-      const startDate = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000)
-      const endDate = Math.floor(new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).getTime() / 1000)
+      const currentDay = now.getDay() // 0 = Sunday, 1 = Monday, etc.
+      const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1 // Adjust so Monday = 0
+
+      // Get Monday of current week at 00:00:00
+      const monday = new Date(now)
+      monday.setDate(now.getDate() - daysFromMonday)
+      monday.setHours(0, 0, 0, 0)
+
+      // Get Sunday of current week at 23:59:59
+      const sunday = new Date(monday)
+      sunday.setDate(monday.getDate() + 6)
+      sunday.setHours(23, 59, 59, 999)
+
+      const startDate = Math.floor(monday.getTime() / 1000)
+      const endDate = Math.floor(sunday.getTime() / 1000)
 
       // Fetch commune basic info
       const basicInfo = await communeOSContract.getCommuneBasicInfo(address)
