@@ -18,17 +18,7 @@ export default function JoinPage() {
   const [signature, setSignature] = useState("")
 
   const { isConnected } = useWallet()
-  const {
-    communeData,
-    isValidating,
-    isApproving,
-    isApproved,
-    isJoining,
-    error,
-    validateInvite,
-    approveCollateral,
-    joinCommune,
-  } = useJoinCommune()
+  const { communeData, isValidating, isJoining, error, validateInvite, joinCommune } = useJoinCommune()
 
   const handleValidate = async () => {
     if (!communeId || !nonce || !signature) {
@@ -158,36 +148,27 @@ export default function JoinPage() {
                       <span className="text-charcoal/70">Chores:</span>
                       <span className="font-medium text-charcoal">{communeData.choreCount}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-charcoal/70">Collateral Required:</span>
+                      <span className="font-medium text-charcoal">{communeData.collateralRequired ? "Yes" : "No"}</span>
+                    </div>
                     {communeData.collateralRequired && (
                       <div className="flex justify-between">
-                        <span className="text-charcoal/70">Collateral Required:</span>
+                        <span className="text-charcoal/70">Collateral Amount:</span>
                         <span className="font-medium text-charcoal">{communeData.collateralAmount} BREAD</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {communeData.collateralRequired && !isApproved && (
-                  <Button
-                    onClick={approveCollateral}
-                    disabled={isApproving || !isConnected}
-                    className="w-full bg-terracotta hover:bg-terracotta/90 text-cream"
-                  >
-                    {isApproving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Approve {communeData.collateralAmount} BREAD
-                  </Button>
-                )}
-
-                {(!communeData.collateralRequired || isApproved) && (
-                  <Button
-                    onClick={handleJoin}
-                    disabled={isJoining || !isConnected}
-                    className="w-full bg-sage hover:bg-sage/90 text-cream"
-                  >
-                    {isJoining && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Join ShareHouse
-                  </Button>
-                )}
+                <Button
+                  onClick={handleJoin}
+                  disabled={isJoining || !isConnected}
+                  className="w-full bg-sage hover:bg-sage/90 text-cream"
+                >
+                  {isJoining && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Join ShareHouse
+                </Button>
               </div>
             )}
           </CardContent>
