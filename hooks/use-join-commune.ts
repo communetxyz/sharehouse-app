@@ -1,16 +1,85 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useWallet } from "./use-wallet"
-import { communeOSContract } from "@/lib/contracts"
+import { communeOSContract, BREAD_TOKEN_ADDRESS, COLLATERAL_MANAGER_ADDRESS, ERC20_ABI } from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
+import { ethers } from "ethers"
 
 export function useJoinCommune() {
   const { address, executeTransaction, isConfirming } = useWallet()
   const [communeData, setCommuneData] = useState<CommuneStatistics | null>(null)
   const [isValidating, setIsValidating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
+  const [isApproving, setIsApproving] = useState(false)
+  const [isCheckingAllowance, setIsCheckingAllowance] = useState(false)
+  const [hasAllowance, setHasAllowance] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (communeData && address && communeData.collateralRequired) {
+      checkAllowance()
+    }
+  }, [communeData, address])
+
+  const checkAllowance = async () => {
+    if (!address || !communeData) return
+
+    setIsCheckingAllowance(true)
+    try {
+      const provider = new ethers.JsonRpcProvider(
+        "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE",
+      )
+      const breadToken = new ethers.Contract(BREAD_TOKEN_ADDRESS, ERC20_ABI, provider)
+
+      const allowance = await breadToken.allowance(address, COLLATERAL_MANAGER_ADDRESS)
+      const requiredAmount = ethers.parseEther(communeData.collateralAmount)
+
+      setHasAllowance(allowance >= requiredAmount)
+    } catch (err) {
+      console.error("Failed to check allowance:", err)
+      setHasAllowance(false)
+    } finally {
+      setIsCheckingAllowance(false)
+    }
+  }
+
+  const approveToken = async (amount: ethers.BigNumber) => {
+    if (!address || !communeData) {
+      setError("Missing required data")
+      return
+    }
+
+    setIsApproving(true)
+    setError(null)
+
+    try {
+      const provider = new ethers.JsonRpcProvider(
+        "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE",
+      )
+      const signer = provider.getSigner()
+      const breadToken = new ethers.Contract(BREAD_TOKEN_ADDRESS, ERC20_ABI, signer)
+
+      await breadToken.approve(COLLATERAL_MANAGER_ADDRESS, amount)
+
+      // Wait for confirmation
+      await new Promise((resolve) => {
+        const checkConfirmation = setInterval(() => {
+          if (!isConfirming) {
+            clearInterval(checkConfirmation)
+            resolve(true)
+          }
+        }, 500)
+      })
+
+      // Recheck allowance after approval
+      await checkAllowance()
+    } catch (err: any) {
+      setError(err.message || "Failed to approve token")
+    } finally {
+      setIsApproving(false)
+    }
+  }
 
   const validateInvite = async (communeId: string, nonce: string, signature: string) => {
     setIsValidating(true)
@@ -80,8 +149,12 @@ export function useJoinCommune() {
     communeData,
     isValidating,
     isJoining,
+    isApproving,
+    isCheckingAllowance,
+    hasAllowance,
     error,
     validateInvite,
     joinCommune,
+    approveToken,
   }
 }

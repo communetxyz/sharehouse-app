@@ -18,13 +18,28 @@ export default function JoinPage() {
   const [signature, setSignature] = useState("")
 
   const { isConnected } = useWallet()
-  const { communeData, isValidating, isJoining, error, validateInvite, joinCommune } = useJoinCommune()
+  const {
+    communeData,
+    isValidating,
+    isJoining,
+    isApproving,
+    isCheckingAllowance,
+    hasAllowance,
+    error,
+    validateInvite,
+    joinCommune,
+    approveToken,
+  } = useJoinCommune()
 
   const handleValidate = async () => {
     if (!communeId || !nonce || !signature) {
       return
     }
     await validateInvite(communeId, nonce, signature)
+  }
+
+  const handleApprove = async () => {
+    await approveToken()
   }
 
   const handleJoin = async () => {
@@ -161,14 +176,34 @@ export default function JoinPage() {
                   </div>
                 </div>
 
-                <Button
-                  onClick={handleJoin}
-                  disabled={isJoining || !isConnected}
-                  className="w-full bg-sage hover:bg-sage/90 text-cream"
-                >
-                  {isJoining && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Join ShareHouse
-                </Button>
+                {communeData.collateralRequired && !hasAllowance && !isCheckingAllowance && (
+                  <Button
+                    onClick={handleApprove}
+                    disabled={isApproving || !isConnected}
+                    className="w-full bg-sage hover:bg-sage/90 text-cream"
+                  >
+                    {isApproving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Approve BREAD Token
+                  </Button>
+                )}
+
+                {(!communeData.collateralRequired || hasAllowance) && !isCheckingAllowance && (
+                  <Button
+                    onClick={handleJoin}
+                    disabled={isJoining || !isConnected}
+                    className="w-full bg-sage hover:bg-sage/90 text-cream"
+                  >
+                    {isJoining && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    Join ShareHouse
+                  </Button>
+                )}
+
+                {isCheckingAllowance && (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-sage" />
+                    <span className="ml-2 text-charcoal/70">Checking token allowance...</span>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
