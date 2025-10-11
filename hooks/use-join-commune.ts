@@ -9,6 +9,7 @@ import {
   BREAD_TOKEN_ADDRESS,
   COLLATERAL_MANAGER_ADDRESS,
   ERC20_ABI,
+  MEMBER_REGISTRY_ABI, // Import MemberRegistry ABI
 } from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
 import { createPublicClient, http } from "viem"
@@ -69,10 +70,15 @@ export function useJoinCommune() {
         transport: http("https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"),
       })
 
-      // Check if nonce is used
-      const isUsed = await provider.readContract({
+      const memberRegistryAddress = (await provider.readContract({
         address: COMMUNE_OS_ADDRESS as `0x${string}`,
         abi: COMMUNE_OS_ABI,
+        functionName: "memberRegistry",
+      })) as `0x${string}`
+
+      const isUsed = await provider.readContract({
+        address: memberRegistryAddress,
+        abi: MEMBER_REGISTRY_ABI,
         functionName: "isNonceUsed",
         args: [BigInt(communeId), BigInt(nonce)],
       })

@@ -139,6 +139,19 @@ export const COMMUNE_OS_ABI = [
   },
 ]
 
+export const MEMBER_REGISTRY_ABI = [
+  {
+    type: "function",
+    name: "isNonceUsed",
+    inputs: [
+      { name: "communeId", type: "uint256" },
+      { name: "nonce", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
+  },
+]
+
 // Create provider and contract instance
 const provider = new ethers.JsonRpcProvider(RPC_URL)
 export const communeOSContract = new ethers.Contract(COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI, provider)
@@ -146,22 +159,7 @@ export const communeOSContract = new ethers.Contract(COMMUNE_OS_ADDRESS, COMMUNE
 // Add isNonceUsed method manually since it's on MemberRegistry
 communeOSContract.isNonceUsed = async (communeId: bigint, nonce: bigint) => {
   const memberRegistryAddress = await communeOSContract.memberRegistry()
-  const memberRegistry = new ethers.Contract(
-    memberRegistryAddress,
-    [
-      {
-        type: "function",
-        name: "isNonceUsed",
-        inputs: [
-          { name: "communeId", type: "uint256" },
-          { name: "nonce", type: "uint256" },
-        ],
-        outputs: [{ name: "", type: "bool" }],
-        stateMutability: "view",
-      },
-    ],
-    provider,
-  )
+  const memberRegistry = new ethers.Contract(memberRegistryAddress, MEMBER_REGISTRY_ABI, provider)
   return await memberRegistry.isNonceUsed(communeId, nonce)
 }
 
