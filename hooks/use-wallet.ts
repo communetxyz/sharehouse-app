@@ -1,7 +1,13 @@
 "use client"
 
-import { useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt } from "wagmi"
-import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
+import { useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi"
+import {
+  COMMUNE_OS_ABI,
+  COMMUNE_OS_ADDRESS,
+  ERC20_ABI,
+  BREAD_TOKEN_ADDRESS,
+  COLLATERAL_MANAGER_ADDRESS,
+} from "@/lib/contracts"
 import { useState } from "react"
 
 export function useWallet() {
@@ -9,6 +15,12 @@ export function useWallet() {
   const { disconnect } = useDisconnect()
   const { writeContractAsync } = useWriteContract()
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
+  const { data: allowance } = useReadContract({
+    address: BREAD_TOKEN_ADDRESS as `0x${string}`,
+    abi: ERC20_ABI,
+    functionName: "allowance",
+    args: [address, COLLATERAL_MANAGER_ADDRESS],
+  })
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -38,11 +50,48 @@ export function useWallet() {
     }
   }
 
+  const approveToken = async (amount: bigint) => {
+    if (!address) {
+      throw new Error("Wallet not connected")
+    }
+
+    try {
+      console.log("[v0] Approving token:", { amount: amount.toString() })
+
+      const hash = await writeContractAsync({
+        address: BREAD_TOKEN_ADDRESS as `0x${string}`,
+        abi: ERC20_ABI,
+        functionName: "approve",
+        args: [COLLATERAL_MANAGER_ADDRESS, amount],
+      })
+
+      console.log("[v0] Approval transaction submitted:", hash)
+      setTxHash(hash)
+      return hash
+    } catch (error: any) {
+      console.error("[v0] Approval failed:", error)
+      throw new Error(error.message || "Token approval failed")
+    }
+  }
+
+  const checkAllowance = async () => {
+    if (!address) return BigInt(0)
+
+    try {
+      return allowance as bigint
+    } catch (error) {
+      console.error("[v0] Failed to check allowance:", error)
+      return BigInt(0)
+    }
+  }
+
   return {
     address,
     isConnected,
     disconnect,
     executeTransaction,
+    approveToken,
+    checkAllowance,
     isConfirming,
     isConfirmed,
     txHash,

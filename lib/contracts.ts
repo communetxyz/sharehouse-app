@@ -2,7 +2,40 @@ import { ethers } from "ethers"
 
 export const COMMUNE_OS_ADDRESS = "0x7D9E1d5AEE1a873AD2C49925b410382d3CAB4ccC"
 
+export const BREAD_TOKEN_ADDRESS = "0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3"
+export const COLLATERAL_MANAGER_ADDRESS = "0x61Ba220071184886710A8F2814B7c6eDecbcaA82"
+
 export const RPC_URL = "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"
+
+export const ERC20_ABI = [
+  {
+    type: "function",
+    name: "approve",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "allowance",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "balanceOf",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+]
 
 export const COMMUNE_OS_ABI = [
   {
