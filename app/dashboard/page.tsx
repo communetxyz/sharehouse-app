@@ -8,10 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChoreKanban } from "@/components/chore-kanban"
 import { MemberList } from "@/components/member-list"
 import { CommuneInfo } from "@/components/commune-info"
+import { WalletConnectButton } from "@/components/wallet-connect-button"
 import { useCommuneData } from "@/hooks/use-commune-data"
+import { useCitizenWallet } from "@/hooks/use-citizen-wallet"
 import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
+  const { address, isConnected } = useCitizenWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
 
   useEffect(() => {
@@ -22,6 +25,33 @@ export default function DashboardPage() {
 
     return () => clearInterval(interval)
   }, [refreshData])
+
+  if (!isConnected || !address) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cream via-sage/20 to-cream">
+        <header className="border-b border-charcoal/10 bg-cream/80 backdrop-blur-sm">
+          <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="text-2xl font-serif">シェアハウス</div>
+              <div className="text-xl font-sans tracking-wide">ShareHouse</div>
+            </Link>
+            <WalletConnectButton />
+          </div>
+        </header>
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <Card className="max-w-md">
+            <CardHeader>
+              <CardTitle className="font-serif text-charcoal">Connect Your Wallet</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-charcoal/70">Please connect your Citizen Wallet to view your ShareHouse dashboard.</p>
+              <WalletConnectButton />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -68,9 +98,17 @@ export default function DashboardPage() {
             <div className="text-2xl font-serif">シェアハウス</div>
             <div className="text-xl font-sans tracking-wide">ShareHouse</div>
           </Link>
-          <Button onClick={refreshData} variant="outline" size="sm" className="border-charcoal/20 bg-transparent">
-            Refresh
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={refreshData}
+              variant="ghost"
+              size="sm"
+              className="text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5"
+            >
+              Refresh
+            </Button>
+            <WalletConnectButton />
+          </div>
         </div>
       </header>
 

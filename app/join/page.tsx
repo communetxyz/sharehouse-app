@@ -8,13 +8,16 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Loader2 } from "lucide-react"
+import { WalletConnectButton } from "@/components/wallet-connect-button"
 import { useJoinCommune } from "@/hooks/use-join-commune"
+import { useCitizenWallet } from "@/hooks/use-citizen-wallet"
 
 export default function JoinPage() {
   const [communeId, setCommuneId] = useState("")
   const [nonce, setNonce] = useState("")
   const [signature, setSignature] = useState("")
 
+  const { isConnected } = useCitizenWallet()
   const { communeData, isValidating, isJoining, error, validateInvite, joinCommune } = useJoinCommune()
 
   const handleValidate = async () => {
@@ -37,12 +40,15 @@ export default function JoinPage() {
             <div className="text-2xl font-serif">シェアハウス</div>
             <div className="text-xl font-sans tracking-wide">ShareHouse</div>
           </Link>
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <WalletConnectButton />
+          </div>
         </div>
       </header>
 
@@ -52,6 +58,18 @@ export default function JoinPage() {
           <h1 className="text-4xl md:text-5xl font-serif text-charcoal mb-4">Join a ShareHouse</h1>
           <p className="text-lg text-charcoal/70">Enter your invite details to join your commune</p>
         </div>
+
+        {!isConnected && (
+          <Card className="border-charcoal/10 mb-6">
+            <CardHeader>
+              <CardTitle className="font-serif">Connect Your Wallet</CardTitle>
+              <CardDescription>You need to connect your Citizen Wallet before joining a commune</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WalletConnectButton />
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-charcoal/10">
           <CardHeader>
@@ -74,7 +92,7 @@ export default function JoinPage() {
                   placeholder="e.g., 1"
                   value={communeId}
                   onChange={(e) => setCommuneId(e.target.value)}
-                  disabled={isValidating || isJoining}
+                  disabled={isValidating || isJoining || !isConnected}
                 />
               </div>
 
@@ -86,7 +104,7 @@ export default function JoinPage() {
                   placeholder="e.g., 12345"
                   value={nonce}
                   onChange={(e) => setNonce(e.target.value)}
-                  disabled={isValidating || isJoining}
+                  disabled={isValidating || isJoining || !isConnected}
                 />
               </div>
 
@@ -97,7 +115,7 @@ export default function JoinPage() {
                   placeholder="0x..."
                   value={signature}
                   onChange={(e) => setSignature(e.target.value)}
-                  disabled={isValidating || isJoining}
+                  disabled={isValidating || isJoining || !isConnected}
                 />
               </div>
             </div>
@@ -105,7 +123,7 @@ export default function JoinPage() {
             {!communeData && (
               <Button
                 onClick={handleValidate}
-                disabled={!communeId || !nonce || !signature || isValidating}
+                disabled={!communeId || !nonce || !signature || isValidating || !isConnected}
                 className="w-full bg-sage hover:bg-sage/90 text-cream"
               >
                 {isValidating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -141,7 +159,7 @@ export default function JoinPage() {
 
                 <Button
                   onClick={handleJoin}
-                  disabled={isJoining}
+                  disabled={isJoining || !isConnected}
                   className="w-full bg-sage hover:bg-sage/90 text-cream"
                 >
                   {isJoining && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
