@@ -7,10 +7,82 @@ import { CheckCircle2, Circle, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
 import type { ChoreInstance } from "@/types/commune"
+import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
   onRefresh: () => void
+}
+
+function ChoreCard({
+  chore,
+  onComplete,
+  isCompleting,
+  showCompleteButton,
+}: {
+  chore: ChoreInstance
+  onComplete?: () => void
+  isCompleting?: boolean
+  showCompleteButton?: boolean
+}) {
+  const assignedToName = useEnsNameOrAddress(chore.assignedTo)
+
+  const getFrequencyLabel = (frequency: number) => {
+    const days = frequency / (24 * 60 * 60)
+    if (days === 1) return "Daily"
+    if (days === 7) return "Weekly"
+    if (days === 30) return "Monthly"
+    return `Every ${days} days`
+  }
+
+  const formatPeriodDate = (periodStart: number) => {
+    const start = new Date(periodStart * 1000)
+    return start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+  }
+
+  return (
+    <Card className={`border-charcoal/10 ${chore.completed ? "border-sage/20 bg-sage/5" : "bg-white/50"}`}>
+      <CardContent className="p-4 space-y-3">
+        <div>
+          <h4 className={`font-medium text-charcoal mb-1 ${chore.completed ? "line-through opacity-60" : ""}`}>
+            {chore.title}
+          </h4>
+          <div className="flex flex-wrap gap-2 text-xs text-charcoal/60">
+            <Badge variant="outline" className={chore.completed ? "border-sage/30 text-sage" : "border-charcoal/20"}>
+              {getFrequencyLabel(chore.frequency)}
+            </Badge>
+            <span>{formatPeriodDate(chore.periodStart)}</span>
+          </div>
+        </div>
+        {!showCompleteButton && (
+          <p className="text-xs text-charcoal/60">
+            {chore.completed ? "Completed by: " : "Assigned to: "}
+            {assignedToName}
+          </p>
+        )}
+        {showCompleteButton && onComplete && (
+          <Button
+            onClick={onComplete}
+            disabled={isCompleting}
+            size="sm"
+            className="w-full bg-sage hover:bg-sage/90 text-cream"
+          >
+            {isCompleting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Marking...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Mark Complete
+              </>
+            )}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  )
 }
 
 export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
@@ -30,19 +102,6 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
     onRefresh()
   }
 
-  const getFrequencyLabel = (frequency: number) => {
-    const days = frequency / (24 * 60 * 60)
-    if (days === 1) return "Daily"
-    if (days === 7) return "Weekly"
-    if (days === 30) return "Monthly"
-    return `Every ${days} days`
-  }
-
-  const formatPeriodDate = (periodStart: number) => {
-    const start = new Date(periodStart * 1000)
-    return start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-  }
-
   return (
     <div className="grid md:grid-cols-3 gap-6">
       {/* Assigned to Me */}
@@ -58,37 +117,13 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
             <p className="text-sm text-charcoal/60 text-center py-8">No chores assigned to you right now</p>
           ) : (
             assignedToMe.map((chore) => (
-              <Card key={`${chore.scheduleId}-${chore.periodNumber}`} className="border-charcoal/10">
-                <CardContent className="p-4 space-y-3">
-                  <div>
-                    <h4 className="font-medium text-charcoal mb-1">{chore.title}</h4>
-                    <div className="flex flex-wrap gap-2 text-xs text-charcoal/60">
-                      <Badge variant="outline" className="border-sage/30 text-sage">
-                        {getFrequencyLabel(chore.frequency)}
-                      </Badge>
-                      <span>{formatPeriodDate(chore.periodStart)}</span>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => handleComplete(chore)}
-                    disabled={isMarking || completingId === chore.scheduleId.toString()}
-                    size="sm"
-                    className="w-full bg-sage hover:bg-sage/90 text-cream"
-                  >
-                    {completingId === chore.scheduleId.toString() ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Marking...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 mr-2" />
-                        Mark Complete
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
+              <ChoreCard
+                key={`${chore.scheduleId}-${chore.periodNumber}`}
+                chore={chore}
+                onComplete={() => handleComplete(chore)}
+                isCompleting={completingId === chore.scheduleId.toString()}
+                showCompleteButton
+              />
             ))
           )}
         </CardContent>
@@ -106,24 +141,7 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
           {notStarted.length === 0 ? (
             <p className="text-sm text-charcoal/60 text-center py-8">No pending chores</p>
           ) : (
-            notStarted.map((chore) => (
-              <Card key={`${chore.scheduleId}-${chore.periodNumber}`} className="border-charcoal/10 bg-white/50">
-                <CardContent className="p-4 space-y-2">
-                  <div>
-                    <h4 className="font-medium text-charcoal mb-1">{chore.title}</h4>
-                    <div className="flex flex-wrap gap-2 text-xs text-charcoal/60">
-                      <Badge variant="outline" className="border-charcoal/20">
-                        {getFrequencyLabel(chore.frequency)}
-                      </Badge>
-                      <span>{formatPeriodDate(chore.periodStart)}</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-charcoal/60">
-                    Assigned to: {chore.assignedTo.slice(0, 6)}...{chore.assignedTo.slice(-4)}
-                  </p>
-                </CardContent>
-              </Card>
-            ))
+            notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
           )}
         </CardContent>
       </Card>
@@ -140,24 +158,7 @@ export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
           {completed.length === 0 ? (
             <p className="text-sm text-charcoal/60 text-center py-8">No completed chores yet</p>
           ) : (
-            completed.map((chore) => (
-              <Card key={`${chore.scheduleId}-${chore.periodNumber}`} className="border-sage/20 bg-sage/5">
-                <CardContent className="p-4 space-y-2">
-                  <div>
-                    <h4 className="font-medium text-charcoal mb-1 line-through opacity-60">{chore.title}</h4>
-                    <div className="flex flex-wrap gap-2 text-xs text-charcoal/60">
-                      <Badge variant="outline" className="border-sage/30 text-sage">
-                        {getFrequencyLabel(chore.frequency)}
-                      </Badge>
-                      <span>{formatPeriodDate(chore.periodStart)}</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-charcoal/60">
-                    Completed by: {chore.assignedTo.slice(0, 6)}...{chore.assignedTo.slice(-4)}
-                  </p>
-                </CardContent>
-              </Card>
-            ))
+            completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
           )}
         </CardContent>
       </Card>

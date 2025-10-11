@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Wallet, LogOut, Copy, Check } from "lucide-react"
 import { useState } from "react"
+import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 
 export function WalletConnectButton() {
   const { address, isConnected } = useAccount()
   const { disconnect } = useDisconnect()
   const { open } = useWeb3Modal()
   const [copied, setCopied] = useState(false)
+  const displayName = useEnsNameOrAddress(address)
 
   const copyAddress = () => {
     if (address) {
@@ -19,10 +21,6 @@ export function WalletConnectButton() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
-  }
-
-  const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`
   }
 
   if (!isConnected || !address) {
@@ -39,7 +37,7 @@ export function WalletConnectButton() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="border-charcoal/20 hover:bg-charcoal/5 bg-transparent gap-2">
           <Wallet className="w-4 h-4" />
-          {formatAddress(address)}
+          {displayName}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
