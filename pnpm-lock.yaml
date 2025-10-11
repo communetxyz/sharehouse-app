@@ -75,7 +75,7 @@ importers:
         specifier: latest
         version: 1.4.0
       viem:
-        specifier: ^2.30.0
+        specifier: latest
         version: 2.38.0(bufferutil@4.0.9)(typescript@5.0.2)(utf-8-validate@5.0.10)(zod@4.1.12)
       wagmi:
         specifier: latest

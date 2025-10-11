@@ -1,52 +1,42 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useWallet } from "./use-wallet"
-import { communeOSContract, BREAD_TOKEN_ADDRESS, COLLATERAL_MANAGER_ADDRESS, ERC20_ABI } from "@/lib/contracts"
+import { useReadContract } from "wagmi"
+import {
+  COMMUNE_OS_ABI,
+  COMMUNE_OS_ADDRESS,
+  BREAD_TOKEN_ADDRESS,
+  COLLATERAL_MANAGER_ADDRESS,
+  ERC20_ABI,
+} from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
-import { ethers } from "ethers"
+import { createPublicClient, http } from "viem"
+import { mainnet } from "viem/chains"
 
 export function useJoinCommune() {
-  const { address, executeTransaction, isConfirming } = useWallet()
+  const { address, executeTransaction, approveToken, isConfirming } = useWallet()
   const [communeData, setCommuneData] = useState<CommuneStatistics | null>(null)
   const [isValidating, setIsValidating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
-  const [isCheckingAllowance, setIsCheckingAllowance] = useState(false)
-  const [hasAllowance, setHasAllowance] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (communeData && address && communeData.collateralRequired) {
-      checkAllowance()
-    }
-  }, [communeData, address])
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+    address: BREAD_TOKEN_ADDRESS as `0x${string}`,
+    abi: ERC20_ABI,
+    functionName: "allowance",
+    args: address && communeData ? [address, COLLATERAL_MANAGER_ADDRESS as `0x${string}`] : undefined,
+  })
 
-  const checkAllowance = async () => {
-    if (!address || !communeData) return
+  const hasAllowance =
+    communeData && allowance
+      ? (allowance as bigint) >= BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
+      : false
 
-    setIsCheckingAllowance(true)
-    try {
-      const provider = new ethers.JsonRpcProvider(
-        "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE",
-      )
-      const breadToken = new ethers.Contract(BREAD_TOKEN_ADDRESS, ERC20_ABI, provider)
-
-      const allowance = await breadToken.allowance(address, COLLATERAL_MANAGER_ADDRESS)
-      const requiredAmount = ethers.parseEther(communeData.collateralAmount)
-
-      setHasAllowance(allowance >= requiredAmount)
-    } catch (err) {
-      console.error("Failed to check allowance:", err)
-      setHasAllowance(false)
-    } finally {
-      setIsCheckingAllowance(false)
-    }
-  }
-
-  const approveToken = async (amount: ethers.BigNumber) => {
-    if (!address || !communeData) {
-      setError("Missing required data")
+  const handleApproveToken = async () => {
+    if (!communeData) {
+      setError("Missing commune data")
       return
     }
 
@@ -54,26 +44,14 @@ export function useJoinCommune() {
     setError(null)
 
     try {
-      const provider = new ethers.JsonRpcProvider(
-        "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE",
-      )
-      const signer = provider.getSigner()
-      const breadToken = new ethers.Contract(BREAD_TOKEN_ADDRESS, ERC20_ABI, signer)
+      const amount = BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
+      await approveToken(amount)
 
-      await breadToken.approve(COLLATERAL_MANAGER_ADDRESS, amount)
+      // Wait a bit for the transaction to be mined
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      // Wait for confirmation
-      await new Promise((resolve) => {
-        const checkConfirmation = setInterval(() => {
-          if (!isConfirming) {
-            clearInterval(checkConfirmation)
-            resolve(true)
-          }
-        }, 500)
-      })
-
-      // Recheck allowance after approval
-      await checkAllowance()
+      // Refetch allowance
+      await refetchAllowance()
     } catch (err: any) {
       setError(err.message || "Failed to approve token")
     } finally {
@@ -86,15 +64,30 @@ export function useJoinCommune() {
     setError(null)
 
     try {
+      const provider = createPublicClient({
+        chain: mainnet,
+        transport: http("https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"),
+      })
+
       // Check if nonce is used
-      const isUsed = await communeOSContract.isNonceUsed(BigInt(communeId), BigInt(nonce))
+      const isUsed = await provider.readContract({
+        address: COMMUNE_OS_ADDRESS as `0x${string}`,
+        abi: COMMUNE_OS_ABI,
+        functionName: "isNonceUsed",
+        args: [BigInt(communeId), BigInt(nonce)],
+      })
 
       if (isUsed) {
         throw new Error("This invite has already been used or expired")
       }
 
       // Fetch commune statistics
-      const stats = await communeOSContract.getCommuneStatistics(BigInt(communeId))
+      const stats: any = await provider.readContract({
+        address: COMMUNE_OS_ADDRESS as `0x${string}`,
+        abi: COMMUNE_OS_ABI,
+        functionName: "getCommuneStatistics",
+        args: [BigInt(communeId)],
+      })
 
       setCommuneData({
         id: stats.commune.id.toString(),
@@ -150,11 +143,10 @@ export function useJoinCommune() {
     isValidating,
     isJoining,
     isApproving,
-    isCheckingAllowance,
     hasAllowance,
     error,
     validateInvite,
     joinCommune,
-    approveToken,
+    approveToken: handleApproveToken,
   }
 }
