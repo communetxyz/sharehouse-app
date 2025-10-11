@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useCitizenWallet } from "./use-citizen-wallet"
+import { useWallet } from "./use-wallet"
 import { communeOSContract } from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
 
 export function useJoinCommune() {
-  const { address, executeTransaction } = useCitizenWallet()
+  const { address, executeTransaction } = useWallet()
   const [communeData, setCommuneData] = useState<CommuneStatistics | null>(null)
   const [isValidating, setIsValidating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
@@ -55,7 +55,7 @@ export function useJoinCommune() {
     setError(null)
 
     try {
-      await executeTransaction("joinCommune", [BigInt(communeId), BigInt(nonce), signature], BigInt(0))
+      await executeTransaction("joinCommune", [BigInt(communeId), BigInt(nonce), signature])
 
       // Redirect to dashboard after successful join
       window.location.href = "/dashboard"

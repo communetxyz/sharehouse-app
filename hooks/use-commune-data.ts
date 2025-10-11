@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useCitizenWallet } from "./use-citizen-wallet"
+import { useWallet } from "./use-wallet"
 import { communeOSContract } from "@/lib/contracts"
 import type { Commune, Member, ChoreInstance } from "@/types/commune"
 
 export function useCommuneData() {
-  const { address } = useCitizenWallet()
+  const { address } = useWallet()
   const [commune, setCommune] = useState<Commune | null>(null)
   const [members, setMembers] = useState<Member[]>([])
   const [chores, setChores] = useState<ChoreInstance[]>([])

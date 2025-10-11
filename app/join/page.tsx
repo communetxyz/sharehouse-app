@@ -10,14 +10,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { WalletConnectButton } from "@/components/wallet-connect-button"
 import { useJoinCommune } from "@/hooks/use-join-commune"
-import { useCitizenWallet } from "@/hooks/use-citizen-wallet"
+import { useWallet } from "@/hooks/use-wallet"
 
 export default function JoinPage() {
   const [communeId, setCommuneId] = useState("")
   const [nonce, setNonce] = useState("")
   const [signature, setSignature] = useState("")
 
-  const { isConnected } = useCitizenWallet()
+  const { isConnected } = useWallet()
   const { communeData, isValidating, isJoining, error, validateInvite, joinCommune } = useJoinCommune()
 
   const handleValidate = async () => {
@@ -63,7 +63,7 @@ export default function JoinPage() {
           <Card className="border-charcoal/10 mb-6">
             <CardHeader>
               <CardTitle className="font-serif">Connect Your Wallet</CardTitle>
-              <CardDescription>You need to connect your Citizen Wallet before joining a commune</CardDescription>
+              <CardDescription>You need to connect your wallet before joining a commune</CardDescription>
             </CardHeader>
             <CardContent>
               <WalletConnectButton />

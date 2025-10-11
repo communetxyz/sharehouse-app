@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useCitizenWallet } from "./use-citizen-wallet"
+import { useWallet } from "./use-wallet"
 import { useCommuneData } from "./use-commune-data"
 
 export function useMarkChoreComplete() {
-  const { executeTransaction } = useCitizenWallet()
+  const { executeTransaction } = useWallet()
   const { commune } = useCommuneData()
   const [isMarking, setIsMarking] = useState(false)
 
@@ -17,7 +17,7 @@ export function useMarkChoreComplete() {
     setIsMarking(true)
 
     try {
-      await executeTransaction("markChoreComplete", [BigInt(commune.id), BigInt(choreId)], BigInt(0))
+      await executeTransaction("markChoreComplete", [BigInt(commune.id), BigInt(choreId)])
     } catch (err: any) {
       throw new Error(err.message || "Failed to mark chore complete")
     } finally {

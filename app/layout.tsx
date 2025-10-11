@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { Noto_Serif_JP } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import { Web3Provider } from "@/lib/web3-provider"
 import "./globals.css"
 
 const notoSerifJP = Noto_Serif_JP({
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${notoSerifJP.variable}`}>
-        <Suspense fallback={null}>{children}</Suspense>
+        <Web3Provider>
+          <Suspense fallback={null}>{children}</Suspense>
+        </Web3Provider>
         <Analytics />
       </body>
     </html>

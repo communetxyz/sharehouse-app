@@ -10,11 +10,11 @@ import { MemberList } from "@/components/member-list"
 import { CommuneInfo } from "@/components/commune-info"
 import { WalletConnectButton } from "@/components/wallet-connect-button"
 import { useCommuneData } from "@/hooks/use-commune-data"
-import { useCitizenWallet } from "@/hooks/use-citizen-wallet"
+import { useWallet } from "@/hooks/use-wallet"
 import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
-  const { address, isConnected } = useCitizenWallet()
+  const { address, isConnected } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function DashboardPage() {
               <CardTitle className="font-serif text-charcoal">Connect Your Wallet</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-charcoal/70">Please connect your Citizen Wallet to view your ShareHouse dashboard.</p>
+              <p className="text-charcoal/70">Please connect your wallet to view your ShareHouse dashboard.</p>
               <WalletConnectButton />
             </CardContent>
           </Card>
