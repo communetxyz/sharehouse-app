@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { WalletConnectButton } from "@/components/wallet-connect-button"
 
 export default function HomePage() {
   return (
@@ -22,11 +23,14 @@ export default function HomePage() {
               Join
             </Link>
           </nav>
-          <Link href="/dashboard">
-            <Button variant="outline" className="border-charcoal/20 hover:bg-charcoal/5 bg-transparent">
-              Dashboard
-            </Button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard" className="hidden sm:block">
+              <Button variant="ghost" className="text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5">
+                Dashboard
+              </Button>
+            </Link>
+            <WalletConnectButton />
+          </div>
         </div>
       </header>
 
