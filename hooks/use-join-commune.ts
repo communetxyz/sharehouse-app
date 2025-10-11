@@ -9,7 +9,7 @@ import {
   BREAD_TOKEN_ADDRESS,
   COLLATERAL_MANAGER_ADDRESS,
   ERC20_ABI,
-  MEMBER_REGISTRY_ABI, // Import MemberRegistry ABI
+  MEMBER_REGISTRY_ABI,
 } from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
 import { createPublicClient, http } from "viem"
@@ -23,17 +23,26 @@ export function useJoinCommune() {
   const [isApproving, setIsApproving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+  const shouldCheckAllowance = Boolean(address && communeData?.collateralRequired)
+
+  const {
+    data: allowance,
+    refetch: refetchAllowance,
+    isLoading: isCheckingAllowance,
+  } = useReadContract({
     address: BREAD_TOKEN_ADDRESS as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "allowance",
-    args: address && communeData ? [address, COLLATERAL_MANAGER_ADDRESS as `0x${string}`] : undefined,
+    args: shouldCheckAllowance ? [address!, COLLATERAL_MANAGER_ADDRESS as `0x${string}`] : undefined,
+    query: {
+      enabled: shouldCheckAllowance, // Only run query when we have the required data
+    },
   })
 
   const hasAllowance =
-    communeData && allowance
+    communeData?.collateralRequired && allowance
       ? (allowance as bigint) >= BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
-      : false
+      : !communeData?.collateralRequired // If no collateral required, consider it as "has allowance"
 
   const handleApproveToken = async () => {
     if (!communeData) {
@@ -149,6 +158,7 @@ export function useJoinCommune() {
     isValidating,
     isJoining,
     isApproving,
+    isCheckingAllowance, // Export isCheckingAllowance state
     hasAllowance,
     error,
     validateInvite,
