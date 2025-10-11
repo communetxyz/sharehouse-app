@@ -3,18 +3,15 @@
 import { useCitizenWallet } from "@/hooks/use-citizen-wallet"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Wallet, LogOut, Copy, Check } from "lucide-react"
+import { Wallet, LogOut, Copy, Check, QrCode } from "lucide-react"
 import { useState } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { CWQRCode } from "./cw-qr-code"
 
 export function WalletConnectButton() {
-  const { address, isConnected, disconnect } = useCitizenWallet()
+  const { address, isConnected, disconnect, authUrl } = useCitizenWallet()
   const [copied, setCopied] = useState(false)
-
-  const handleConnect = () => {
-    // Redirect to Citizen Wallet app for authentication
-    const returnUrl = encodeURIComponent(window.location.origin)
-    window.location.href = `https://app.citizenwallet.xyz?returnUrl=${returnUrl}`
-  }
+  const [showQR, setShowQR] = useState(false)
 
   const copyAddress = () => {
     if (address) {
@@ -30,10 +27,39 @@ export function WalletConnectButton() {
 
   if (!isConnected || !address) {
     return (
-      <Button onClick={handleConnect} className="bg-sage hover:bg-sage/90 text-cream gap-2">
-        <Wallet className="w-4 h-4" />
-        Connect Wallet
-      </Button>
+      <>
+        <Button onClick={() => setShowQR(true)} className="bg-sage hover:bg-sage/90 text-cream gap-2">
+          <QrCode className="w-4 h-4" />
+          Connect Wallet
+        </Button>
+
+        <Dialog open={showQR} onOpenChange={setShowQR}>
+          <DialogContent className="sm:max-w-md bg-cream border-charcoal/20">
+            <DialogHeader>
+              <DialogTitle className="text-charcoal">Connect with Citizen Wallet</DialogTitle>
+              <DialogDescription className="text-charcoal/70">
+                Scan this QR code with your Citizen Wallet app to authenticate
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center py-6">
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <CWQRCode url={authUrl} size={256} />
+              </div>
+            </div>
+            <p className="text-xs text-center text-charcoal/60">
+              Don't have Citizen Wallet?{" "}
+              <a
+                href="https://citizenwallet.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sage hover:underline"
+              >
+                Get it here
+              </a>
+            </p>
+          </DialogContent>
+        </Dialog>
+      </>
     )
   }
 
