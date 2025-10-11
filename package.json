@@ -17,8 +17,8 @@
     "@radix-ui/react-tabs": "^1.1.2",
     "@tanstack/react-query": "latest",
     "@vercel/analytics": "latest",
-    "@wagmi/connectors": "5.1.15",
-    "@wagmi/core": "2.13.8",
+    "@wagmi/connectors": "latest",
+    "@wagmi/core": "latest",
     "@web3modal/wagmi": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -31,7 +31,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "tw-animate-css": "latest",
-    "viem": "2.21.1",
+    "viem": "^2.30.0",
     "wagmi": "latest"
   },
   "devDependencies": {
