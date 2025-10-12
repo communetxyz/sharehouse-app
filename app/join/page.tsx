@@ -38,6 +38,13 @@ export default function JoinPage() {
   useEffect(() => {
     if (hasLoadedParams.current) return
 
+    console.log("[v0] Full search params:", searchParams.toString())
+    console.log("[v0] All params:", {
+      communeId: searchParams.get("communeId"),
+      nonce: searchParams.get("nonce"),
+      signature: searchParams.get("signature"),
+    })
+
     const urlCommuneId = searchParams.get("communeId")
     const urlNonce = searchParams.get("nonce")
     const urlSignature = searchParams.get("signature")
