@@ -24,7 +24,7 @@ export default function HomePage() {
             </Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="hidden sm:block">
+            <Link href="/dashboard">
               <Button variant="ghost" className="text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5">
                 Dashboard
               </Button>
@@ -49,8 +49,17 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-              <Link href="/join">
+              <Link href="/dashboard">
                 <Button size="lg" className="bg-sage hover:bg-sage/90 text-cream px-8">
+                  Go to Dashboard
+                </Button>
+              </Link>
+              <Link href="/join">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-charcoal/20 hover:bg-charcoal/5 px-8 bg-transparent"
+                >
                   Join a ShareHouse
                 </Button>
               </Link>
