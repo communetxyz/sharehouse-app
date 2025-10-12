@@ -22,21 +22,19 @@ export function useCommuneData() {
 
     try {
       const now = new Date()
-      const currentDay = now.getDay() // 0 = Sunday, 1 = Monday, etc.
-      const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1 // Adjust so Monday = 0
 
-      // Get Monday of current week at 00:00:00
-      const monday = new Date(now)
-      monday.setDate(now.getDate() - daysFromMonday)
-      monday.setHours(0, 0, 0, 0)
+      // Get 7 days ago at 00:00:00
+      const sevenDaysAgo = new Date(now)
+      sevenDaysAgo.setDate(now.getDate() - 7)
+      sevenDaysAgo.setHours(0, 0, 0, 0)
 
-      // Get Sunday of current week at 23:59:59
-      const sunday = new Date(monday)
-      sunday.setDate(monday.getDate() + 6)
-      sunday.setHours(23, 59, 59, 999)
+      // Get 4 days from now at 23:59:59
+      const fourDaysFromNow = new Date(now)
+      fourDaysFromNow.setDate(now.getDate() + 4)
+      fourDaysFromNow.setHours(23, 59, 59, 999)
 
-      const startDate = Math.floor(monday.getTime() / 1000)
-      const endDate = Math.floor(sunday.getTime() / 1000)
+      const startDate = Math.floor(sevenDaysAgo.getTime() / 1000)
+      const endDate = Math.floor(fourDaysFromNow.getTime() / 1000)
 
       // Fetch commune basic info
       const basicInfo = await communeOSContract.getCommuneBasicInfo(address)

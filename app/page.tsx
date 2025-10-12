@@ -1,8 +1,14 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { WalletConnectButton } from "@/components/wallet-connect-button"
+import { LanguageToggle } from "@/components/language-toggle"
+import { useI18n } from "@/lib/i18n/context"
 
 export default function HomePage() {
+  const { t } = useI18n()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cream via-sage/20 to-cream">
       {/* Header */}
@@ -14,19 +20,20 @@ export default function HomePage() {
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <Link href="#features" className="text-sm text-charcoal/70 hover:text-charcoal transition-colors">
-              Features
+              {t("common.features")}
             </Link>
             <Link href="#how-it-works" className="text-sm text-charcoal/70 hover:text-charcoal transition-colors">
-              How It Works
+              {t("common.howItWorks")}
             </Link>
             <Link href="/join" className="text-sm text-charcoal/70 hover:text-charcoal transition-colors">
-              Join
+              {t("common.join")}
             </Link>
           </nav>
           <div className="flex items-center gap-3">
+            <LanguageToggle />
             <Link href="/dashboard">
               <Button variant="ghost" className="text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5">
-                Dashboard
+                {t("common.dashboard")}
               </Button>
             </Link>
             <WalletConnectButton />
@@ -39,19 +46,18 @@ export default function HomePage() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-8">
             <div className="inline-block">
-              <div className="text-6xl md:text-8xl font-serif text-charcoal mb-4">共同生活</div>
-              <div className="text-xl md:text-2xl text-charcoal/60 tracking-wide">Harmonious Living, Together</div>
+              <div className="text-6xl md:text-8xl font-serif text-charcoal mb-4">{t("home.title")}</div>
+              <div className="text-xl md:text-2xl text-charcoal/60 tracking-wide">{t("home.subtitle")}</div>
             </div>
 
             <p className="text-lg md:text-xl text-charcoal/70 max-w-2xl mx-auto leading-relaxed">
-              ShareHouse brings the spirit of Japanese communal living to the blockchain. Manage shared
-              responsibilities, rotate chores fairly, and build a harmonious home together.
+              {t("home.description")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
               <Link href="/dashboard">
                 <Button size="lg" className="bg-sage hover:bg-sage/90 text-cream px-8">
-                  Go to Dashboard
+                  {t("home.goToDashboard")}
                 </Button>
               </Link>
               <Link href="/join">
@@ -60,7 +66,7 @@ export default function HomePage() {
                   variant="outline"
                   className="border-charcoal/20 hover:bg-charcoal/5 px-8 bg-transparent"
                 >
-                  Join a ShareHouse
+                  {t("home.joinSharehouse")}
                 </Button>
               </Link>
               <Link href="#how-it-works">
@@ -69,7 +75,7 @@ export default function HomePage() {
                   variant="outline"
                   className="border-charcoal/20 hover:bg-charcoal/5 px-8 bg-transparent"
                 >
-                  Learn More
+                  {t("common.learnMore")}
                 </Button>
               </Link>
             </div>
@@ -80,34 +86,25 @@ export default function HomePage() {
       {/* Features Section */}
       <section id="features" className="py-20 px-6 bg-white/50">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl md:text-5xl font-serif text-center mb-16 text-charcoal">Features</h2>
+          <h2 className="text-4xl md:text-5xl font-serif text-center mb-16 text-charcoal">{t("home.featuresTitle")}</h2>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="space-y-4 p-8 rounded-lg bg-cream/50 border border-charcoal/10">
               <div className="text-3xl">🏠</div>
-              <h3 className="text-xl font-serif text-charcoal">Invite-Based Communities</h3>
-              <p className="text-charcoal/70 leading-relaxed">
-                Join trusted communities through secure, signature-based invitations. No public listings, just curated
-                homes.
-              </p>
+              <h3 className="text-xl font-serif text-charcoal">{t("home.feature1Title")}</h3>
+              <p className="text-charcoal/70 leading-relaxed">{t("home.feature1Desc")}</p>
             </div>
 
             <div className="space-y-4 p-8 rounded-lg bg-cream/50 border border-charcoal/10">
               <div className="text-3xl">🔄</div>
-              <h3 className="text-xl font-serif text-charcoal">Rotating Chores</h3>
-              <p className="text-charcoal/70 leading-relaxed">
-                Fair, automatic rotation of household tasks. Everyone contributes equally, tracked transparently
-                on-chain.
-              </p>
+              <h3 className="text-xl font-serif text-charcoal">{t("home.feature2Title")}</h3>
+              <p className="text-charcoal/70 leading-relaxed">{t("home.feature2Desc")}</p>
             </div>
 
             <div className="space-y-4 p-8 rounded-lg bg-cream/50 border border-charcoal/10">
               <div className="text-3xl">📋</div>
-              <h3 className="text-xl font-serif text-charcoal">Kanban Board</h3>
-              <p className="text-charcoal/70 leading-relaxed">
-                Visualize your responsibilities with an intuitive kanban interface. Track what's yours, what's pending,
-                and what's done.
-              </p>
+              <h3 className="text-xl font-serif text-charcoal">{t("home.feature3Title")}</h3>
+              <p className="text-charcoal/70 leading-relaxed">{t("home.feature3Desc")}</p>
             </div>
           </div>
         </div>
@@ -116,7 +113,9 @@ export default function HomePage() {
       {/* How It Works Section */}
       <section id="how-it-works" className="py-20 px-6">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="text-4xl md:text-5xl font-serif text-center mb-16 text-charcoal">How It Works</h2>
+          <h2 className="text-4xl md:text-5xl font-serif text-center mb-16 text-charcoal">
+            {t("home.howItWorksTitle")}
+          </h2>
 
           <div className="space-y-12">
             <div className="flex gap-6 items-start">
@@ -124,10 +123,8 @@ export default function HomePage() {
                 1
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-serif text-charcoal">Receive an Invite</h3>
-                <p className="text-charcoal/70 leading-relaxed">
-                  Get invite parameters (commune ID, nonce, and signature) from your future housemates.
-                </p>
+                <h3 className="text-xl font-serif text-charcoal">{t("home.step1Title")}</h3>
+                <p className="text-charcoal/70 leading-relaxed">{t("home.step1Desc")}</p>
               </div>
             </div>
 
@@ -136,10 +133,8 @@ export default function HomePage() {
                 2
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-serif text-charcoal">Join with Your Wallet</h3>
-                <p className="text-charcoal/70 leading-relaxed">
-                  Connect your wallet using WalletConnect, deposit any required collateral, and become a member.
-                </p>
+                <h3 className="text-xl font-serif text-charcoal">{t("home.step2Title")}</h3>
+                <p className="text-charcoal/70 leading-relaxed">{t("home.step2Desc")}</p>
               </div>
             </div>
 
@@ -148,10 +143,8 @@ export default function HomePage() {
                 3
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-serif text-charcoal">View Your Chores</h3>
-                <p className="text-charcoal/70 leading-relaxed">
-                  See your assigned tasks on the kanban board. Chores rotate automatically based on the schedule.
-                </p>
+                <h3 className="text-xl font-serif text-charcoal">{t("home.step3Title")}</h3>
+                <p className="text-charcoal/70 leading-relaxed">{t("home.step3Desc")}</p>
               </div>
             </div>
 
@@ -160,10 +153,8 @@ export default function HomePage() {
                 4
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-serif text-charcoal">Complete & Track</h3>
-                <p className="text-charcoal/70 leading-relaxed">
-                  Mark tasks complete as you finish them. Everyone sees real-time updates on the shared board.
-                </p>
+                <h3 className="text-xl font-serif text-charcoal">{t("home.step4Title")}</h3>
+                <p className="text-charcoal/70 leading-relaxed">{t("home.step4Desc")}</p>
               </div>
             </div>
           </div>
@@ -173,13 +164,11 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 px-6 bg-sage text-cream">
         <div className="container mx-auto max-w-4xl text-center space-y-8">
-          <h2 className="text-4xl md:text-5xl font-serif">Ready to Join?</h2>
-          <p className="text-lg md:text-xl text-cream/90 leading-relaxed max-w-2xl mx-auto">
-            Have an invite? Enter your commune details and start your journey toward harmonious shared living.
-          </p>
+          <h2 className="text-4xl md:text-5xl font-serif">{t("home.ctaTitle")}</h2>
+          <p className="text-lg md:text-xl text-cream/90 leading-relaxed max-w-2xl mx-auto">{t("home.ctaDesc")}</p>
           <Link href="/join">
             <Button size="lg" className="bg-cream text-sage hover:bg-cream/90 px-8">
-              Join Your ShareHouse
+              {t("home.joinSharehouse")}
             </Button>
           </Link>
         </div>
@@ -195,7 +184,7 @@ export default function HomePage() {
             </div>
             <div className="text-sm text-center md:text-right">
               <p>Built on Gnosis Chain with WalletConnect</p>
-              <p className="text-cream/50 mt-1">Harmonious living, powered by blockchain</p>
+              <p className="text-cream/50 mt-1">{t("home.footerTagline")}</p>
             </div>
           </div>
         </div>

@@ -92,11 +92,23 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
 
   const sortByDate = (a: ChoreInstance, b: ChoreInstance) => a.periodStart - b.periodStart
 
+  const now = Math.floor(Date.now() / 1000) // Current time in seconds
+  const fourDaysFromNow = now + 4 * 24 * 60 * 60
+  const sevenDaysAgo = now - 7 * 24 * 60 * 60
+
   const filteredChores = filterMyChores ? chores.filter((c) => c.isAssignedToUser) : chores
 
-  const assignedToMe = filteredChores.filter((c) => c.isAssignedToUser && !c.completed).sort(sortByDate)
-  const notStarted = filteredChores.filter((c) => !c.isAssignedToUser && !c.completed).sort(sortByDate)
-  const completed = filteredChores.filter((c) => c.completed).sort(sortByDate)
+  // For pending/in-progress: show chores starting within the next 4 days
+  const assignedToMe = filteredChores
+    .filter((c) => c.isAssignedToUser && !c.completed && c.periodStart <= fourDaysFromNow)
+    .sort(sortByDate)
+
+  const notStarted = filteredChores
+    .filter((c) => !c.isAssignedToUser && !c.completed && c.periodStart <= fourDaysFromNow)
+    .sort(sortByDate)
+
+  // For completed: show chores from the last 7 days
+  const completed = filteredChores.filter((c) => c.completed && c.periodStart >= sevenDaysAgo).sort(sortByDate)
 
   const handleComplete = async (chore: ChoreInstance) => {
     setCompletingId(chore.scheduleId.toString())
