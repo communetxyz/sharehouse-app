@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChoreKanban } from "@/components/chore-kanban"
+import { ChoreCalendar } from "@/components/chore-calendar"
 import { MemberList } from "@/components/member-list"
 import { CommuneInfo } from "@/components/commune-info"
 import { ExpenseList } from "@/components/expense-list"
@@ -139,6 +140,7 @@ export default function DashboardPage() {
           <TabsList className="bg-white/50 border border-charcoal/10">
             <TabsTrigger value="my-chores">{t("dashboard.myChores")}</TabsTrigger>
             <TabsTrigger value="all-chores">{t("dashboard.allChores")}</TabsTrigger>
+            <TabsTrigger value="calendar">{t("dashboard.calendar")}</TabsTrigger>
             <TabsTrigger value="expenses">{t("dashboard.expenses")}</TabsTrigger>
             <TabsTrigger value="members">{t("dashboard.members")}</TabsTrigger>
             <TabsTrigger value="info">{t("dashboard.info")}</TabsTrigger>
@@ -150,6 +152,10 @@ export default function DashboardPage() {
 
           <TabsContent value="all-chores" className="space-y-6">
             <ChoreKanban chores={chores} onRefresh={refreshData} />
+          </TabsContent>
+
+          <TabsContent value="calendar" className="space-y-6">
+            <ChoreCalendar chores={chores} />
           </TabsContent>
 
           <TabsContent value="expenses" className="space-y-6">
