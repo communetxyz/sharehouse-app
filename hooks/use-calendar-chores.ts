@@ -22,22 +22,9 @@ export function useCalendarChores(year: number, month: number) {
     try {
       setIsLoading(true)
 
-      // Get first day of the month at midnight UTC
       const startDate = Math.floor(Date.UTC(year, month, 1, 0, 0, 0) / 1000)
-
-      // Get last day of the month at 23:59:59 UTC
-      // month + 1, 0 gives us the last day of the current month
       const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
       const endDate = Math.floor(Date.UTC(year, month, lastDayOfMonth, 23, 59, 59) / 1000)
-
-      console.log("[v0] Fetching calendar chores for:", {
-        year,
-        month: month + 1, // Display as 1-12 for readability
-        startDate,
-        endDate,
-        startDateReadable: new Date(startDate * 1000).toISOString(),
-        endDateReadable: new Date(endDate * 1000).toISOString(),
-      })
 
       const choreData = await communeOSContract.getCommuneChores(address, BigInt(startDate), BigInt(endDate))
 
@@ -52,8 +39,6 @@ export function useCalendarChores(year: number, month: number) {
         completed: Boolean(instance.completed),
         isAssignedToUser: instance.assignedTo.toLowerCase() === address.toLowerCase(),
       }))
-
-      console.log("[v0] Fetched", mappedChores.length, "chores for calendar")
 
       setChores(mappedChores)
       setError(null)

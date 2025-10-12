@@ -7,7 +7,6 @@ import {
   COMMUNE_OS_ABI,
   COMMUNE_OS_ADDRESS,
   BREAD_TOKEN_ADDRESS,
-  COLLATERAL_MANAGER_ADDRESS,
   ERC20_ABI,
   MEMBER_REGISTRY_ABI,
 } from "@/lib/contracts"
@@ -23,7 +22,13 @@ export function useJoinCommune() {
   const [isApproving, setIsApproving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const shouldCheckAllowance = Boolean(address && communeData?.collateralRequired)
+  const { data: collateralManagerAddress } = useReadContract({
+    address: COMMUNE_OS_ADDRESS as `0x${string}`,
+    abi: COMMUNE_OS_ABI,
+    functionName: "collateralManager",
+  })
+
+  const shouldCheckAllowance = Boolean(address && communeData?.collateralRequired && collateralManagerAddress)
 
   const {
     data: allowance,
@@ -33,7 +38,7 @@ export function useJoinCommune() {
     address: BREAD_TOKEN_ADDRESS as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "allowance",
-    args: shouldCheckAllowance ? [address!, COLLATERAL_MANAGER_ADDRESS as `0x${string}`] : undefined,
+    args: shouldCheckAllowance ? [address!, collateralManagerAddress as `0x${string}`] : undefined,
     query: {
       enabled: shouldCheckAllowance,
     },
@@ -60,12 +65,17 @@ export function useJoinCommune() {
       return
     }
 
+    if (!collateralManagerAddress) {
+      setError("Collateral manager address not available")
+      return
+    }
+
     setIsApproving(true)
     setError(null)
 
     try {
       const amount = BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
-      await approveToken(amount)
+      await approveToken(amount, collateralManagerAddress as `0x${string}`)
       // Don't set isApproving to false here - let the useEffect handle it after confirmation
     } catch (err: any) {
       console.error("[v0] Approval error:", err)

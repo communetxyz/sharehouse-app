@@ -139,6 +139,13 @@ export const COMMUNE_OS_ABI = [
   },
   {
     type: "function",
+    name: "collateralManager",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "createExpense",
     inputs: [
       { name: "communeId", type: "uint256" },
@@ -228,6 +235,11 @@ communeOSContract.isNonceUsed = async (communeId: bigint, nonce: bigint) => {
   const memberRegistryAddress = await communeOSContract.memberRegistry()
   const memberRegistry = new ethers.Contract(memberRegistryAddress, MEMBER_REGISTRY_ABI, provider)
   return await memberRegistry.isNonceUsed(communeId, nonce)
+}
+
+// Add collateralManager method manually since it's on CommuneOS
+communeOSContract.collateralManager = async () => {
+  return await communeOSContract.collateralManager()
 }
 
 // Citizen Wallet Community Config
