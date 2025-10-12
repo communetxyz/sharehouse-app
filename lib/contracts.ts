@@ -137,6 +137,75 @@ export const COMMUNE_OS_ABI = [
     outputs: [{ name: "", type: "address" }],
     stateMutability: "view",
   },
+  {
+    type: "function",
+    name: "createExpense",
+    inputs: [
+      { name: "communeId", type: "uint256" },
+      { name: "amount", type: "uint256" },
+      { name: "description", type: "string" },
+      { name: "dueDate", type: "uint256" },
+      { name: "assignedTo", type: "address" },
+    ],
+    outputs: [{ name: "expenseId", type: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "markExpensePaid",
+    inputs: [
+      { name: "communeId", type: "uint256" },
+      { name: "expenseId", type: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "disputeExpense",
+    inputs: [
+      { name: "communeId", type: "uint256" },
+      { name: "expenseId", type: "uint256" },
+      { name: "newAssignee", type: "address" },
+    ],
+    outputs: [{ name: "disputeId", type: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "voteOnDispute",
+    inputs: [
+      { name: "communeId", type: "uint256" },
+      { name: "disputeId", type: "uint256" },
+      { name: "support", type: "bool" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "getCommuneExpenses",
+    inputs: [{ name: "user", type: "address" }],
+    outputs: [
+      { name: "communeId", type: "uint256" },
+      {
+        name: "expenses",
+        type: "tuple[]",
+        components: [
+          { name: "id", type: "uint256" },
+          { name: "amount", type: "uint256" },
+          { name: "description", type: "string" },
+          { name: "assignedTo", type: "address" },
+          { name: "dueDate", type: "uint256" },
+          { name: "paid", type: "bool" },
+          { name: "disputed", type: "bool" },
+          { name: "createdBy", type: "address" },
+          { name: "createdAt", type: "uint256" },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
 ]
 
 export const MEMBER_REGISTRY_ABI = [

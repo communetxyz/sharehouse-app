@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { Web3Provider } from "@/lib/web3-provider"
 import { I18nProvider } from "@/lib/i18n/context"
+import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
 const notoSerifJP = Noto_Serif_JP({
@@ -32,6 +33,7 @@ export default function RootLayout({
         <I18nProvider>
           <Web3Provider>
             <Suspense fallback={null}>{children}</Suspense>
+            <Toaster />
           </Web3Provider>
         </I18nProvider>
         <Analytics />

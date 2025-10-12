@@ -1,13 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { useWallet } from "./use-wallet"
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi"
 import { useCommuneData } from "./use-commune-data"
+import { COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI } from "@/lib/contracts"
 
 export function useMarkChoreComplete() {
-  const { executeTransaction } = useWallet()
   const { commune } = useCommuneData()
   const [isMarking, setIsMarking] = useState(false)
+
+  const { writeContract, data: hash, error: writeError } = useWriteContract()
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  })
 
   const markComplete = async (choreId: string) => {
     if (!commune) {
@@ -17,16 +23,23 @@ export function useMarkChoreComplete() {
     setIsMarking(true)
 
     try {
-      await executeTransaction("markChoreComplete", [BigInt(commune.id), BigInt(choreId)])
+      writeContract({
+        address: COMMUNE_OS_ADDRESS,
+        abi: COMMUNE_OS_ABI,
+        functionName: "markChoreComplete",
+        args: [BigInt(commune.id), BigInt(choreId)],
+      })
     } catch (err: any) {
-      throw new Error(err.message || "Failed to mark chore complete")
-    } finally {
       setIsMarking(false)
+      throw new Error(err.message || "Failed to mark chore complete")
     }
   }
 
   return {
     markComplete,
-    isMarking,
+    isMarking: isMarking || isConfirming,
+    isConfirmed,
+    isConfirming,
+    error: writeError,
   }
 }

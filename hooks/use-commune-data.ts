@@ -23,12 +23,10 @@ export function useCommuneData() {
     try {
       const now = new Date()
 
-      // Get 7 days ago at 00:00:00
       const sevenDaysAgo = new Date(now)
       sevenDaysAgo.setDate(now.getDate() - 7)
       sevenDaysAgo.setHours(0, 0, 0, 0)
 
-      // Get 4 days from now at 23:59:59
       const fourDaysFromNow = new Date(now)
       fourDaysFromNow.setDate(now.getDate() + 4)
       fourDaysFromNow.setHours(23, 59, 59, 999)
@@ -57,11 +55,6 @@ export function useCommuneData() {
 
       // Fetch chores
       const choreData = await communeOSContract.getCommuneChores(address, BigInt(startDate), BigInt(endDate))
-
-      console.log(
-        "[v0] RAW choreData from contract:",
-        JSON.stringify(choreData, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2),
-      )
 
       setChores(
         choreData.instances.map((instance: any) => ({

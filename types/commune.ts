@@ -29,3 +29,25 @@ export interface ChoreInstance {
   completed: boolean
   isAssignedToUser: boolean
 }
+
+export interface Expense {
+  id: string
+  amount: string
+  description: string
+  assignedTo: string
+  dueDate: number
+  paid: boolean
+  disputed: boolean
+  createdBy: string
+  createdAt: number
+  isAssignedToUser: boolean
+  isCreatedByUser: boolean
+}
+
+export interface ExpenseDispute {
+  id: string
+  expenseId: string
+  newAssignee: string
+  votes: number
+  resolved: boolean
+}
