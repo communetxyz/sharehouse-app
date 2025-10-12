@@ -8,10 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChoreKanban } from "@/components/chore-kanban"
 import { MemberList } from "@/components/member-list"
 import { CommuneInfo } from "@/components/commune-info"
+import { ExpenseList } from "@/components/expense-list"
+import { CreateExpenseDialog } from "@/components/create-expense-dialog"
 import { WalletConnectButton } from "@/components/wallet-connect-button"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
+import { useExpenseData } from "@/hooks/use-expense-data"
 import { useWallet } from "@/hooks/use-wallet"
 import { Loader2 } from "lucide-react"
 
@@ -19,14 +22,16 @@ export default function DashboardPage() {
   const { t } = useI18n()
   const { address, isConnected } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
+  const { expenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
 
   useEffect(() => {
     const interval = setInterval(() => {
       refreshData()
+      refreshExpenses()
     }, 10000)
 
     return () => clearInterval(interval)
-  }, [refreshData])
+  }, [refreshData, refreshExpenses])
 
   if (!isConnected || !address) {
     return (
@@ -106,7 +111,10 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <LanguageToggle />
             <Button
-              onClick={refreshData}
+              onClick={() => {
+                refreshData()
+                refreshExpenses()
+              }}
               variant="ghost"
               size="sm"
               className="text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5"
@@ -131,6 +139,7 @@ export default function DashboardPage() {
           <TabsList className="bg-white/50 border border-charcoal/10">
             <TabsTrigger value="my-chores">{t("dashboard.myChores")}</TabsTrigger>
             <TabsTrigger value="all-chores">{t("dashboard.allChores")}</TabsTrigger>
+            <TabsTrigger value="expenses">{t("dashboard.expenses")}</TabsTrigger>
             <TabsTrigger value="members">{t("dashboard.members")}</TabsTrigger>
             <TabsTrigger value="info">{t("dashboard.info")}</TabsTrigger>
           </TabsList>
@@ -141,6 +150,20 @@ export default function DashboardPage() {
 
           <TabsContent value="all-chores" className="space-y-6">
             <ChoreKanban chores={chores} onRefresh={refreshData} />
+          </TabsContent>
+
+          <TabsContent value="expenses" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-serif text-charcoal">{t("expenses.title")}</h2>
+              {commune && <CreateExpenseDialog communeId={commune.id} members={members} onSuccess={refreshExpenses} />}
+            </div>
+            {isLoadingExpenses ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-sage" />
+              </div>
+            ) : (
+              commune && <ExpenseList expenses={expenses} communeId={commune.id} onRefresh={refreshExpenses} />
+            )}
           </TabsContent>
 
           <TabsContent value="members" className="space-y-6">

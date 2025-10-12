@@ -12,8 +12,10 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import { WalletConnectButton } from "@/components/wallet-connect-button"
 import { useJoinCommune } from "@/hooks/use-join-commune"
 import { useWallet } from "@/hooks/use-wallet"
+import { useI18n } from "@/lib/i18n/context"
 
 export default function JoinPage() {
+  const { t } = useI18n()
   const searchParams = useSearchParams()
   const [communeId, setCommuneId] = useState("")
   const [nonce, setNonce] = useState("")
@@ -103,7 +105,7 @@ export default function JoinPage() {
             <Link href="/">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
+                {t("common.back", "Back")}
               </Button>
             </Link>
             <WalletConnectButton />
@@ -114,15 +116,17 @@ export default function JoinPage() {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12 max-w-2xl">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-serif text-charcoal mb-4">Join a ShareHouse</h1>
-          <p className="text-lg text-charcoal/70">Enter your invite details to join your commune</p>
+          <h1 className="text-4xl md:text-5xl font-serif text-charcoal mb-4">{t("join.title")}</h1>
+          <p className="text-lg text-charcoal/70">
+            {t("join.subtitle", "Enter your invite details to join your commune")}
+          </p>
         </div>
 
         {!isConnected && (
           <Card className="border-charcoal/10 mb-6">
             <CardHeader>
-              <CardTitle className="font-serif">Connect Your Wallet</CardTitle>
-              <CardDescription>You need to connect your wallet before joining a commune</CardDescription>
+              <CardTitle className="font-serif">{t("dashboard.connectWallet")}</CardTitle>
+              <CardDescription>{t("dashboard.connectWalletDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <WalletConnectButton />
@@ -132,8 +136,8 @@ export default function JoinPage() {
 
         <Card className="border-charcoal/10">
           <CardHeader>
-            <CardTitle className="font-serif">Invite Details</CardTitle>
-            <CardDescription>You should have received these parameters from your commune creator</CardDescription>
+            <CardTitle className="font-serif">{t("join.inviteDetails")}</CardTitle>
+            <CardDescription>{t("join.inviteDetailsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {error && (
@@ -144,7 +148,7 @@ export default function JoinPage() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="communeId">Commune ID</Label>
+                <Label htmlFor="communeId">{t("join.communeId")}</Label>
                 <Input
                   id="communeId"
                   type="number"
@@ -156,7 +160,7 @@ export default function JoinPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="nonce">Nonce</Label>
+                <Label htmlFor="nonce">{t("join.nonce")}</Label>
                 <Input
                   id="nonce"
                   type="number"
@@ -168,7 +172,7 @@ export default function JoinPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signature">Signature</Label>
+                <Label htmlFor="signature">{t("join.signature")}</Label>
                 <Input
                   id="signature"
                   placeholder="0x..."
@@ -186,34 +190,36 @@ export default function JoinPage() {
                 className="w-full bg-sage hover:bg-sage/90 text-cream"
               >
                 {isValidating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Validate Invite
+                {isValidating ? t("join.validating") : t("join.validateInvite")}
               </Button>
             )}
 
             {communeData && (
               <div className="space-y-6">
                 <div className="p-6 rounded-lg bg-sage/10 border border-sage/20 space-y-4">
-                  <h3 className="font-serif text-xl text-charcoal">Commune Details</h3>
+                  <h3 className="font-serif text-xl text-charcoal">{t("join.communeDetails", "Commune Details")}</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-charcoal/70">Name:</span>
+                      <span className="text-charcoal/70">{t("commune.name")}:</span>
                       <span className="font-medium text-charcoal">{communeData.name}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-charcoal/70">Members:</span>
+                      <span className="text-charcoal/70">{t("members.title")}:</span>
                       <span className="font-medium text-charcoal">{communeData.memberCount}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-charcoal/70">Chores:</span>
+                      <span className="text-charcoal/70">{t("commune.totalChores")}:</span>
                       <span className="font-medium text-charcoal">{communeData.choreCount}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-charcoal/70">Collateral Required:</span>
-                      <span className="font-medium text-charcoal">{communeData.collateralRequired ? "Yes" : "No"}</span>
+                      <span className="text-charcoal/70">{t("commune.collateralRequired")}:</span>
+                      <span className="font-medium text-charcoal">
+                        {communeData.collateralRequired ? t("commune.yes") : t("commune.no")}
+                      </span>
                     </div>
                     {communeData.collateralRequired && (
                       <div className="flex justify-between">
-                        <span className="text-charcoal/70">Collateral Amount:</span>
+                        <span className="text-charcoal/70">{t("commune.collateralAmount")}:</span>
                         <span className="font-medium text-charcoal">{communeData.collateralAmount} BREAD</span>
                       </div>
                     )}
@@ -227,7 +233,7 @@ export default function JoinPage() {
                     className="w-full bg-sage hover:bg-sage/90 text-cream"
                   >
                     {isApproving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Approve BREAD Token
+                    {isApproving ? t("join.approving") : t("join.approveBread")}
                   </Button>
                 )}
 
@@ -238,14 +244,14 @@ export default function JoinPage() {
                     className="w-full bg-sage hover:bg-sage/90 text-cream"
                   >
                     {isJoining && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Join ShareHouse
+                    {isJoining ? t("join.joining") : t("join.joinSharehouse")}
                   </Button>
                 )}
 
                 {isCheckingAllowance && (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="w-6 h-6 animate-spin text-sage" />
-                    <span className="ml-2 text-charcoal/70">Checking token allowance...</span>
+                    <span className="ml-2 text-charcoal/70">{t("join.checkingAllowance")}</span>
                   </div>
                 )}
               </div>
@@ -254,7 +260,7 @@ export default function JoinPage() {
         </Card>
 
         <div className="mt-8 text-center text-sm text-charcoal/60">
-          <p>Don't have an invite? Contact your future housemates to get started.</p>
+          <p>{t("join.noInvite", "Don't have an invite? Contact your future housemates to get started.")}</p>
         </div>
       </main>
     </div>

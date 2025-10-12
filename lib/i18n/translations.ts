@@ -12,6 +12,7 @@ export const translations = {
       tryAgain: "再試行",
       loading: "読み込み中...",
       error: "エラー",
+      back: "戻る",
     },
     home: {
       title: "共同生活",
@@ -85,8 +86,10 @@ export const translations = {
     },
     join: {
       title: "シェアハウスに参加",
+      subtitle: "招待の詳細を入力してコミューンに参加",
       inviteDetails: "招待の詳細",
       inviteDetailsDesc: "コミューン作成者からこれらのパラメータを受け取っているはずです",
+      communeDetails: "コミューンの詳細",
       communeId: "コミューンID",
       nonce: "ノンス",
       signature: "署名",
@@ -97,6 +100,7 @@ export const translations = {
       joinSharehouse: "シェアハウスに参加",
       joining: "参加中...",
       checkingAllowance: "許可を確認中...",
+      noInvite: "招待状をお持ちでないですか？将来のハウスメイトに連絡して始めましょう。",
     },
     expenses: {
       title: "経費",
@@ -140,6 +144,7 @@ export const translations = {
       tryAgain: "Try Again",
       loading: "Loading...",
       error: "Error",
+      back: "Back",
     },
     home: {
       title: "Communal Living",
@@ -215,8 +220,10 @@ export const translations = {
     },
     join: {
       title: "Join a ShareHouse",
+      subtitle: "Enter your invite details to join your commune",
       inviteDetails: "Invite Details",
       inviteDetailsDesc: "You should have received these parameters from your commune creator",
+      communeDetails: "Commune Details",
       communeId: "Commune ID",
       nonce: "Nonce",
       signature: "Signature",
@@ -227,6 +234,7 @@ export const translations = {
       joinSharehouse: "Join ShareHouse",
       joining: "Joining...",
       checkingAllowance: "Checking allowance...",
+      noInvite: "Don't have an invite? Contact your future housemates to get started.",
     },
     expenses: {
       title: "Expenses",
