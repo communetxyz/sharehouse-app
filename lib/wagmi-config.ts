@@ -2,7 +2,7 @@
 
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config"
 import { cookieStorage, createStorage } from "wagmi"
-import { gnosis } from "wagmi/chains"
+import { gnosis, mainnet } from "wagmi/chains"
 
 // Get projectId from environment variable
 export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "549077143e5bfa40a6c5f280e0b0d13e"
@@ -18,7 +18,7 @@ const metadata = {
 
 // Create wagmiConfig
 export const config = defaultWagmiConfig({
-  chains: [gnosis],
+  chains: [gnosis, mainnet],
   projectId,
   metadata,
   ssr: true,
