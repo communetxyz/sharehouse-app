@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -18,7 +18,8 @@ export default function JoinPage() {
   const [communeId, setCommuneId] = useState("")
   const [nonce, setNonce] = useState("")
   const [signature, setSignature] = useState("")
-  const [hasAutoValidated, setHasAutoValidated] = useState(false)
+  const hasLoadedParams = useRef(false)
+  const hasAutoValidated = useRef(false)
 
   const { isConnected } = useWallet()
   const {
@@ -35,20 +36,37 @@ export default function JoinPage() {
   } = useJoinCommune()
 
   useEffect(() => {
+    if (hasLoadedParams.current) return
+
     const urlCommuneId = searchParams.get("communeId")
     const urlNonce = searchParams.get("nonce")
     const urlSignature = searchParams.get("signature")
 
-    if (urlCommuneId) setCommuneId(urlCommuneId)
-    if (urlNonce) setNonce(urlNonce)
-    if (urlSignature) setSignature(urlSignature)
-
-    // Auto-validate if all params are present and wallet is connected
-    if (urlCommuneId && urlNonce && urlSignature && isConnected && !hasAutoValidated && !communeData) {
-      setHasAutoValidated(true)
-      validateInvite(urlCommuneId, urlNonce, urlSignature)
+    if (urlCommuneId) {
+      setCommuneId(urlCommuneId)
+      console.log("[v0] Loaded communeId from URL:", urlCommuneId)
     }
-  }, [searchParams, isConnected, hasAutoValidated, communeData, validateInvite])
+    if (urlNonce) {
+      setNonce(urlNonce)
+      console.log("[v0] Loaded nonce from URL:", urlNonce)
+    }
+    if (urlSignature) {
+      setSignature(urlSignature)
+      console.log("[v0] Loaded signature from URL:", urlSignature)
+    }
+
+    hasLoadedParams.current = true
+  }, [searchParams])
+
+  useEffect(() => {
+    if (hasAutoValidated.current || !isConnected || communeData) return
+
+    if (communeId && nonce && signature) {
+      console.log("[v0] Auto-validating invite with params:", { communeId, nonce, signature })
+      hasAutoValidated.current = true
+      validateInvite(communeId, nonce, signature)
+    }
+  }, [isConnected, communeId, nonce, signature, communeData, validateInvite])
 
   const handleValidate = async () => {
     if (!communeId || !nonce || !signature) {

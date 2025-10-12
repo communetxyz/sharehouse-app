@@ -94,8 +94,7 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
 
   const sortByDate = (a: ChoreInstance, b: ChoreInstance) => a.periodStart - b.periodStart
 
-  const now = Math.floor(Date.now() / 1000)
-  const sevenDaysAgo = now - 7 * 24 * 60 * 60
+  const sevenDaysAgo = Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60
 
   const assignedToMe = chores.filter((c) => c.isAssignedToUser === true && c.completed === false).sort(sortByDate)
   const notStarted = chores.filter((c) => c.isAssignedToUser === false && c.completed === false).sort(sortByDate)
