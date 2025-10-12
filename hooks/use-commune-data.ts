@@ -58,6 +58,11 @@ export function useCommuneData() {
       // Fetch chores
       const choreData = await communeOSContract.getCommuneChores(address, BigInt(startDate), BigInt(endDate))
 
+      console.log(
+        "[v0] RAW choreData from contract:",
+        JSON.stringify(choreData, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2),
+      )
+
       setChores(
         choreData.instances.map((instance: any) => ({
           scheduleId: instance.scheduleId.toString(),
