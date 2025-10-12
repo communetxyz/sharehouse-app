@@ -36,6 +36,13 @@ export function useCommuneData() {
       const startDate = Math.floor(sevenDaysAgo.getTime() / 1000)
       const endDate = Math.floor(fourDaysFromNow.getTime() / 1000)
 
+      console.log("[v0] Fetching chores for date range:", {
+        startDate,
+        endDate,
+        startDateReadable: new Date(startDate * 1000).toISOString(),
+        endDateReadable: new Date(endDate * 1000).toISOString(),
+      })
+
       // Fetch commune basic info
       const basicInfo = await communeOSContract.getCommuneBasicInfo(address)
 
@@ -58,8 +65,11 @@ export function useCommuneData() {
       // Fetch chores
       const choreData = await communeOSContract.getCommuneChores(address, BigInt(startDate), BigInt(endDate))
 
-      setChores(
-        choreData.instances.map((instance: any) => ({
+      console.log("[v0] Raw chore data from contract:", choreData)
+      console.log("[v0] Number of chore instances:", choreData.instances.length)
+
+      const processedChores = choreData.instances.map((instance: any) => {
+        const chore = {
           scheduleId: instance.scheduleId.toString(),
           title: instance.title,
           frequency: Number(instance.frequency),
@@ -69,8 +79,34 @@ export function useCommuneData() {
           assignedTo: instance.assignedTo,
           completed: instance.completed,
           isAssignedToUser: instance.assignedTo.toLowerCase() === address.toLowerCase(),
-        })),
-      )
+        }
+
+        console.log("[v0] Chore instance:", {
+          scheduleId: chore.scheduleId,
+          periodNumber: chore.periodNumber,
+          title: chore.title,
+          completed: chore.completed,
+          assignedTo: chore.assignedTo,
+          isAssignedToUser: chore.isAssignedToUser,
+        })
+
+        return chore
+      })
+
+      setChores(processedChores)
+
+      const completedCount = processedChores.filter((c: ChoreInstance) => c.completed).length
+      const uncompletedCount = processedChores.filter((c: ChoreInstance) => !c.completed).length
+      const myCompletedCount = processedChores.filter((c: ChoreInstance) => c.completed && c.isAssignedToUser).length
+      const myUncompletedCount = processedChores.filter((c: ChoreInstance) => !c.completed && c.isAssignedToUser).length
+
+      console.log("[v0] Chore summary:", {
+        total: processedChores.length,
+        completed: completedCount,
+        uncompleted: uncompletedCount,
+        myCompleted: myCompletedCount,
+        myUncompleted: myUncompletedCount,
+      })
 
       setError(null)
     } catch (err: any) {
