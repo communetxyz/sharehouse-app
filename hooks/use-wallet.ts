@@ -50,19 +50,19 @@ export function useWallet() {
     }
   }
 
-  const approveToken = async (amount: bigint) => {
+  const approveToken = async (amount: bigint, spender: `0x${string}`) => {
     if (!address) {
       throw new Error("Wallet not connected")
     }
 
     try {
-      console.log("[v0] Approving token:", { amount: amount.toString() })
+      console.log("[v0] Approving token:", { amount: amount.toString(), spender })
 
       const hash = await writeContractAsync({
         address: BREAD_TOKEN_ADDRESS as `0x${string}`,
         abi: ERC20_ABI,
         functionName: "approve",
-        args: [COLLATERAL_MANAGER_ADDRESS, amount],
+        args: [spender, amount],
       })
 
       console.log("[v0] Approval transaction submitted:", hash)

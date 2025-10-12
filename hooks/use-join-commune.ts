@@ -20,6 +20,7 @@ export function useJoinCommune() {
   const [isValidating, setIsValidating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
+  const [justApproved, setJustApproved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const { data: collateralManagerAddress } = useReadContract({
@@ -45,14 +46,16 @@ export function useJoinCommune() {
   })
 
   useEffect(() => {
-    if (isConfirmed && !isConfirming && isApproving) {
-      // Wait a bit for blockchain state to update, then refetch
+    if (justApproved && isConfirmed && !isConfirming) {
+      console.log("[v0] Approval confirmed, refetching allowance")
+      // Wait for blockchain state to update
       setTimeout(() => {
         refetchAllowance()
+        setJustApproved(false)
         setIsApproving(false)
-      }, 1000)
+      }, 2000) // Increased delay to 2 seconds
     }
-  }, [isConfirmed, isConfirming, isApproving, refetchAllowance])
+  }, [isConfirmed, isConfirming, justApproved, refetchAllowance])
 
   const hasAllowance =
     communeData?.collateralRequired && allowance
@@ -71,16 +74,19 @@ export function useJoinCommune() {
     }
 
     setIsApproving(true)
+    setJustApproved(false)
     setError(null)
 
     try {
       const amount = BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
+      console.log("[v0] Starting approval for amount:", amount.toString(), "to spender:", collateralManagerAddress)
       await approveToken(amount, collateralManagerAddress as `0x${string}`)
-      // Don't set isApproving to false here - let the useEffect handle it after confirmation
+      setJustApproved(true)
     } catch (err: any) {
       console.error("[v0] Approval error:", err)
       setError(err.message || "Failed to approve token")
       setIsApproving(false)
+      setJustApproved(false)
     }
   }
 
