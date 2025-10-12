@@ -119,14 +119,19 @@ export default function DashboardPage() {
           <p className="text-charcoal/70">Manage your shared responsibilities</p>
         </div>
 
-        <Tabs defaultValue="chores" className="space-y-6">
+        <Tabs defaultValue="my-chores" className="space-y-6">
           <TabsList className="bg-white/50 border border-charcoal/10">
-            <TabsTrigger value="chores">Chores</TabsTrigger>
+            <TabsTrigger value="my-chores">My Chores</TabsTrigger>
+            <TabsTrigger value="all-chores">All Chores</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="info">Info</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="chores" className="space-y-6">
+          <TabsContent value="my-chores" className="space-y-6">
+            <ChoreKanban chores={chores} onRefresh={refreshData} filterMyChores />
+          </TabsContent>
+
+          <TabsContent value="all-chores" className="space-y-6">
             <ChoreKanban chores={chores} onRefresh={refreshData} />
           </TabsContent>
 

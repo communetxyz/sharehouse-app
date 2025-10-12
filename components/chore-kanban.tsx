@@ -12,6 +12,7 @@ import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
   onRefresh: () => void
+  filterMyChores?: boolean // Added prop to filter only user's chores
 }
 
 function ChoreCard({
@@ -85,15 +86,17 @@ function ChoreCard({
   )
 }
 
-export function ChoreKanban({ chores, onRefresh }: ChoreKanbanProps) {
+export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { markComplete, isMarking } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
 
   const sortByDate = (a: ChoreInstance, b: ChoreInstance) => a.periodStart - b.periodStart
 
-  const assignedToMe = chores.filter((c) => c.isAssignedToUser && !c.completed).sort(sortByDate)
-  const notStarted = chores.filter((c) => !c.isAssignedToUser && !c.completed).sort(sortByDate)
-  const completed = chores.filter((c) => c.completed).sort(sortByDate)
+  const filteredChores = filterMyChores ? chores.filter((c) => c.isAssignedToUser) : chores
+
+  const assignedToMe = filteredChores.filter((c) => c.isAssignedToUser && !c.completed).sort(sortByDate)
+  const notStarted = filteredChores.filter((c) => !c.isAssignedToUser && !c.completed).sort(sortByDate)
+  const completed = filteredChores.filter((c) => c.completed).sort(sortByDate)
 
   const handleComplete = async (chore: ChoreInstance) => {
     setCompletingId(chore.scheduleId.toString())
