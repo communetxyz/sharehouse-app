@@ -2,12 +2,12 @@
 
 import { createConfig } from "@privy-io/wagmi"
 import { http } from "wagmi"
-import { gnosis, mainnet } from "wagmi/chains"
+import { base, baseSepolia } from "wagmi/chains"
 
 export const config = createConfig({
-  chains: [gnosis, mainnet],
+  chains: [baseSepolia, base],
   transports: {
-    [gnosis.id]: http(),
-    [mainnet.id]: http(),
+    [baseSepolia.id]: http(),
+    [base.id]: http(),
   },
 })
