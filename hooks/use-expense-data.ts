@@ -2,27 +2,29 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useWallet } from "./use-wallet"
+import { useCommuneData } from "./use-commune-data"
 import { communeOSContract } from "@/lib/contracts"
 import type { Expense } from "@/types/commune"
 
 export function useExpenseData() {
   const { address } = useWallet()
+  const { commune } = useCommuneData()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const refreshExpenses = useCallback(async () => {
-    if (!address) {
-      setError("Please connect your wallet")
+    if (!address || !commune?.id) {
       setIsLoading(false)
       return
     }
 
     try {
-      const expenseData = await communeOSContract.getCommuneExpenses(address)
+      setIsLoading(true)
+      const expenseData = await communeOSContract.getCommuneExpenses(BigInt(commune.id))
 
       setExpenses(
-        expenseData.expenses.map((expense: any) => ({
+        expenseData.map((expense: any) => ({
           id: expense.id.toString(),
           communeId: expense.communeId.toString(),
           amount: (Number(expense.amount) / 1e18).toString(),
@@ -42,7 +44,7 @@ export function useExpenseData() {
     } finally {
       setIsLoading(false)
     }
-  }, [address])
+  }, [address, commune?.id])
 
   useEffect(() => {
     refreshExpenses()

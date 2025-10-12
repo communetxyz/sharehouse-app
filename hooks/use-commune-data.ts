@@ -23,16 +23,14 @@ export function useCommuneData() {
     try {
       const now = new Date()
 
-      const sevenDaysAgo = new Date(now)
-      sevenDaysAgo.setDate(now.getDate() - 7)
-      sevenDaysAgo.setHours(0, 0, 0, 0)
+      const firstDayOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      firstDayOfPrevMonth.setHours(0, 0, 0, 0)
 
-      const fourDaysFromNow = new Date(now)
-      fourDaysFromNow.setDate(now.getDate() + 4)
-      fourDaysFromNow.setHours(23, 59, 59, 999)
+      const lastDayOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 0)
+      lastDayOfNextMonth.setHours(23, 59, 59, 999)
 
-      const startDate = Math.floor(sevenDaysAgo.getTime() / 1000)
-      const endDate = Math.floor(fourDaysFromNow.getTime() / 1000)
+      const startDate = Math.floor(firstDayOfPrevMonth.getTime() / 1000)
+      const endDate = Math.floor(lastDayOfNextMonth.getTime() / 1000)
 
       // Fetch commune basic info
       const basicInfo = await communeOSContract.getCommuneBasicInfo(address)

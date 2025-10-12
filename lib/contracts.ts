@@ -185,15 +185,14 @@ export const COMMUNE_OS_ABI = [
   {
     type: "function",
     name: "getCommuneExpenses",
-    inputs: [{ name: "user", type: "address" }],
+    inputs: [{ name: "communeId", type: "uint256" }],
     outputs: [
-      { name: "communeId", type: "uint256" },
       {
         name: "expenses",
         type: "tuple[]",
         components: [
           { name: "id", type: "uint256" },
-          { name: "communeId", type: "uint256" }, // Added missing communeId field
+          { name: "communeId", type: "uint256" },
           { name: "amount", type: "uint256" },
           { name: "description", type: "string" },
           { name: "assignedTo", type: "address" },
