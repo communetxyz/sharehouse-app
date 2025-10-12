@@ -13,7 +13,19 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
       config={{
-        loginMethods: ["email", "wallet", "google", "twitter"],
+        loginMethods: [
+          "email",
+          "wallet",
+          "google",
+          "twitter",
+          "discord",
+          "github",
+          "linkedin",
+          "apple",
+          "farcaster",
+          "telegram",
+          "sms",
+        ],
         appearance: {
           theme: "light",
           accentColor: "#8B7355",
@@ -22,6 +34,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         embeddedWallets: {
           createOnLogin: "users-without-wallets",
         },
+        supportedChains: ["base-sepolia", "base"],
       }}
     >
       <QueryClientProvider client={queryClient}>
