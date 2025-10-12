@@ -8,11 +8,12 @@ import { useState } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
 import type { ChoreInstance } from "@/types/commune"
 import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
+import { useLanguage } from "@/lib/i18n/context"
 
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
   onRefresh: () => void
-  filterMyChores?: boolean // Added prop to filter only user's chores
+  filterMyChores?: boolean
 }
 
 function ChoreCard({
@@ -89,26 +90,19 @@ function ChoreCard({
 export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { markComplete, isMarking } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const sortByDate = (a: ChoreInstance, b: ChoreInstance) => a.periodStart - b.periodStart
 
-  const now = Math.floor(Date.now() / 1000) // Current time in seconds
-  const fourDaysFromNow = now + 4 * 24 * 60 * 60
+  const now = Math.floor(Date.now() / 1000)
   const sevenDaysAgo = now - 7 * 24 * 60 * 60
 
-  const filteredChores = filterMyChores ? chores.filter((c) => c.isAssignedToUser) : chores
+  const assignedToMe = chores.filter((c) => c.isAssignedToUser && !c.completed).sort(sortByDate)
 
-  // For pending/in-progress: show chores starting within the next 4 days
-  const assignedToMe = filteredChores
-    .filter((c) => c.isAssignedToUser && !c.completed && c.periodStart <= fourDaysFromNow)
-    .sort(sortByDate)
-
-  const notStarted = filteredChores
-    .filter((c) => !c.isAssignedToUser && !c.completed && c.periodStart <= fourDaysFromNow)
-    .sort(sortByDate)
+  const notStarted = chores.filter((c) => !c.isAssignedToUser && !c.completed).sort(sortByDate)
 
   // For completed: show chores from the last 7 days
-  const completed = filteredChores.filter((c) => c.completed && c.periodStart >= sevenDaysAgo).sort(sortByDate)
+  const completed = chores.filter((c) => c.completed && c.periodStart >= sevenDaysAgo).sort(sortByDate)
 
   const handleComplete = async (chore: ChoreInstance) => {
     setCompletingId(chore.scheduleId.toString())
@@ -117,44 +111,69 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
     onRefresh()
   }
 
-  return (
-    <div className="grid md:grid-cols-3 gap-6">
-      {/* Assigned to Me */}
-      <Card className="border-sage/30 bg-sage/5">
-        <CardHeader>
-          <CardTitle className="font-serif text-charcoal flex items-center gap-2">
-            <Circle className="w-5 h-5 text-sage" />
-            Assigned to Me
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {assignedToMe.length === 0 ? (
-            <p className="text-sm text-charcoal/60 text-center py-8">No chores assigned to you right now</p>
-          ) : (
-            assignedToMe.map((chore) => (
-              <ChoreCard
-                key={`${chore.scheduleId}-${chore.periodNumber}`}
-                chore={chore}
-                onComplete={() => handleComplete(chore)}
-                isCompleting={completingId === chore.scheduleId.toString()}
-                showCompleteButton
-              />
-            ))
-          )}
-        </CardContent>
-      </Card>
+  if (filterMyChores) {
+    // My Chores view: Only show "Assigned to Me" and "Completed"
+    return (
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Assigned to Me */}
+        <Card className="border-sage/30 bg-sage/5">
+          <CardHeader>
+            <CardTitle className="font-serif text-charcoal flex items-center gap-2">
+              <Circle className="w-5 h-5 text-sage" />
+              {t("chores.assignedToMe")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {assignedToMe.length === 0 ? (
+              <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noAssignedChores")}</p>
+            ) : (
+              assignedToMe.map((chore) => (
+                <ChoreCard
+                  key={`${chore.scheduleId}-${chore.periodNumber}`}
+                  chore={chore}
+                  onComplete={() => handleComplete(chore)}
+                  isCompleting={completingId === chore.scheduleId.toString()}
+                  showCompleteButton
+                />
+              ))
+            )}
+          </CardContent>
+        </Card>
 
+        {/* Completed */}
+        <Card className="border-charcoal/10">
+          <CardHeader>
+            <CardTitle className="font-serif text-charcoal flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-sage" />
+              {t("chores.completed")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {completed.length === 0 ? (
+              <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
+            ) : (
+              completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // All Chores view: Only show "Not Started" and "Completed"
+  return (
+    <div className="grid md:grid-cols-2 gap-6">
       {/* Not Started */}
       <Card className="border-charcoal/10">
         <CardHeader>
           <CardTitle className="font-serif text-charcoal flex items-center gap-2">
             <Circle className="w-5 h-5 text-charcoal/40" />
-            Not Started
+            {t("chores.notStarted")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {notStarted.length === 0 ? (
-            <p className="text-sm text-charcoal/60 text-center py-8">No pending chores</p>
+            <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noPendingChores")}</p>
           ) : (
             notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
           )}
@@ -166,12 +185,12 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
         <CardHeader>
           <CardTitle className="font-serif text-charcoal flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-sage" />
-            Completed
+            {t("chores.completed")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {completed.length === 0 ? (
-            <p className="text-sm text-charcoal/60 text-center py-8">No completed chores yet</p>
+            <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
           ) : (
             completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
           )}
