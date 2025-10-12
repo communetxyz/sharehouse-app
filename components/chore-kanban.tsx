@@ -167,7 +167,13 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
   const handleComplete = async (chore: ChoreInstance) => {
     setCompletingId(chore.scheduleId.toString())
     try {
-      await markComplete(chore.scheduleId)
+      await markComplete(chore.scheduleId, {
+        scheduleId: chore.scheduleId,
+        periodNumber: chore.periodNumber,
+        title: chore.title,
+        assignedTo: chore.assignedTo,
+        completed: chore.completed,
+      })
     } catch (err) {
       setCompletingId(null)
     }

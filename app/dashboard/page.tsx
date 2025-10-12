@@ -1,6 +1,4 @@
 "use client"
-
-import { useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,15 +22,6 @@ export default function DashboardPage() {
   const { address, isConnected, status } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
   const { expenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshData()
-      refreshExpenses()
-    }, 10000)
-
-    return () => clearInterval(interval)
-  }, [refreshData, refreshExpenses])
 
   if (status === "reconnecting" || status === "connecting") {
     return (

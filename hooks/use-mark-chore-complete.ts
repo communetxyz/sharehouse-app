@@ -14,7 +14,7 @@ export function useMarkChoreComplete() {
 
   const { sendTransaction } = useSendTransaction()
 
-  const markComplete = async (choreId: string) => {
+  const markComplete = async (choreId: string, choreData?: any) => {
     if (!commune) {
       throw new Error("No commune data available")
     }
@@ -25,9 +25,12 @@ export function useMarkChoreComplete() {
 
     try {
       console.log("[v0] ===== MARK CHORE COMPLETE START =====")
+      console.log("[v0] Full chore data:", choreData)
       console.log("[v0] Marking chore complete:", {
         choreId,
+        choreIdType: typeof choreId,
         communeId: commune.id,
+        communeIdType: typeof commune.id,
         contractAddress: COMMUNE_OS_ADDRESS,
       })
 
@@ -38,6 +41,10 @@ export function useMarkChoreComplete() {
       })
 
       console.log("[v0] Encoded data:", data)
+      console.log("[v0] Function args:", {
+        communeId: BigInt(commune.id).toString(),
+        choreId: BigInt(choreId).toString(),
+      })
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
       const result = await sendTransaction(
@@ -62,6 +69,7 @@ export function useMarkChoreComplete() {
         message: err.message,
         code: err.code,
         data: err.data,
+        cause: err.cause,
       })
       setError(err)
       throw new Error(err.message || "Failed to mark chore complete")

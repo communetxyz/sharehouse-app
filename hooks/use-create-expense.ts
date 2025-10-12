@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useWallet } from "./use-wallet"
 import { useSendTransaction } from "@privy-io/react-auth"
 import { encodeFunctionData } from "viem"
@@ -11,14 +11,7 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isCreating, setIsCreating] = useState(false)
-  const [isConfirmed, setIsConfirmed] = useState(false)
   const { toast } = useToast()
-
-  useEffect(() => {
-    if (isConfirmed && onSuccess) {
-      onSuccess()
-    }
-  }, [isConfirmed, onSuccess])
 
   const createExpense = async (amount: string, description: string, dueDate: Date, assignedTo: string) => {
     if (!isConnected || !address) {
@@ -31,7 +24,6 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
     }
 
     setIsCreating(true)
-    setIsConfirmed(false)
 
     try {
       console.log("[v0] ===== CREATE EXPENSE START =====")
@@ -67,7 +59,7 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
           data,
         },
         {
-          sponsor: true, // Enable gas sponsorship
+          sponsor: true,
         },
       )
 
@@ -75,12 +67,14 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
       console.log("[v0] Transaction hash:", result.hash)
       console.log("[v0] ===== CREATE EXPENSE SUCCESS =====")
 
-      setIsConfirmed(true)
-
       toast({
         title: "Expense created",
         description: "Your expense has been created successfully",
       })
+
+      if (onSuccess) {
+        onSuccess()
+      }
     } catch (error: any) {
       console.error("[v0] ===== CREATE EXPENSE FAILED =====")
       console.error("[v0] Error creating expense:", error)
@@ -102,6 +96,5 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
   return {
     createExpense,
     isCreating,
-    isConfirmed,
   }
 }
