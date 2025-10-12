@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import type { ChoreInstance } from "@/types/commune"
+import type { ChoreInstance, Expense } from "@/types/commune"
 import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 import { useLanguage } from "@/lib/i18n/context"
 import { useCalendarChores } from "@/hooks/use-calendar-chores"
+import { useCalendarExpenses } from "@/hooks/use-calendar-expenses"
 
 interface ChoreCalendarProps {
   chores: ChoreInstance[]
@@ -32,6 +33,28 @@ function ChoreItem({ chore }: { chore: ChoreInstance }) {
   )
 }
 
+function ExpenseItem({ expense }: { expense: Expense }) {
+  const assignedToName = useEnsNameOrAddress(expense.assignedTo)
+
+  return (
+    <div
+      className={`text-xs p-1.5 rounded mb-1 border-l-2 ${
+        expense.disputed
+          ? "bg-red-50 border-red-400"
+          : expense.paid
+            ? "bg-green-50 border-green-400"
+            : expense.isAssignedToUser
+              ? "bg-blue-50 border-blue-400"
+              : "bg-amber-50 border-amber-400"
+      }`}
+    >
+      <div className="font-medium truncate">💰 {expense.description}</div>
+      <div className="text-charcoal/60 truncate">{expense.amount} BREAD</div>
+      <div className="text-charcoal/60 truncate">{assignedToName}</div>
+    </div>
+  )
+}
+
 export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const { t } = useLanguage()
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -39,7 +62,10 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
 
-  const { chores: fetchedChores, isLoading } = useCalendarChores(year, month)
+  const { chores: fetchedChores, isLoading: isLoadingChores } = useCalendarChores(year, month)
+  const { expenses, isLoading: isLoadingExpenses } = useCalendarExpenses()
+
+  const isLoading = isLoadingChores || isLoadingExpenses
 
   // Get first day of month and total days
   const firstDayOfMonth = new Date(year, month, 1)
@@ -62,12 +88,21 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const choresByDate = new Map<string, ChoreInstance[]>()
   fetchedChores.forEach((chore) => {
     const choreDate = new Date(chore.periodStart * 1000)
-    // Use consistent date key format: YYYY-M-D (no zero padding)
     const dateKey = `${choreDate.getFullYear()}-${choreDate.getMonth()}-${choreDate.getDate()}`
     if (!choresByDate.has(dateKey)) {
       choresByDate.set(dateKey, [])
     }
     choresByDate.get(dateKey)!.push(chore)
+  })
+
+  const expensesByDate = new Map<string, Expense[]>()
+  expenses.forEach((expense) => {
+    const expenseDate = new Date(expense.dueDate * 1000)
+    const dateKey = `${expenseDate.getFullYear()}-${expenseDate.getMonth()}-${expenseDate.getDate()}`
+    if (!expensesByDate.has(dateKey)) {
+      expensesByDate.set(dateKey, [])
+    }
+    expensesByDate.get(dateKey)!.push(expense)
   })
 
   const goToPreviousMonth = () => {
@@ -140,11 +175,12 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
           {days.map((day, index) => {
             const dateKey = day ? `${year}-${month}-${day}` : null
             const dayChores = dateKey ? choresByDate.get(dateKey) || [] : []
+            const dayExpenses = dateKey ? expensesByDate.get(dateKey) || [] : []
 
             return (
               <div
                 key={index}
-                className={`min-h-[100px] p-2 rounded-lg border ${
+                className={`min-h-[120px] p-2 rounded-lg border ${
                   day
                     ? isToday(day)
                       ? "bg-sage/10 border-sage/40"
@@ -161,9 +197,12 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                     >
                       {day}
                     </div>
-                    <div className="space-y-1 overflow-y-auto max-h-[70px]">
+                    <div className="space-y-1 overflow-y-auto max-h-[90px]">
                       {dayChores.map((chore) => (
                         <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
+                      ))}
+                      {dayExpenses.map((expense) => (
+                        <ExpenseItem key={expense.id} expense={expense} />
                       ))}
                     </div>
                   </>
@@ -177,15 +216,31 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
         <div className="mt-4 pt-4 border-t border-charcoal/10 flex flex-wrap gap-4 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-sage/10 border border-sage/40" />
-            <span className="text-charcoal/70">Assigned to me</span>
+            <span className="text-charcoal/70">My chores</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-charcoal/5 border border-charcoal/10" />
-            <span className="text-charcoal/70">Other members</span>
+            <span className="text-charcoal/70">Other chores</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-sage/20 border border-sage/30" />
             <span className="text-charcoal/70">Completed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-blue-50 border-l-2 border-blue-400" />
+            <span className="text-charcoal/70">My expenses</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-amber-50 border-l-2 border-amber-400" />
+            <span className="text-charcoal/70">Other expenses</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-green-50 border-l-2 border-green-400" />
+            <span className="text-charcoal/70">Paid</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-red-50 border-l-2 border-red-400" />
+            <span className="text-charcoal/70">Disputed</span>
           </div>
         </div>
       </CardContent>

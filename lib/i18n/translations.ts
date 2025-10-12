@@ -13,6 +13,7 @@ export const translations = {
       loading: "読み込み中...",
       error: "エラー",
       back: "戻る",
+      cancel: "キャンセル",
     },
     home: {
       title: "共同生活",
@@ -133,6 +134,10 @@ export const translations = {
       markingPaid: "支払済みにしています...",
       disputing: "異議を申し立てています...",
       voting: "投票中...",
+      disputeExpense: "経費に異議を申し立てる",
+      selectNewAssignee: "この経費を再割り当てする新しいメンバーを選択してください",
+      newAssignee: "新しい担当者",
+      submitDispute: "異議を提出",
     },
   },
   en: {
@@ -147,6 +152,7 @@ export const translations = {
       loading: "Loading...",
       error: "Error",
       back: "Back",
+      cancel: "Cancel",
     },
     home: {
       title: "Communal Living",
@@ -269,6 +275,10 @@ export const translations = {
       markingPaid: "Marking paid...",
       disputing: "Disputing...",
       voting: "Voting...",
+      disputeExpense: "Dispute Expense",
+      selectNewAssignee: "Select a new member to reassign this expense to",
+      newAssignee: "New Assignee",
+      submitDispute: "Submit Dispute",
     },
   },
 }
