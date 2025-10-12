@@ -32,16 +32,14 @@ export interface ChoreInstance {
 
 export interface Expense {
   id: string
+  communeId: string // Added communeId field to match contract structure
   amount: string
   description: string
   assignedTo: string
   dueDate: number
   paid: boolean
   disputed: boolean
-  createdBy: string
-  createdAt: number
   isAssignedToUser: boolean
-  isCreatedByUser: boolean
 }
 
 export interface ExpenseDispute {

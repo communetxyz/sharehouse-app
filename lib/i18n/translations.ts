@@ -53,6 +53,7 @@ export const translations = {
       info: "情報",
       connectWallet: "ウォレットを接続",
       connectWalletDesc: "シェアハウスダッシュボードを表示するには、ウォレットを接続してください。",
+      connectingWallet: "ウォレットを接続中...",
       loadingSharehouse: "シェアハウスを読み込み中...",
     },
     chores: {
@@ -188,6 +189,7 @@ export const translations = {
       info: "Info",
       connectWallet: "Connect Your Wallet",
       connectWalletDesc: "Please connect your wallet to view your ShareHouse dashboard.",
+      connectingWallet: "Connecting wallet...",
       loadingSharehouse: "Loading your ShareHouse...",
     },
     chores: {

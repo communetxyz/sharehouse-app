@@ -11,7 +11,7 @@ import {
 import { useState } from "react"
 
 export function useWallet() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, status } = useAccount()
   const { disconnect } = useDisconnect()
   const { writeContractAsync } = useWriteContract()
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
@@ -88,6 +88,7 @@ export function useWallet() {
   return {
     address,
     isConnected,
+    status,
     disconnect,
     executeTransaction,
     approveToken,

@@ -24,16 +24,14 @@ export function useExpenseData() {
       setExpenses(
         expenseData.expenses.map((expense: any) => ({
           id: expense.id.toString(),
+          communeId: expense.communeId.toString(),
           amount: (Number(expense.amount) / 1e18).toString(),
           description: expense.description,
           assignedTo: expense.assignedTo,
           dueDate: Number(expense.dueDate),
           paid: Boolean(expense.paid),
           disputed: Boolean(expense.disputed),
-          createdBy: expense.createdBy,
-          createdAt: Number(expense.createdAt),
           isAssignedToUser: expense.assignedTo.toLowerCase() === address.toLowerCase(),
-          isCreatedByUser: expense.createdBy.toLowerCase() === address.toLowerCase(),
         })),
       )
 

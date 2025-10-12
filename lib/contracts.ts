@@ -193,14 +193,13 @@ export const COMMUNE_OS_ABI = [
         type: "tuple[]",
         components: [
           { name: "id", type: "uint256" },
+          { name: "communeId", type: "uint256" }, // Added missing communeId field
           { name: "amount", type: "uint256" },
           { name: "description", type: "string" },
           { name: "assignedTo", type: "address" },
           { name: "dueDate", type: "uint256" },
           { name: "paid", type: "bool" },
           { name: "disputed", type: "bool" },
-          { name: "createdBy", type: "address" },
-          { name: "createdAt", type: "uint256" },
         ],
       },
     ],

@@ -21,7 +21,7 @@ import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
   const { t } = useI18n()
-  const { address, isConnected } = useWallet()
+  const { address, isConnected, status } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
   const { expenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
 
@@ -33,6 +33,17 @@ export default function DashboardPage() {
 
     return () => clearInterval(interval)
   }, [refreshData, refreshExpenses])
+
+  if (status === "reconnecting" || status === "connecting") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cream via-sage/20 to-cream flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-sage mx-auto" />
+          <p className="text-charcoal/70">{t("dashboard.connectingWallet")}</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!isConnected || !address) {
     return (
