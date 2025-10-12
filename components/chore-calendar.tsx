@@ -52,6 +52,11 @@ function ExpenseItem({ expense }: { expense: Expense }) {
   )
 }
 
+function isSameUTCDay(timestamp: number, year: number, month: number, day: number): boolean {
+  const date = new Date(timestamp * 1000)
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month && date.getUTCDate() === day
+}
+
 export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const { t } = useLanguage()
   const today = new Date()
@@ -63,52 +68,18 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
 
   const isLoading = isLoadingChores || isLoadingExpenses
 
-  // Get first day of month and total days
   const firstDayOfMonth = new Date(year, month, 1)
   const lastDayOfMonth = new Date(year, month + 1, 0)
   const daysInMonth = lastDayOfMonth.getDate()
   const startingDayOfWeek = firstDayOfMonth.getDay()
 
-  // Create array of days
   const days = []
-  // Add empty cells for days before month starts
   for (let i = 0; i < startingDayOfWeek; i++) {
     days.push(null)
   }
-  // Add days of month
   for (let i = 1; i <= daysInMonth; i++) {
     days.push(i)
   }
-
-  // Group chores by date
-  const choresByDate = new Map<string, ChoreInstance[]>()
-  fetchedChores.forEach((chore) => {
-    const choreDate = new Date(chore.periodStart * 1000)
-    const dateKey = `${choreDate.getFullYear()}-${choreDate.getMonth()}-${choreDate.getDate()}`
-    if (!choresByDate.has(dateKey)) {
-      choresByDate.set(dateKey, [])
-    }
-    choresByDate.get(dateKey)!.push(chore)
-  })
-
-  console.log(
-    "[v0] Chores grouped by date:",
-    Array.from(choresByDate.entries()).map(([key, chores]) => ({
-      dateKey: key,
-      count: chores.length,
-      chores: chores.map((c) => c.title),
-    })),
-  )
-
-  const expensesByDate = new Map<string, Expense[]>()
-  expenses.forEach((expense) => {
-    const expenseDate = new Date(expense.dueDate * 1000)
-    const dateKey = `${expenseDate.getFullYear()}-${expenseDate.getMonth()}-${expenseDate.getDate()}`
-    if (!expensesByDate.has(dateKey)) {
-      expensesByDate.set(dateKey, [])
-    }
-    expensesByDate.get(dateKey)!.push(expense)
-  })
 
   const monthNames = [
     "January",
@@ -155,9 +126,10 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-2">
           {days.map((day, index) => {
-            const dateKey = day ? `${year}-${month}-${day}` : null
-            const dayChores = dateKey ? choresByDate.get(dateKey) || [] : []
-            const dayExpenses = dateKey ? expensesByDate.get(dateKey) || [] : []
+            const dayChores = day
+              ? fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, month, day))
+              : []
+            const dayExpenses = day ? expenses.filter((expense) => isSameUTCDay(expense.dueDate, year, month, day)) : []
 
             return (
               <div
