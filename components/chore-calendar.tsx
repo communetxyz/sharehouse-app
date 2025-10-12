@@ -1,9 +1,6 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
 import type { ChoreInstance, Expense } from "@/types/commune"
 import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 import { useLanguage } from "@/lib/i18n/context"
@@ -57,10 +54,9 @@ function ExpenseItem({ expense }: { expense: Expense }) {
 
 export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const { t } = useLanguage()
-  const [currentDate, setCurrentDate] = useState(new Date())
-
-  const year = currentDate.getFullYear()
-  const month = currentDate.getMonth()
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = today.getMonth()
 
   const { chores: fetchedChores, isLoading: isLoadingChores } = useCalendarChores(year, month)
   const { expenses, isLoading: isLoadingExpenses } = useCalendarExpenses()
@@ -95,6 +91,15 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
     choresByDate.get(dateKey)!.push(chore)
   })
 
+  console.log(
+    "[v0] Chores grouped by date:",
+    Array.from(choresByDate.entries()).map(([key, chores]) => ({
+      dateKey: key,
+      count: chores.length,
+      chores: chores.map((c) => c.title),
+    })),
+  )
+
   const expensesByDate = new Map<string, Expense[]>()
   expenses.forEach((expense) => {
     const expenseDate = new Date(expense.dueDate * 1000)
@@ -104,18 +109,6 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
     }
     expensesByDate.get(dateKey)!.push(expense)
   })
-
-  const goToPreviousMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1))
-  }
-
-  const goToNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1))
-  }
-
-  const goToToday = () => {
-    setCurrentDate(new Date())
-  }
 
   const monthNames = [
     "January",
@@ -134,7 +127,6 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
 
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
-  const today = new Date()
   const isToday = (day: number | null) => {
     if (!day) return false
     return today.getDate() === day && today.getMonth() === month && today.getFullYear() === year
@@ -146,18 +138,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="font-serif text-charcoal">
             {monthNames[month]} {year}
+            {isLoading && <span className="text-sm font-normal text-charcoal/60 ml-2">Loading...</span>}
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <Button onClick={goToToday} variant="outline" size="sm" className="text-xs bg-transparent">
-              {isLoading ? "Loading..." : "Today"}
-            </Button>
-            <Button onClick={goToPreviousMonth} variant="ghost" size="sm" disabled={isLoading}>
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button onClick={goToNextMonth} variant="ghost" size="sm" disabled={isLoading}>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
       </CardHeader>
       <CardContent>

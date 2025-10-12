@@ -36,8 +36,10 @@ export function useCalendarChores(year: number, month: number) {
       console.log("[v0] Fetching calendar chores for:", {
         year,
         month: month + 1,
-        startDate: new Date(startDate * 1000).toISOString(),
-        endDate: new Date(endDate * 1000).toISOString(),
+        firstDay: firstDay.toISOString(),
+        lastDay: lastDay.toISOString(),
+        startDate,
+        endDate,
       })
 
       const choreData = await communeOSContract.getCommuneChores(address, BigInt(startDate), BigInt(endDate))
@@ -55,6 +57,13 @@ export function useCalendarChores(year: number, month: number) {
       }))
 
       console.log("[v0] Fetched", mappedChores.length, "chores for calendar")
+      console.log(
+        "[v0] Sample chore dates:",
+        mappedChores.slice(0, 3).map((c) => ({
+          title: c.title,
+          periodStart: new Date(c.periodStart * 1000).toISOString(),
+        })),
+      )
 
       setChores(mappedChores)
       setError(null)

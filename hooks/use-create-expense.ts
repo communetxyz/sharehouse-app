@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useWallet } from "./use-wallet"
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
@@ -16,6 +16,12 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: txHash,
   })
+
+  useEffect(() => {
+    if (isConfirmed && onSuccess) {
+      onSuccess()
+    }
+  }, [isConfirmed, onSuccess])
 
   const createExpense = async (amount: string, description: string, dueDate: Date, assignedTo: string) => {
     if (!isConnected || !address) {
@@ -44,12 +50,8 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
 
       toast({
         title: "Expense created",
-        description: "Your expense has been created successfully",
+        description: "Waiting for confirmation...",
       })
-
-      if (onSuccess) {
-        onSuccess()
-      }
     } catch (error: any) {
       console.error("Error creating expense:", error)
       toast({
@@ -61,6 +63,16 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
       setIsCreating(false)
     }
   }
+
+  useEffect(() => {
+    if (isConfirmed) {
+      setIsCreating(false)
+      toast({
+        title: "Expense confirmed",
+        description: "Your expense has been created successfully",
+      })
+    }
+  }, [isConfirmed, toast])
 
   return {
     createExpense,
