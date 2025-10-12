@@ -1,6 +1,7 @@
 "use client"
 
-import { createConfig, http } from "@privy-io/wagmi"
+import { createConfig } from "@privy-io/wagmi"
+import { http } from "wagmi"
 import { gnosis, mainnet } from "wagmi/chains"
 
 export const config = createConfig({
