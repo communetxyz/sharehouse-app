@@ -108,21 +108,29 @@ export function useJoinCommune() {
       })
 
       console.log("[v0] Raw commune stats from contract:", stats)
+      console.log("[v0] Stats is array:", Array.isArray(stats))
+      console.log("[v0] Stats length:", stats?.length)
 
-      if (!stats) {
-        throw new Error("No data returned from contract")
+      if (!stats || !Array.isArray(stats) || stats.length < 4) {
+        throw new Error("Invalid data structure returned from contract")
       }
 
-      if (!stats.commune) {
-        console.error("[v0] Stats structure:", Object.keys(stats))
-        throw new Error("Invalid commune data structure returned from contract")
-      }
+      console.log("[v0] stats[0] (commune):", stats[0])
+      console.log("[v0] stats[1] (totalMembers):", stats[1])
+      console.log("[v0] stats[2] (totalChores):", stats[2])
+      console.log("[v0] stats[3] (activeChores):", stats[3])
 
-      const communeInfo = stats.commune
-      console.log("[v0] Commune info:", communeInfo)
+      const communeInfo = stats[0]
+      const totalMembers = stats[1]
+      const totalChores = stats[2]
+      const activeChores = stats[3]
 
-      if (!communeInfo.name) {
-        throw new Error("Commune name is missing from contract data")
+      console.log("[v0] communeInfo type:", typeof communeInfo)
+      console.log("[v0] communeInfo keys:", communeInfo ? Object.keys(communeInfo) : "null")
+      console.log("[v0] communeInfo.name:", communeInfo?.name)
+
+      if (!communeInfo || typeof communeInfo !== "object") {
+        throw new Error("Commune info is not an object")
       }
 
       setCommuneData({
@@ -131,9 +139,9 @@ export function useJoinCommune() {
         creator: communeInfo.creator || "0x0",
         collateralRequired: communeInfo.collateralRequired || false,
         collateralAmount: communeInfo.collateralAmount ? (Number(communeInfo.collateralAmount) / 1e18).toString() : "0",
-        memberCount: stats.memberCount?.toString() || "0",
-        choreCount: stats.choreCount?.toString() || "0",
-        expenseCount: stats.expenseCount?.toString() || "0",
+        memberCount: totalMembers?.toString() || "0",
+        choreCount: totalChores?.toString() || "0",
+        expenseCount: activeChores?.toString() || "0",
       })
 
       console.log("[v0] Successfully set commune data")
