@@ -22,7 +22,6 @@ export function useJoinCommune() {
   const [isJoining, setIsJoining] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [justApproved, setJustApproved] = useState(false)
 
   const shouldCheckAllowance = Boolean(address && communeData?.collateralRequired)
 
@@ -41,13 +40,14 @@ export function useJoinCommune() {
   })
 
   useEffect(() => {
-    if (justApproved && isConfirmed && !isConfirming) {
-      console.log("[v0] Approval confirmed, refetching allowance")
-      refetchAllowance()
-      setJustApproved(false)
-      setIsApproving(false)
+    if (isConfirmed && !isConfirming && isApproving) {
+      // Wait a bit for blockchain state to update, then refetch
+      setTimeout(() => {
+        refetchAllowance()
+        setIsApproving(false)
+      }, 1000)
     }
-  }, [isConfirmed, isConfirming, justApproved, refetchAllowance])
+  }, [isConfirmed, isConfirming, isApproving, refetchAllowance])
 
   const hasAllowance =
     communeData?.collateralRequired && allowance
@@ -65,9 +65,8 @@ export function useJoinCommune() {
 
     try {
       const amount = BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
-      console.log("[v0] Starting approval for amount:", amount.toString())
       await approveToken(amount)
-      setJustApproved(true)
+      // Don't set isApproving to false here - let the useEffect handle it after confirmation
     } catch (err: any) {
       console.error("[v0] Approval error:", err)
       setError(err.message || "Failed to approve token")
@@ -91,16 +90,12 @@ export function useJoinCommune() {
         functionName: "memberRegistry",
       })) as `0x${string}`
 
-      console.log("[v0] Member registry address:", memberRegistryAddress)
-
       const isUsed = await provider.readContract({
         address: memberRegistryAddress,
         abi: MEMBER_REGISTRY_ABI,
         functionName: "isNonceUsed",
         args: [BigInt(communeId), BigInt(nonce)],
       })
-
-      console.log("[v0] Is nonce used:", isUsed)
 
       if (isUsed) {
         throw new Error("This invite has already been used or expired")
@@ -113,27 +108,14 @@ export function useJoinCommune() {
         args: [BigInt(communeId)],
       })
 
-      console.log("[v0] Raw commune stats from contract:", stats)
-      console.log("[v0] Stats is array:", Array.isArray(stats))
-      console.log("[v0] Stats length:", stats?.length)
-
       if (!stats || !Array.isArray(stats) || stats.length < 4) {
         throw new Error("Invalid data structure returned from contract")
       }
-
-      console.log("[v0] stats[0] (commune):", stats[0])
-      console.log("[v0] stats[1] (totalMembers):", stats[1])
-      console.log("[v0] stats[2] (totalChores):", stats[2])
-      console.log("[v0] stats[3] (activeChores):", stats[3])
 
       const communeInfo = stats[0]
       const totalMembers = stats[1]
       const totalChores = stats[2]
       const activeChores = stats[3]
-
-      console.log("[v0] communeInfo type:", typeof communeInfo)
-      console.log("[v0] communeInfo keys:", communeInfo ? Object.keys(communeInfo) : "null")
-      console.log("[v0] communeInfo.name:", communeInfo?.name)
 
       if (!communeInfo || typeof communeInfo !== "object") {
         throw new Error("Commune info is not an object")
@@ -149,8 +131,6 @@ export function useJoinCommune() {
         choreCount: totalChores?.toString() || "0",
         expenseCount: activeChores?.toString() || "0",
       })
-
-      console.log("[v0] Successfully set commune data")
     } catch (err: any) {
       console.error("[v0] Validation error:", err)
       setError(err.message || "Failed to validate invite")
@@ -195,7 +175,7 @@ export function useJoinCommune() {
     communeData,
     isValidating,
     isJoining,
-    isApproving: isApproving || isConfirming, // Include transaction confirmation in loading state
+    isApproving: isApproving || isConfirming,
     isCheckingAllowance,
     hasAllowance,
     error,
