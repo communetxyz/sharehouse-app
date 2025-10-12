@@ -1,7 +1,6 @@
 "use client"
 
-import { useAccount, useDisconnect } from "wagmi"
-import { useWeb3Modal } from "@web3modal/wagmi/react"
+import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Wallet, LogOut, Copy, Check } from "lucide-react"
@@ -9,10 +8,11 @@ import { useState } from "react"
 import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 
 export function WalletConnectButton() {
-  const { address, isConnected } = useAccount()
-  const { disconnect } = useDisconnect()
-  const { open } = useWeb3Modal()
+  const { ready, authenticated, login, logout, user } = usePrivy()
+  const { wallets } = useWallets()
   const [copied, setCopied] = useState(false)
+
+  const address = wallets[0]?.address as `0x${string}` | undefined
   const displayName = useEnsNameOrAddress(address)
 
   const copyAddress = () => {
@@ -23,9 +23,18 @@ export function WalletConnectButton() {
     }
   }
 
-  if (!isConnected || !address) {
+  if (!ready) {
     return (
-      <Button onClick={() => open()} className="bg-sage hover:bg-sage/90 text-cream gap-2">
+      <Button disabled className="bg-sage/50 text-cream gap-2">
+        <Wallet className="w-4 h-4" />
+        Loading...
+      </Button>
+    )
+  }
+
+  if (!authenticated) {
+    return (
+      <Button onClick={login} className="bg-sage hover:bg-sage/90 text-cream gap-2">
         <Wallet className="w-4 h-4" />
         Connect Wallet
       </Button>
@@ -45,7 +54,7 @@ export function WalletConnectButton() {
           {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
           {copied ? "Copied!" : "Copy Address"}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => disconnect()} className="cursor-pointer text-red-600">
+        <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
           <LogOut className="w-4 h-4 mr-2" />
           Disconnect
         </DropdownMenuItem>

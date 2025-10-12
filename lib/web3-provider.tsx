@@ -1,36 +1,32 @@
 "use client"
 
-import { createWeb3Modal } from "@web3modal/wagmi/react"
+import { PrivyProvider } from "@privy-io/react-auth"
+import { WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { type ReactNode, useState } from "react"
-import { type State, WagmiProvider } from "wagmi"
-import { config, projectId } from "./wagmi-config"
+import { config } from "./wagmi-config"
 
-// Create modal
-createWeb3Modal({
-  wagmiConfig: config,
-  projectId,
-  enableAnalytics: true,
-  enableOnramp: true,
-  themeMode: "light",
-  themeVariables: {
-    "--w3m-accent": "#8B7355",
-    "--w3m-border-radius-master": "2px",
-  },
-})
-
-export function Web3Provider({
-  children,
-  initialState,
-}: {
-  children: ReactNode
-  initialState?: State
-}) {
+export function Web3Provider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())
 
   return (
-    <WagmiProvider config={config} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </WagmiProvider>
+    <PrivyProvider
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
+      config={{
+        loginMethods: ["email", "wallet", "google", "twitter"],
+        appearance: {
+          theme: "light",
+          accentColor: "#8B7355",
+          logo: "https://avatars.githubusercontent.com/u/37784886",
+        },
+        embeddedWallets: {
+          createOnLogin: "users-without-wallets",
+        },
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={config}>{children}</WagmiProvider>
+      </QueryClientProvider>
+    </PrivyProvider>
   )
 }

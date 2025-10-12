@@ -67,7 +67,7 @@ export function CreateExpenseDialog({ communeId, members, onSuccess }: CreateExp
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="amount">{t("expenses.amount")} (BREAD)</Label>
+            <Label htmlFor="amount">{t("expenses.amount")} (Collateral Currency)</Label>
             <Input
               id="amount"
               type="number"

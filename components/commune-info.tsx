@@ -49,7 +49,7 @@ export function CommuneInfo({ commune, members }: CommuneInfoProps) {
             {commune.collateralRequired && (
               <div>
                 <p className="text-sm text-charcoal/60 mb-1">Collateral Amount</p>
-                <p className="font-medium text-charcoal">{commune.collateralAmount} BREAD</p>
+                <p className="font-medium text-charcoal">{commune.collateralAmount} Collateral Currency</p>
               </div>
             )}
           </div>

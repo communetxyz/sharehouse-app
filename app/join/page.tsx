@@ -220,7 +220,9 @@ export default function JoinPage() {
                     {communeData.collateralRequired && (
                       <div className="flex justify-between">
                         <span className="text-charcoal/70">{t("commune.collateralAmount")}:</span>
-                        <span className="font-medium text-charcoal">{communeData.collateralAmount} BREAD</span>
+                        <span className="font-medium text-charcoal">
+                          {communeData.collateralAmount} Collateral Currency
+                        </span>
                       </div>
                     )}
                   </div>
@@ -233,7 +235,7 @@ export default function JoinPage() {
                     className="w-full bg-sage hover:bg-sage/90 text-cream"
                   >
                     {isApproving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    {isApproving ? t("join.approving") : t("join.approveBread")}
+                    {isApproving ? t("join.approving") : t("join.approveCollateral")}
                   </Button>
                 )}
 

@@ -46,7 +46,7 @@ function ExpenseItem({ expense }: { expense: Expense }) {
       }`}
     >
       <div className="font-medium truncate">💰 {expense.description}</div>
-      <div className="text-charcoal/60 truncate">{expense.amount} BREAD</div>
+      <div className="text-charcoal/60 truncate">{expense.amount} Collateral Currency</div>
       <div className="text-charcoal/60 truncate">{assignedToName}</div>
     </div>
   )

@@ -1,6 +1,7 @@
 "use client"
 
 import { useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi"
+import { useWallets } from "@privy-io/react-auth"
 import {
   COMMUNE_OS_ABI,
   COMMUNE_OS_ADDRESS,
@@ -11,15 +12,22 @@ import {
 import { useState } from "react"
 
 export function useWallet() {
-  const { address, isConnected, status } = useAccount()
+  const { wallets } = useWallets()
+  const privyAddress = wallets[0]?.address as `0x${string}` | undefined
+
+  const { address: wagmiAddress, isConnected: wagmiConnected, status } = useAccount()
   const { disconnect } = useDisconnect()
   const { writeContractAsync } = useWriteContract()
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
+
+  const address = privyAddress || wagmiAddress
+  const isConnected = !!privyAddress || wagmiConnected
+
   const { data: allowance } = useReadContract({
     address: BREAD_TOKEN_ADDRESS as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "allowance",
-    args: [address, COLLATERAL_MANAGER_ADDRESS],
+    args: address ? [address, COLLATERAL_MANAGER_ADDRESS] : undefined,
   })
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({

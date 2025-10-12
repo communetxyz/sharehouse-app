@@ -154,7 +154,7 @@ function ExpenseCard({ expense, communeId, isPaid, isDisputed, onMarkPaid, isMar
             <CardDescription className="flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1">
                 <DollarSign className="h-3 w-3" />
-                {expense.amount} BREAD
+                {expense.amount} Collateral Currency
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />

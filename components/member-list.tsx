@@ -28,7 +28,7 @@ function MemberItem({ member }: { member: Member }) {
       </div>
       <div className="text-right">
         <p className="text-sm text-charcoal/60">Collateral</p>
-        <p className="font-medium text-charcoal">{member.collateral} BREAD</p>
+        <p className="font-medium text-charcoal">{member.collateral} Collateral Currency</p>
       </div>
     </div>
   )
