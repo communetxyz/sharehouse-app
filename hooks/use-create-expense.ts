@@ -2,20 +2,17 @@
 
 import { useState, useEffect } from "react"
 import { useWallet } from "./use-wallet"
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi"
+import { useSendTransaction } from "@privy-io/react-auth"
+import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
 export function useCreateExpense(communeId: string, onSuccess?: () => void) {
   const { address, isConnected } = useWallet()
-  const { writeContractAsync } = useWriteContract()
-  const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
+  const { sendTransaction } = useSendTransaction()
   const [isCreating, setIsCreating] = useState(false)
+  const [isConfirmed, setIsConfirmed] = useState(false)
   const { toast } = useToast()
-
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    hash: txHash,
-  })
 
   useEffect(() => {
     if (isConfirmed && onSuccess) {
@@ -34,26 +31,64 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
     }
 
     setIsCreating(true)
+    setIsConfirmed(false)
 
     try {
+      console.log("[v0] ===== CREATE EXPENSE START =====")
+      console.log("[v0] Creating expense:", {
+        amount,
+        description,
+        dueDate,
+        assignedTo,
+        communeId,
+        contractAddress: COMMUNE_OS_ADDRESS,
+      })
+
       const amountInWei = BigInt(Math.floor(Number.parseFloat(amount) * 1e18))
       const dueDateTimestamp = BigInt(Math.floor(dueDate.getTime() / 1000))
 
-      const hash = await writeContractAsync({
-        address: COMMUNE_OS_ADDRESS as `0x${string}`,
+      console.log("[v0] Converted values:", {
+        amountInWei: amountInWei.toString(),
+        dueDateTimestamp: dueDateTimestamp.toString(),
+      })
+
+      const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "createExpense",
         args: [BigInt(communeId), amountInWei, description, dueDateTimestamp, assignedTo as `0x${string}`],
       })
 
-      setTxHash(hash)
+      console.log("[v0] Encoded data:", data)
+      console.log("[v0] Calling sendTransaction with sponsor: true")
+
+      const result = await sendTransaction(
+        {
+          to: COMMUNE_OS_ADDRESS as `0x${string}`,
+          data,
+        },
+        {
+          sponsor: true, // Enable gas sponsorship
+        },
+      )
+
+      console.log("[v0] Transaction result:", result)
+      console.log("[v0] Transaction hash:", result.hash)
+      console.log("[v0] ===== CREATE EXPENSE SUCCESS =====")
+
+      setIsConfirmed(true)
 
       toast({
         title: "Expense created",
-        description: "Waiting for confirmation...",
+        description: "Your expense has been created successfully",
       })
     } catch (error: any) {
-      console.error("Error creating expense:", error)
+      console.error("[v0] ===== CREATE EXPENSE FAILED =====")
+      console.error("[v0] Error creating expense:", error)
+      console.error("[v0] Error details:", {
+        message: error.message,
+        code: error.code,
+        data: error.data,
+      })
       toast({
         title: "Failed to create expense",
         description: error.message || "An error occurred",
@@ -64,20 +99,9 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
     }
   }
 
-  useEffect(() => {
-    if (isConfirmed) {
-      setIsCreating(false)
-      toast({
-        title: "Expense confirmed",
-        description: "Your expense has been created successfully",
-      })
-    }
-  }, [isConfirmed, toast])
-
   return {
     createExpense,
-    isCreating: isCreating || isConfirming,
+    isCreating,
     isConfirmed,
-    txHash,
   }
 }

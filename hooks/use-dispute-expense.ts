@@ -2,20 +2,17 @@
 
 import { useState } from "react"
 import { useWallet } from "./use-wallet"
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi"
+import { useSendTransaction } from "@privy-io/react-auth"
+import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
 export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
   const { address, isConnected } = useWallet()
-  const { writeContractAsync } = useWriteContract()
-  const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
+  const { sendTransaction } = useSendTransaction()
   const [isDisputing, setIsDisputing] = useState(false)
+  const [isConfirmed, setIsConfirmed] = useState(false)
   const { toast } = useToast()
-
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    hash: txHash,
-  })
 
   const disputeExpense = async (expenseId: string, newAssignee: string) => {
     if (!isConnected || !address) {
@@ -28,16 +25,41 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
     }
 
     setIsDisputing(true)
+    setIsConfirmed(false)
 
     try {
-      const hash = await writeContractAsync({
-        address: COMMUNE_OS_ADDRESS as `0x${string}`,
+      console.log("[v0] ===== DISPUTE EXPENSE START =====")
+      console.log("[v0] Disputing expense:", {
+        expenseId,
+        newAssignee,
+        communeId,
+        contractAddress: COMMUNE_OS_ADDRESS,
+      })
+
+      const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "disputeExpense",
         args: [BigInt(communeId), BigInt(expenseId), newAssignee as `0x${string}`],
       })
 
-      setTxHash(hash)
+      console.log("[v0] Encoded data:", data)
+      console.log("[v0] Calling sendTransaction with sponsor: true")
+
+      const result = await sendTransaction(
+        {
+          to: COMMUNE_OS_ADDRESS as `0x${string}`,
+          data,
+        },
+        {
+          sponsor: true, // Enable gas sponsorship
+        },
+      )
+
+      console.log("[v0] Transaction result:", result)
+      console.log("[v0] Transaction hash:", result.hash)
+      console.log("[v0] ===== DISPUTE EXPENSE SUCCESS =====")
+
+      setIsConfirmed(true)
 
       toast({
         title: "Dispute initiated",
@@ -48,7 +70,13 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
         onSuccess()
       }
     } catch (error: any) {
-      console.error("Error disputing expense:", error)
+      console.error("[v0] ===== DISPUTE EXPENSE FAILED =====")
+      console.error("[v0] Error disputing expense:", error)
+      console.error("[v0] Error details:", {
+        message: error.message,
+        code: error.code,
+        data: error.data,
+      })
       toast({
         title: "Failed to dispute expense",
         description: error.message || "An error occurred",
@@ -61,8 +89,7 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
 
   return {
     disputeExpense,
-    isDisputing: isDisputing || isConfirming,
+    isDisputing,
     isConfirmed,
-    txHash,
   }
 }

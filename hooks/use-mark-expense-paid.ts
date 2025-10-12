@@ -2,20 +2,17 @@
 
 import { useState } from "react"
 import { useWallet } from "./use-wallet"
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi"
+import { useSendTransaction } from "@privy-io/react-auth"
+import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
 export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
   const { address, isConnected } = useWallet()
-  const { writeContractAsync } = useWriteContract()
-  const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
+  const { sendTransaction } = useSendTransaction()
   const [isMarking, setIsMarking] = useState(false)
+  const [isConfirmed, setIsConfirmed] = useState(false)
   const { toast } = useToast()
-
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    hash: txHash,
-  })
 
   const markPaid = async (expenseId: string) => {
     if (!isConnected || !address) {
@@ -28,16 +25,26 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
     }
 
     setIsMarking(true)
+    setIsConfirmed(false)
 
     try {
-      const hash = await writeContractAsync({
-        address: COMMUNE_OS_ADDRESS as `0x${string}`,
+      const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "markExpensePaid",
         args: [BigInt(communeId), BigInt(expenseId)],
       })
 
-      setTxHash(hash)
+      await sendTransaction(
+        {
+          to: COMMUNE_OS_ADDRESS as `0x${string}`,
+          data,
+        },
+        {
+          sponsor: true, // Enable gas sponsorship
+        },
+      )
+
+      setIsConfirmed(true)
 
       toast({
         title: "Expense marked as paid",
@@ -61,8 +68,7 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
 
   return {
     markPaid,
-    isMarking: isMarking || isConfirming,
+    isMarking,
     isConfirmed,
-    txHash,
   }
 }
