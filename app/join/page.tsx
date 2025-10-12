@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,9 +14,11 @@ import { useJoinCommune } from "@/hooks/use-join-commune"
 import { useWallet } from "@/hooks/use-wallet"
 
 export default function JoinPage() {
+  const searchParams = useSearchParams()
   const [communeId, setCommuneId] = useState("")
   const [nonce, setNonce] = useState("")
   const [signature, setSignature] = useState("")
+  const [hasAutoValidated, setHasAutoValidated] = useState(false)
 
   const { isConnected } = useWallet()
   const {
@@ -30,6 +33,22 @@ export default function JoinPage() {
     joinCommune,
     approveToken,
   } = useJoinCommune()
+
+  useEffect(() => {
+    const urlCommuneId = searchParams.get("communeId")
+    const urlNonce = searchParams.get("nonce")
+    const urlSignature = searchParams.get("signature")
+
+    if (urlCommuneId) setCommuneId(urlCommuneId)
+    if (urlNonce) setNonce(urlNonce)
+    if (urlSignature) setSignature(urlSignature)
+
+    // Auto-validate if all params are present and wallet is connected
+    if (urlCommuneId && urlNonce && urlSignature && isConnected && !hasAutoValidated && !communeData) {
+      setHasAutoValidated(true)
+      validateInvite(urlCommuneId, urlNonce, urlSignature)
+    }
+  }, [searchParams, isConnected, hasAutoValidated, communeData, validateInvite])
 
   const handleValidate = async () => {
     if (!communeId || !nonce || !signature) {
