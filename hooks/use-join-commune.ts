@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useWallet } from "./use-wallet"
 import { useReadContract } from "wagmi"
 import {
@@ -16,12 +16,13 @@ import { createPublicClient, http } from "viem"
 import { mainnet } from "viem/chains"
 
 export function useJoinCommune() {
-  const { address, executeTransaction, approveToken, isConfirming } = useWallet()
+  const { address, executeTransaction, approveToken, isConfirming, isConfirmed } = useWallet()
   const [communeData, setCommuneData] = useState<CommuneStatistics | null>(null)
   const [isValidating, setIsValidating] = useState(false)
   const [isJoining, setIsJoining] = useState(false)
   const [isApproving, setIsApproving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [justApproved, setJustApproved] = useState(false)
 
   const shouldCheckAllowance = Boolean(address && communeData?.collateralRequired)
 
@@ -35,14 +36,23 @@ export function useJoinCommune() {
     functionName: "allowance",
     args: shouldCheckAllowance ? [address!, COLLATERAL_MANAGER_ADDRESS as `0x${string}`] : undefined,
     query: {
-      enabled: shouldCheckAllowance, // Only run query when we have the required data
+      enabled: shouldCheckAllowance,
     },
   })
+
+  useEffect(() => {
+    if (justApproved && isConfirmed && !isConfirming) {
+      console.log("[v0] Approval confirmed, refetching allowance")
+      refetchAllowance()
+      setJustApproved(false)
+      setIsApproving(false)
+    }
+  }, [isConfirmed, isConfirming, justApproved, refetchAllowance])
 
   const hasAllowance =
     communeData?.collateralRequired && allowance
       ? (allowance as bigint) >= BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
-      : !communeData?.collateralRequired // If no collateral required, consider it as "has allowance"
+      : !communeData?.collateralRequired
 
   const handleApproveToken = async () => {
     if (!communeData) {
@@ -55,16 +65,12 @@ export function useJoinCommune() {
 
     try {
       const amount = BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
+      console.log("[v0] Starting approval for amount:", amount.toString())
       await approveToken(amount)
-
-      // Wait a bit for the transaction to be mined
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Refetch allowance
-      await refetchAllowance()
+      setJustApproved(true)
     } catch (err: any) {
+      console.error("[v0] Approval error:", err)
       setError(err.message || "Failed to approve token")
-    } finally {
       setIsApproving(false)
     }
   }
@@ -189,8 +195,8 @@ export function useJoinCommune() {
     communeData,
     isValidating,
     isJoining,
-    isApproving,
-    isCheckingAllowance, // Export isCheckingAllowance state
+    isApproving: isApproving || isConfirming, // Include transaction confirmation in loading state
+    isCheckingAllowance,
     hasAllowance,
     error,
     validateInvite,
