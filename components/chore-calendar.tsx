@@ -7,6 +7,7 @@ import { useState } from "react"
 import type { ChoreInstance } from "@/types/commune"
 import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 import { useLanguage } from "@/lib/i18n/context"
+import { useCalendarChores } from "@/hooks/use-calendar-chores"
 
 interface ChoreCalendarProps {
   chores: ChoreInstance[]
@@ -38,6 +39,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
 
+  const { chores: fetchedChores, isLoading } = useCalendarChores(year, month)
+
   // Get first day of month and total days
   const firstDayOfMonth = new Date(year, month, 1)
   const lastDayOfMonth = new Date(year, month + 1, 0)
@@ -57,8 +60,9 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
 
   // Group chores by date
   const choresByDate = new Map<string, ChoreInstance[]>()
-  chores.forEach((chore) => {
+  fetchedChores.forEach((chore) => {
     const choreDate = new Date(chore.periodStart * 1000)
+    // Use consistent date key format: YYYY-M-D (no zero padding)
     const dateKey = `${choreDate.getFullYear()}-${choreDate.getMonth()}-${choreDate.getDate()}`
     if (!choresByDate.has(dateKey)) {
       choresByDate.set(dateKey, [])
@@ -110,12 +114,12 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button onClick={goToToday} variant="outline" size="sm" className="text-xs bg-transparent">
-              Today
+              {isLoading ? "Loading..." : "Today"}
             </Button>
-            <Button onClick={goToPreviousMonth} variant="ghost" size="sm">
+            <Button onClick={goToPreviousMonth} variant="ghost" size="sm" disabled={isLoading}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <Button onClick={goToNextMonth} variant="ghost" size="sm">
+            <Button onClick={goToNextMonth} variant="ghost" size="sm" disabled={isLoading}>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
