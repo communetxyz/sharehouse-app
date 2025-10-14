@@ -51,36 +51,307 @@ export const COMMUNE_OS_ABI = [
   },
   {
     type: "function",
-    name: "joinCommune",
+    name: "addChores",
     inputs: [
-      { name: "communeId", type: "uint256" },
-      { name: "nonce", type: "uint256" },
-      { name: "signature", type: "bytes" },
-      { name: "username", type: "string" },
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "choreSchedules",
+        type: "tuple[]",
+        internalType: "struct ChoreSchedule[]",
+        components: [
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "title",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "frequency",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "startTime",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
-    name: "getCommuneBasicInfo",
-    inputs: [{ name: "user", type: "address" }],
+    name: "choreScheduler",
+    inputs: [],
     outputs: [
-      { name: "communeId", type: "uint256" },
+      {
+        name: "",
+        type: "address",
+        internalType: "contract ChoreScheduler",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "collateralManager",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "contract CollateralManager",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "communeRegistry",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "contract CommuneRegistry",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "createCommune",
+    inputs: [
+      {
+        name: "name",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "collateralRequired",
+        type: "bool",
+        internalType: "bool",
+      },
+      {
+        name: "collateralAmount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "choreSchedules",
+        type: "tuple[]",
+        internalType: "struct ChoreSchedule[]",
+        components: [
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "title",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "frequency",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "startTime",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
+      {
+        name: "username",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "createExpense",
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "amount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "description",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "dueDate",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "assignedTo",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "expenseId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "disputeExpense",
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "expenseId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "newAssignee",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "disputeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "expenseManager",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "contract ExpenseManager",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getCollateralBalance",
+    inputs: [
+      {
+        name: "member",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getCommuneBasicInfo",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
       {
         name: "communeData",
         type: "tuple",
+        internalType: "struct Commune",
         components: [
-          { name: "id", type: "uint256" },
-          { name: "name", type: "string" },
-          { name: "creator", type: "address" },
-          { name: "collateralRequired", type: "bool" },
-          { name: "collateralAmount", type: "uint256" },
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "name",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "creator",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "collateralRequired",
+            type: "bool",
+            internalType: "bool",
+          },
+          {
+            name: "collateralAmount",
+            type: "uint256",
+            internalType: "uint256",
+          },
         ],
       },
-      { name: "members", type: "address[]" },
-      { name: "memberCollaterals", type: "uint256[]" },
-      { name: "memberUsernames", type: "string[]" },
+      {
+        name: "members",
+        type: "address[]",
+        internalType: "address[]",
+      },
+      {
+        name: "memberCollaterals",
+        type: "uint256[]",
+        internalType: "uint256[]",
+      },
+      {
+        name: "memberUsernames",
+        type: "string[]",
+        internalType: "string[]",
+      },
     ],
     stateMutability: "view",
   },
@@ -88,26 +359,422 @@ export const COMMUNE_OS_ABI = [
     type: "function",
     name: "getCommuneChores",
     inputs: [
-      { name: "user", type: "address" },
-      { name: "startDate", type: "uint256" },
-      { name: "endDate", type: "uint256" },
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "startDate",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "endDate",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
-      { name: "communeId", type: "uint256" },
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
       {
         name: "instances",
         type: "tuple[]",
+        internalType: "struct ChoreInstance[]",
         components: [
-          { name: "scheduleId", type: "uint256" },
-          { name: "title", type: "string" },
-          { name: "frequency", type: "uint256" },
-          { name: "periodNumber", type: "uint256" },
-          { name: "periodStart", type: "uint256" },
-          { name: "periodEnd", type: "uint256" },
-          { name: "assignedTo", type: "address" },
-          { name: "assignedToUsername", type: "string" },
-          { name: "completed", type: "bool" },
+          {
+            name: "scheduleId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "title",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "frequency",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "periodNumber",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "periodStart",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "periodEnd",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "assignedTo",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "assignedToUsername",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "completed",
+            type: "bool",
+            internalType: "bool",
+          },
         ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getCommuneDisputes",
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "disputes",
+        type: "tuple[]",
+        internalType: "struct Dispute[]",
+        components: [
+          {
+            name: "expenseId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "proposedNewAssignee",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "votesFor",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "votesAgainst",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "status",
+            type: "uint8",
+            internalType: "enum DisputeStatus",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getCommuneExpenses",
+    inputs: [
+      {
+        name: "user",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "monthStart",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "monthEnd",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "paidExpenses",
+        type: "tuple[]",
+        internalType: "struct Expense[]",
+        components: [
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "communeId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "amount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "description",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "assignedTo",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "dueDate",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "paid",
+            type: "bool",
+            internalType: "bool",
+          },
+          {
+            name: "disputed",
+            type: "bool",
+            internalType: "bool",
+          },
+        ],
+      },
+      {
+        name: "pendingExpenses",
+        type: "tuple[]",
+        internalType: "struct Expense[]",
+        components: [
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "communeId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "amount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "description",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "assignedTo",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "dueDate",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "paid",
+            type: "bool",
+            internalType: "bool",
+          },
+          {
+            name: "disputed",
+            type: "bool",
+            internalType: "bool",
+          },
+        ],
+      },
+      {
+        name: "disputedExpenses",
+        type: "tuple[]",
+        internalType: "struct Expense[]",
+        components: [
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "communeId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "amount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "description",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "assignedTo",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "dueDate",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "paid",
+            type: "bool",
+            internalType: "bool",
+          },
+          {
+            name: "disputed",
+            type: "bool",
+            internalType: "bool",
+          },
+        ],
+      },
+      {
+        name: "overdueExpenses",
+        type: "tuple[]",
+        internalType: "struct Expense[]",
+        components: [
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "communeId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "amount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "description",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "assignedTo",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "dueDate",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "paid",
+            type: "bool",
+            internalType: "bool",
+          },
+          {
+            name: "disputed",
+            type: "bool",
+            internalType: "bool",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getCommuneExpenses",
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "tuple[]",
+        internalType: "struct Expense[]",
+        components: [
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "communeId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "amount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "description",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "assignedTo",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "dueDate",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "paid",
+            type: "bool",
+            internalType: "bool",
+          },
+          {
+            name: "disputed",
+            type: "bool",
+            internalType: "bool",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getCommuneMembers",
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address[]",
+        internalType: "address[]",
       },
     ],
     stateMutability: "view",
@@ -115,31 +782,218 @@ export const COMMUNE_OS_ABI = [
   {
     type: "function",
     name: "getCommuneStatistics",
-    inputs: [{ name: "communeId", type: "uint256" }],
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
       {
         name: "commune",
         type: "tuple",
+        internalType: "struct Commune",
         components: [
-          { name: "id", type: "uint256" },
-          { name: "name", type: "string" },
-          { name: "creator", type: "address" },
-          { name: "collateralRequired", type: "bool" },
-          { name: "collateralAmount", type: "uint256" },
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "name",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "creator",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "collateralRequired",
+            type: "bool",
+            internalType: "bool",
+          },
+          {
+            name: "collateralAmount",
+            type: "uint256",
+            internalType: "uint256",
+          },
         ],
       },
-      { name: "memberCount", type: "uint256" },
-      { name: "choreCount", type: "uint256" },
-      { name: "expenseCount", type: "uint256" },
+      {
+        name: "memberCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "choreCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "expenseCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     stateMutability: "view",
   },
   {
     type: "function",
+    name: "getCurrentChores",
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "schedules",
+        type: "tuple[]",
+        internalType: "struct ChoreSchedule[]",
+        components: [
+          {
+            name: "id",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "title",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "frequency",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "startTime",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
+      {
+        name: "periods",
+        type: "uint256[]",
+        internalType: "uint256[]",
+      },
+      {
+        name: "completed",
+        type: "bool[]",
+        internalType: "bool[]",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getDisputeVoters",
+    inputs: [
+      {
+        name: "disputeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "voters",
+        type: "address[]",
+        internalType: "address[]",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getUsernames",
+    inputs: [
+      {
+        name: "addresses",
+        type: "address[]",
+        internalType: "address[]",
+      },
+    ],
+    outputs: [
+      {
+        name: "usernames",
+        type: "string[]",
+        internalType: "string[]",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "joinCommune",
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "nonce",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "signature",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "username",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "markChoreComplete",
     inputs: [
-      { name: "communeId", type: "uint256" },
-      { name: "choreId", type: "uint256" },
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "choreId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "markExpensePaid",
+    inputs: [
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "expenseId",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -148,135 +1002,49 @@ export const COMMUNE_OS_ABI = [
     type: "function",
     name: "memberRegistry",
     inputs: [],
-    outputs: [{ name: "", type: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "contract MemberRegistry",
+      },
+    ],
     stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "collateralManager",
-    inputs: [],
-    outputs: [{ name: "", type: "address" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "createExpense",
-    inputs: [
-      { name: "communeId", type: "uint256" },
-      { name: "amount", type: "uint256" },
-      { name: "description", type: "string" },
-      { name: "dueDate", type: "uint256" },
-      { name: "assignedTo", type: "address" },
-    ],
-    outputs: [{ name: "expenseId", type: "uint256" }],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "markExpensePaid",
-    inputs: [
-      { name: "communeId", type: "uint256" },
-      { name: "expenseId", type: "uint256" },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "disputeExpense",
-    inputs: [
-      { name: "communeId", type: "uint256" },
-      { name: "expenseId", type: "uint256" },
-      { name: "newAssignee", type: "address" },
-    ],
-    outputs: [{ name: "disputeId", type: "uint256" }],
-    stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "voteOnDispute",
     inputs: [
-      { name: "communeId", type: "uint256" },
-      { name: "disputeId", type: "uint256" },
-      { name: "support", type: "bool" },
+      {
+        name: "communeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "disputeId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "support",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
-    name: "getCommuneExpenses",
-    inputs: [
-      { name: "user", type: "address" },
-      { name: "monthStart", type: "uint256" },
-      { name: "monthEnd", type: "uint256" },
-    ],
+    name: "votingModule",
+    inputs: [],
     outputs: [
-      { name: "communeId", type: "uint256" },
       {
-        name: "paidExpenses",
-        type: "tuple[]",
-        components: [
-          { name: "id", type: "uint256" },
-          { name: "communeId", type: "uint256" },
-          { name: "amount", type: "uint256" },
-          { name: "description", type: "string" },
-          { name: "assignedTo", type: "address" },
-          { name: "dueDate", type: "uint256" },
-          { name: "paid", type: "bool" },
-          { name: "disputed", type: "bool" },
-        ],
-      },
-      {
-        name: "pendingExpenses",
-        type: "tuple[]",
-        components: [
-          { name: "id", type: "uint256" },
-          { name: "communeId", type: "uint256" },
-          { name: "amount", type: "uint256" },
-          { name: "description", type: "string" },
-          { name: "assignedTo", type: "address" },
-          { name: "dueDate", type: "uint256" },
-          { name: "paid", type: "bool" },
-          { name: "disputed", type: "bool" },
-        ],
-      },
-      {
-        name: "disputedExpenses",
-        type: "tuple[]",
-        components: [
-          { name: "id", type: "uint256" },
-          { name: "communeId", type: "uint256" },
-          { name: "amount", type: "uint256" },
-          { name: "description", type: "string" },
-          { name: "assignedTo", type: "address" },
-          { name: "dueDate", type: "uint256" },
-          { name: "paid", type: "bool" },
-          { name: "disputed", type: "bool" },
-        ],
-      },
-      {
-        name: "overdueExpenses",
-        type: "tuple[]",
-        components: [
-          { name: "id", type: "uint256" },
-          { name: "communeId", type: "uint256" },
-          { name: "amount", type: "uint256" },
-          { name: "description", type: "string" },
-          { name: "assignedTo", type: "address" },
-          { name: "dueDate", type: "uint256" },
-          { name: "paid", type: "bool" },
-          { name: "disputed", type: "bool" },
-        ],
+        name: "",
+        type: "address",
+        internalType: "contract VotingModule",
       },
     ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "getUsernames",
-    inputs: [{ name: "addresses", type: "address[]" }],
-    outputs: [{ name: "usernames", type: "string[]" }],
     stateMutability: "view",
   },
   {
