@@ -151,9 +151,10 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
         onRefresh()
       }, 1500)
 
-      // Cleanup timeout on unmount
+      // Cleanup timeout when effect re-runs or component unmounts
       return () => clearTimeout(timer)
     }
+    // No cleanup needed if condition is false
   }, [isConfirmed, completingId, onRefresh, toast])
 
   useEffect(() => {
