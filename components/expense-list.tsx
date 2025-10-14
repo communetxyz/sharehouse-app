@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useI18n } from "@/lib/i18n/context"
 import { useMarkExpensePaid } from "@/hooks/use-mark-expense-paid"
-import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import type { Expense } from "@/types/commune"
 import { DollarSign, Calendar, User, AlertCircle } from "lucide-react"
@@ -126,7 +125,6 @@ interface ExpenseCardProps {
 
 function ExpenseCard({ expense, communeId, isPaid, isDisputed, onMarkPaid, isMarking, onRefresh }: ExpenseCardProps) {
   const { t } = useI18n()
-  const assignedToName = useEnsNameOrAddress(expense.assignedTo)
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const { members } = useCommuneData()
 
@@ -167,7 +165,7 @@ function ExpenseCard({ expense, communeId, isPaid, isDisputed, onMarkPaid, isMar
               <div className="flex items-center gap-1">
                 <User className="h-3 w-3" />
                 <span>
-                  {t("expenses.assignedTo")}: {assignedToName}
+                  {t("expenses.assignedTo")}: {expense.assignedToUsername}
                 </span>
               </div>
             </div>

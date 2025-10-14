@@ -39,6 +39,7 @@ export function useCommuneData() {
         id: basicInfo.communeId.toString(),
         name: basicInfo.communeData.name,
         creator: basicInfo.communeData.creator,
+        creatorUsername: basicInfo.communeData.creatorUsername,
         collateralRequired: basicInfo.communeData.collateralRequired,
         collateralAmount: (Number(basicInfo.communeData.collateralAmount) / 1e18).toString(),
       })
@@ -46,6 +47,7 @@ export function useCommuneData() {
       setMembers(
         basicInfo.members.map((addr: string, idx: number) => ({
           address: addr,
+          username: basicInfo.memberUsernames[idx] || addr,
           collateral: (Number(basicInfo.memberCollaterals[idx]) / 1e18).toString(),
           isCurrentUser: addr.toLowerCase() === address.toLowerCase(),
         })),
@@ -63,6 +65,7 @@ export function useCommuneData() {
           periodStart: Number(instance.periodStart),
           periodEnd: Number(instance.periodEnd),
           assignedTo: instance.assignedTo,
+          assignedToUsername: instance.assignedToUsername || instance.assignedTo,
           completed: Boolean(instance.completed),
           isAssignedToUser: instance.assignedTo.toLowerCase() === address.toLowerCase(),
         })),

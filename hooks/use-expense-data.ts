@@ -30,6 +30,7 @@ export function useExpenseData() {
           amount: (Number(expense.amount) / 1e18).toString(),
           description: expense.description,
           assignedTo: expense.assignedTo,
+          assignedToUsername: expense.assignedToUsername || expense.assignedTo,
           dueDate: Number(expense.dueDate),
           paid: Boolean(expense.paid),
           disputed: Boolean(expense.disputed),

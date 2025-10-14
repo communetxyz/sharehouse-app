@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useI18n } from "@/lib/i18n/context"
 import { useDisputeExpense } from "@/hooks/use-dispute-expense"
-import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 import type { Member } from "@/types/commune"
 
 interface DisputeExpenseDialogProps {
@@ -61,7 +60,7 @@ export function DisputeExpenseDialog({
               <SelectContent>
                 {availableMembers.map((member) => (
                   <SelectItem key={member.address} value={member.address}>
-                    <MemberOption address={member.address} />
+                    {member.username}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -84,9 +83,4 @@ export function DisputeExpenseDialog({
       </DialogContent>
     </Dialog>
   )
-}
-
-function MemberOption({ address }: { address: string }) {
-  const name = useEnsNameOrAddress(address)
-  return <span>{name}</span>
 }

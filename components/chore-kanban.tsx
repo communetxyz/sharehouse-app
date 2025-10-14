@@ -7,7 +7,6 @@ import { CheckCircle2, Circle, Loader2, Sparkles } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
 import type { ChoreInstance } from "@/types/commune"
-import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 import { useLanguage } from "@/lib/i18n/context"
 import { useToast } from "@/hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
@@ -31,8 +30,6 @@ function ChoreCard({
   showCompleteButton?: boolean
   isSuccess?: boolean
 }) {
-  const assignedToName = useEnsNameOrAddress(chore.assignedTo)
-
   const getFrequencyLabel = (frequency: number) => {
     const days = frequency / (24 * 60 * 60)
     if (days === 1) return "Daily"
@@ -91,7 +88,7 @@ function ChoreCard({
           {!showCompleteButton && (
             <p className="text-xs text-charcoal/60">
               {chore.completed ? "Completed by: " : "Assigned to: "}
-              {assignedToName}
+              {chore.assignedToUsername}
             </p>
           )}
           {showCompleteButton && onComplete && (

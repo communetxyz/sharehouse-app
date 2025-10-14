@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Commune, Member } from "@/types/commune"
-import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 
 interface CommuneInfoProps {
   commune: Commune | null
@@ -8,8 +7,6 @@ interface CommuneInfoProps {
 }
 
 export function CommuneInfo({ commune, members }: CommuneInfoProps) {
-  const creatorName = useEnsNameOrAddress(commune?.creator)
-
   if (!commune) {
     return (
       <Card className="border-charcoal/10">
@@ -36,7 +33,7 @@ export function CommuneInfo({ commune, members }: CommuneInfoProps) {
             </div>
             <div>
               <p className="text-sm text-charcoal/60 mb-1">Creator</p>
-              <p className="font-mono text-sm text-charcoal">{creatorName}</p>
+              <p className="font-mono text-sm text-charcoal">{commune.creatorUsername || commune.creator}</p>
             </div>
             <div>
               <p className="text-sm text-charcoal/60 mb-1">Members</p>

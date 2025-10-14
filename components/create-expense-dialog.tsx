@@ -99,7 +99,7 @@ export function CreateExpenseDialog({ communeId, members, onSuccess }: CreateExp
               <SelectContent>
                 {members.map((member) => (
                   <SelectItem key={member.address} value={member.address}>
-                    {member.address.slice(0, 6)}...{member.address.slice(-4)}
+                    {member.username}
                     {member.isCurrentUser && " (You)"}
                   </SelectItem>
                 ))}

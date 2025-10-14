@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ChoreInstance, Expense } from "@/types/commune"
-import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 import { useLanguage } from "@/lib/i18n/context"
 import { useCalendarChores } from "@/hooks/use-calendar-chores"
 import { useCalendarExpenses } from "@/hooks/use-calendar-expenses"
@@ -12,8 +11,6 @@ interface ChoreCalendarProps {
 }
 
 function ChoreItem({ chore }: { chore: ChoreInstance }) {
-  const assignedToName = useEnsNameOrAddress(chore.assignedTo)
-
   return (
     <div
       className={`text-xs p-1.5 rounded mb-1 ${
@@ -25,14 +22,12 @@ function ChoreItem({ chore }: { chore: ChoreInstance }) {
       }`}
     >
       <div className="font-medium truncate">{chore.title}</div>
-      <div className="text-charcoal/60 truncate">{assignedToName}</div>
+      <div className="text-charcoal/60 truncate">{chore.assignedToUsername}</div>
     </div>
   )
 }
 
 function ExpenseItem({ expense }: { expense: Expense }) {
-  const assignedToName = useEnsNameOrAddress(expense.assignedTo)
-
   return (
     <div
       className={`text-xs p-1.5 rounded mb-1 border-l-2 ${
@@ -47,7 +42,7 @@ function ExpenseItem({ expense }: { expense: Expense }) {
     >
       <div className="font-medium truncate">💰 {expense.description}</div>
       <div className="text-charcoal/60 truncate">{expense.amount} Collateral Currency</div>
-      <div className="text-charcoal/60 truncate">{assignedToName}</div>
+      <div className="text-charcoal/60 truncate">{expense.assignedToUsername}</div>
     </div>
   )
 }
