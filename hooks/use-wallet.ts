@@ -65,6 +65,7 @@ export function useWallet() {
         {
           to: COMMUNE_OS_ADDRESS as `0x${string}`,
           data,
+          address, // Specify which wallet to use for the transaction
         },
         {
           sponsor: true, // Enable gas sponsorship
@@ -119,6 +120,7 @@ export function useWallet() {
         {
           to: BREAD_TOKEN_ADDRESS as `0x${string}`,
           data,
+          address, // Specify which wallet to use for the transaction
         },
         {
           sponsor: true, // Enable gas sponsorship

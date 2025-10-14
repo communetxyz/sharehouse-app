@@ -171,20 +171,15 @@ export function useJoinCommune() {
     setError(null)
 
     try {
-      // Calculate collateral amount from commune data
-      const collateralAmount = communeData.collateralRequired
-        ? BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
-        : BigInt(0)
-
       console.log("[v0] Joining commune with params:", {
         communeId: BigInt(communeId),
-        collateralAmount,
+        nonce: BigInt(nonce),
         signature,
         username,
       })
 
-      // Call joinCommune with correct parameters: communeId, collateralAmount, signature, username
-      await executeTransaction("joinCommune", [BigInt(communeId), collateralAmount, signature, username])
+      // Call joinCommune with correct parameters: communeId, nonce, signature, username
+      await executeTransaction("joinCommune", [BigInt(communeId), BigInt(nonce), signature, username])
 
       // Wait for confirmation
       await new Promise((resolve) => {
