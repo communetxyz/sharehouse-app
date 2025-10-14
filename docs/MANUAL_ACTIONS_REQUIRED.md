@@ -8,7 +8,7 @@ This document lists actions that require manual intervention or cannot be comple
 
 Create a `.env.local` file in the project root with the following variables:
 
-```bash
+\`\`\`bash
 # Alchemy API Configuration
 NEXT_PUBLIC_ALCHEMY_API_KEY=Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE
 NEXT_PUBLIC_RPC_URL=https://gnosis-mainnet.g.alchemy.com/v2
@@ -17,23 +17,23 @@ NEXT_PUBLIC_RPC_URL=https://gnosis-mainnet.g.alchemy.com/v2
 NEXT_PUBLIC_COMMUNE_OS_ADDRESS=0x05e7feed5b5db8a7b394d02e9de809b057fd6ee6
 NEXT_PUBLIC_BREAD_TOKEN_ADDRESS=0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3
 NEXT_PUBLIC_COLLATERAL_MANAGER_ADDRESS=0x61Ba220071184886710A8F2814B7c6eDecbcaA82
-```
+\`\`\`
 
 ### 2. Update `.gitignore`
 
 Ensure `.env.local` is in `.gitignore`:
 
-```
+\`\`\`
 # Local env files
 .env*.local
 .env.local
-```
+\`\`\`
 
 ### 3. Security Best Practice (Recommended)
 
 For production, consider creating a Next.js API route to proxy RPC calls:
 
-```typescript
+\`\`\`typescript
 // app/api/rpc/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-```
+\`\`\`
 
 Then update `lib/contracts.ts` to use `/api/rpc` instead of direct Alchemy URL.
 
@@ -87,10 +87,10 @@ Verify:
 
 Manually trigger errors to test error boundary:
 
-```typescript
+\`\`\`typescript
 // Temporarily add to a component to test
 throw new Error('Test error boundary');
-```
+\`\`\`
 
 Verify:
 - ✅ Error boundary catches error
@@ -112,10 +112,10 @@ Use React DevTools Profiler to verify:
 
 Verify that contract method calls match the actual deployed contract ABI:
 
-```typescript
+\`\`\`typescript
 // hooks/use-expense-data.ts - verify this matches contract
 const expenses = await contract.read.getCommuneExpenses([BigInt(commune.id)]);
-```
+\`\`\`
 
 Check against actual contract on Gnosis scan to ensure:
 - Function name is correct
@@ -139,12 +139,12 @@ Current fix implements Option A. If you want Option B or C, update `hooks/use-en
 
 The transaction hooks have been updated with better error handling. Verify gas sponsorship still works:
 
-```typescript
+\`\`\`typescript
 // Check that paymasterAddress is still accepted
 gasSponsorship: {
   paymasterAddress: PAYMASTER_ADDRESS as `0x${string}`
 }
-```
+\`\`\`
 
 Test with actual transactions on testnet/mainnet.
 
@@ -154,22 +154,22 @@ Test with actual transactions on testnet/mainnet.
 
 Consider adding Sentry or similar:
 
-```bash
+\`\`\`bash
 npm install @sentry/nextjs
 npx @sentry/wizard -i nextjs
-```
+\`\`\`
 
 ### 11. Add Bundle Analysis
 
 To track bundle size after changes:
 
-```bash
+\`\`\`bash
 npm install --save-dev @next/bundle-analyzer
-```
+\`\`\`
 
 Update `next.config.js`:
 
-```javascript
+\`\`\`javascript
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
@@ -177,7 +177,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 module.exports = withBundleAnalyzer({
   // ... existing config
 });
-```
+\`\`\`
 
 Run: `ANALYZE=true npm run build`
 
@@ -185,9 +185,9 @@ Run: `ANALYZE=true npm run build`
 
 If performance is still an issue after Context migration, consider React Query:
 
-```bash
+\`\`\`bash
 npm install @tanstack/react-query
-```
+\`\`\`
 
 See `docs/06-state-management-refactor.md` for implementation guide.
 
@@ -195,10 +195,10 @@ See `docs/06-state-management-refactor.md` for implementation guide.
 
 Consider adding Playwright for critical flows:
 
-```bash
+\`\`\`bash
 npm install --save-dev @playwright/test
 npx playwright install
-```
+\`\`\`
 
 Test flows:
 - Join commune

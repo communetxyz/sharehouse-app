@@ -156,20 +156,20 @@ No error boundary to catch unhandled errors gracefully.
 
 ## Estimated Impact by Category
 
-```mermaid
+\`\`\`mermaid
 pie title Issues by Severity
     "Critical" : 6
     "Major" : 25
     "Minor" : 44
-```
+\`\`\`
 
-```mermaid
+\`\`\`mermaid
 pie title Estimated Time to Fix
     "Critical (12-15 hrs)" : 15
     "High Priority (20-30 hrs)" : 30
     "Medium Priority (15-20 hrs)" : 20
     "Low Priority (10-15 hrs)" : 15
-```
+\`\`\`
 
 ## Recommended Implementation Order
 

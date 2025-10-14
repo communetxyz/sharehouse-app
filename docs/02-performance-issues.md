@@ -17,7 +17,7 @@ These issues compound as the number of expenses, chores, and members grows, lead
 
 ## Current Architecture
 
-```mermaid
+\`\`\`mermaid
 sequenceDiagram
     participant Dashboard
     participant CommuneData
@@ -39,7 +39,7 @@ sequenceDiagram
     ExpenseData-->>Dashboard: re-render
     ExpenseList-->>Dashboard: re-render
     ExpenseList->>ExpenseCard: re-render all cards (not memoized)
-```
+\`\`\`
 
 ## Issues Found
 
@@ -54,7 +54,7 @@ sequenceDiagram
 **Description:**
 Multiple hooks and components call `useCommuneData()` independently. When commune data changes, ALL dependent components re-render in a cascade:
 
-```typescript
+\`\`\`typescript
 // In use-expense-data.ts
 const { commune, refreshCommuneData } = useCommuneData();
 
@@ -63,7 +63,7 @@ const { commune, members } = useCommuneData();
 
 // In dashboard page
 const { commune, members, chores, isLoading } = useCommuneData();
-```
+\`\`\`
 
 This creates a performance bottleneck where a single commune update triggers 4+ re-renders.
 
@@ -79,7 +79,7 @@ This creates a performance bottleneck where a single commune update triggers 4+ 
 **Description:**
 The `ChoreCard` component and its helper functions are not memoized:
 
-```typescript
+\`\`\`typescript
 // Not memoized - recreated on every parent render
 function ChoreCard({ chore, onMarkComplete }: ChoreCardProps) {
   // Helper functions recreated every render
@@ -88,7 +88,7 @@ function ChoreCard({ chore, onMarkComplete }: ChoreCardProps) {
 
   return (/* ... */);
 }
-```
+\`\`\`
 
 With 20 chores, this causes 20 unnecessary component re-creations on every parent state change.
 
@@ -99,7 +99,7 @@ With 20 chores, this causes 20 unnecessary component re-creations on every paren
 **Description:**
 The `refreshExpenses` callback depends on `commune?.id` which can cause circular re-renders:
 
-```typescript
+\`\`\`typescript
 const refreshExpenses = useCallback(async () => {
   if (!commune?.id) return;
   // ...
@@ -108,7 +108,7 @@ const refreshExpenses = useCallback(async () => {
 useEffect(() => {
   refreshExpenses();
 }, [refreshExpenses]); // Triggers on every commune change
-```
+\`\`\`
 
 This creates unnecessary API calls and state updates.
 
@@ -121,7 +121,7 @@ This creates unnecessary API calls and state updates.
 **Description:**
 `MemberItem` and `ExpenseCard` components aren't memoized. When any prop changes in the parent, ALL items re-render:
 
-```typescript
+\`\`\`typescript
 // Current - all cards re-render
 function ExpenseCard({ expense, onMarkPaid }: ExpenseCardProps) {
   return (/* ... */);
@@ -131,7 +131,7 @@ function ExpenseCard({ expense, onMarkPaid }: ExpenseCardProps) {
 const ExpenseCard = React.memo(function ExpenseCard({ expense, onMarkPaid }: ExpenseCardProps) {
   return (/* ... */);
 }, (prev, next) => prev.expense.id === next.expense.id && prev.expense.isPaid === next.expense.isPaid);
-```
+\`\`\`
 
 ### 5. Inefficient Filtering in ChoreKanban (Major)
 
@@ -140,7 +140,7 @@ const ExpenseCard = React.memo(function ExpenseCard({ expense, onMarkPaid }: Exp
 **Description:**
 Sorting and filtering operations run on every render:
 
-```typescript
+\`\`\`typescript
 // Runs on every render, not memoized
 const sortByDate = (a: Chore, b: Chore) => a.createdAt - b.createdAt;
 
@@ -151,7 +151,7 @@ return (
     {completedChores.sort(sortByDate).map(/* ... */)}
   </div>
 );
-```
+\`\`\`
 
 ### 6. QueryClient Lacks Caching Configuration (Minor)
 
@@ -160,7 +160,7 @@ return (
 **Description:**
 QueryClient has no `staleTime` or `cacheTime` configuration:
 
-```typescript
+\`\`\`typescript
 const [queryClient] = useState(() => new QueryClient());
 // Should have:
 // const [queryClient] = useState(() => new QueryClient({
@@ -171,7 +171,7 @@ const [queryClient] = useState(() => new QueryClient());
 //     },
 //   },
 // }));
-```
+\`\`\`
 
 ### 7. Expensive Calendar Calculations (Minor)
 
@@ -187,7 +187,7 @@ Calendar day calculations run on every render without memoization.
 **Description:**
 Create a `CommuneContext` to share commune data across components without prop drilling or duplicate hooks.
 
-```typescript
+\`\`\`typescript
 // contexts/commune-context.tsx
 const CommuneContext = createContext<CommuneContextValue | null>(null);
 
@@ -214,7 +214,7 @@ export function useCommuneContext() {
   if (!context) throw new Error('useCommuneContext must be used within CommuneProvider');
   return context;
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Eliminates duplicate data fetching
@@ -230,7 +230,7 @@ export function useCommuneContext() {
 **Description:**
 Add `React.memo`, `useMemo`, and `useCallback` strategically:
 
-```typescript
+\`\`\`typescript
 // Memoize components
 const ExpenseCard = React.memo(ExpenseCard, (prev, next) =>
   prev.expense.id === next.expense.id &&
@@ -249,7 +249,7 @@ const sortedPendingChores = useMemo(() =>
 const handleMarkComplete = useCallback((choreId: number) => {
   markComplete(choreId);
 }, [markComplete]);
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Prevents unnecessary re-renders
@@ -266,7 +266,7 @@ const handleMarkComplete = useCallback((choreId: number) => {
 **Description:**
 Use a proper data fetching library with built-in caching:
 
-```typescript
+\`\`\`typescript
 // hooks/queries/use-commune-query.ts
 export function useCommuneQuery(address: string) {
   return useQuery({
@@ -286,7 +286,7 @@ export function useExpensesQuery(communeId: number) {
     enabled: !!communeId, // Only fetch when communeId exists
   });
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Built-in caching and deduplication
@@ -304,7 +304,7 @@ export function useExpensesQuery(communeId: number) {
 **Description:**
 Fix circular dependencies by memoizing stable values:
 
-```typescript
+\`\`\`typescript
 // Before - causes re-renders
 const refreshExpenses = useCallback(async () => {
   if (!commune?.id) return;
@@ -317,7 +317,7 @@ const refreshExpenses = useCallback(async () => {
   if (!communeId) return;
   // ...
 }, [communeId]); // only changes when ID changes
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Quick fix for immediate issue
@@ -378,7 +378,7 @@ Combine multiple strategies:
 
 ## Benchmarking Plan
 
-```typescript
+\`\`\`typescript
 // Add performance monitoring
 import { Profiler } from 'react';
 
@@ -389,6 +389,6 @@ import { Profiler } from 'react';
 }}>
   <DashboardContent />
 </Profiler>
-```
+\`\`\`
 
 Measure before and after each optimization phase.

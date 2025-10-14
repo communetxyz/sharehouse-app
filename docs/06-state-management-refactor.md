@@ -17,7 +17,7 @@ These issues make the codebase harder to maintain, test, and scale.
 
 ## Current Data Flow Architecture
 
-```mermaid
+\`\`\`mermaid
 graph TD
     A[Dashboard Page] --> B[useCommuneData]
     A --> C[useExpenseData]
@@ -48,7 +48,7 @@ graph TD
     style M fill:#ff6b6b
     style N fill:#ff0000,color:#fff
     style O fill:#ff0000,color:#fff
-```
+\`\`\`
 
 ## Issues Found
 
@@ -59,7 +59,7 @@ graph TD
 **Description:**
 Dashboard passes commune, members, and chores through multiple levels:
 
-```typescript
+\`\`\`typescript
 <div>
   <CommuneInfo commune={commune} members={members} />
   <MemberList members={members} />
@@ -73,7 +73,7 @@ Dashboard passes commune, members, and chores through multiple levels:
     <ChoreCalendar chores={chores} />
   </Tabs>
 </div>
-```
+\`\`\`
 
 Every component receives props from the top level, making the component tree rigid and hard to refactor.
 
@@ -86,7 +86,7 @@ Every component receives props from the top level, making the component tree rig
 **Description:**
 Both hooks maintain separate loading and error states for related data:
 
-```typescript
+\`\`\`typescript
 // use-commune-data.ts
 const [commune, setCommune] = useState<Commune | null>(null);
 const [isLoading, setIsLoading] = useState(true);
@@ -96,7 +96,7 @@ const [error, setError] = useState<string | null>(null);
 const [expenses, setExpenses] = useState<Expense[]>([]);
 const [isLoading, setIsLoading] = useState(true);
 const [error, setError] = useState<string | null>(null);
-```
+\`\`\`
 
 When both are loading, there's no coordination between them.
 
@@ -107,7 +107,7 @@ When both are loading, there's no coordination between them.
 **Description:**
 Hooks depend on each other creating circular update patterns:
 
-```typescript
+\`\`\`typescript
 // use-expense-data.ts
 const { commune } = useCommuneData(); // Depends on commune
 
@@ -116,7 +116,7 @@ useEffect(() => {
     refreshExpenses(); // Triggers when commune changes
   }
 }, [commune?.id]); // Creates circular dependency
-```
+\`\`\`
 
 ### 4. Mixed Concerns in Hooks (Major)
 
@@ -134,7 +134,7 @@ Should be separated into focused hooks.
 
 ## Recommended Architecture
 
-```mermaid
+\`\`\`mermaid
 graph TD
     A[App Layout] --> B[CommuneProvider Context]
 
@@ -158,7 +158,7 @@ graph TD
     style I fill:#95e1d3
     style J fill:#f38181
     style K fill:#f38181
-```
+\`\`\`
 
 ## Approaches and Tradeoffs
 
@@ -167,7 +167,7 @@ graph TD
 **Description:**
 Create a context provider to share commune data across all components:
 
-```typescript
+\`\`\`typescript
 // contexts/commune-context.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 
@@ -276,11 +276,11 @@ export function useChores() {
   const { chores, refreshChores, isLoading } = useCommuneContext();
   return { chores, refreshChores, isLoading };
 }
-```
+\`\`\`
 
 **Usage in Components:**
 
-```typescript
+\`\`\`typescript
 // app/dashboard/page.tsx
 export default function DashboardPage() {
   // No more prop drilling!
@@ -311,7 +311,7 @@ export function ExpenseList() {
     </div>
   );
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Eliminates prop drilling completely
@@ -326,7 +326,7 @@ export function ExpenseList() {
 
 **Optimization with useMemo:**
 
-```typescript
+\`\`\`typescript
 export function CommuneProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<CommuneState>(initialState);
 
@@ -347,25 +347,25 @@ export function CommuneProvider({ children }: { children: React.ReactNode }) {
     </CommuneContext.Provider>
   );
 }
-```
+\`\`\`
 
 **Further Optimization with Split Contexts:**
 
-```typescript
+\`\`\`typescript
 // Split into multiple contexts to reduce re-renders
 const CommuneDataContext = createContext<CommuneData | null>(null);
 const CommuneActionsContext = createContext<CommuneActions | null>(null);
 
 // Components only subscribe to data they need
 // Actions don't cause re-renders since they're stable
-```
+\`\`\`
 
 ### Approach 2: Use React Query/TanStack Query
 
 **Description:**
 Leverage React Query for server state management:
 
-```typescript
+\`\`\`typescript
 // hooks/queries/use-commune-query.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -418,11 +418,11 @@ export function ExpenseList() {
   // React Query handles caching, deduplication, and refetching
   return (/* ... */);
 }
-```
+\`\`\`
 
 **Advanced Features:**
 
-```typescript
+\`\`\`typescript
 // Optimistic updates
 export function useMarkExpensePaidMutation() {
   const queryClient = useQueryClient();
@@ -455,7 +455,7 @@ export function useMarkExpensePaidMutation() {
     },
   });
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Built-in caching and request deduplication
@@ -477,7 +477,7 @@ export function useMarkExpensePaidMutation() {
 **Description:**
 Use Zustand for lightweight global state management:
 
-```typescript
+\`\`\`typescript
 // stores/commune-store.ts
 import create from 'zustand';
 import { devtools } from 'zustand/middleware';
@@ -578,7 +578,7 @@ export function ExpenseList() {
   // Only re-renders when expenses change
   return (/* ... */);
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Very lightweight (~3KB)
@@ -599,7 +599,7 @@ export function ExpenseList() {
 **Description:**
 Use React Query for server state and Context for UI state:
 
-```typescript
+\`\`\`typescript
 // contexts/ui-context.tsx
 interface UIContextValue {
   activeTab: string;
@@ -627,7 +627,7 @@ export function Dashboard() {
 
   return (/* ... */);
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Clear separation: server state vs UI state
@@ -648,7 +648,7 @@ Keep current architecture but make targeted improvements:
 2. Memoize expensive hooks
 3. Add better loading state coordination
 
-```typescript
+\`\`\`typescript
 // Group related props
 interface DashboardData {
   commune: Commune;
@@ -679,7 +679,7 @@ function useDashboardData() {
     error,
   };
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Minimal changes

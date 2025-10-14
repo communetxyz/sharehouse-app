@@ -7,7 +7,7 @@ import { gnosis, gnosisChiado, mainnet } from "wagmi/chains"
 export const config = createConfig({
   chains: [gnosis, gnosisChiado, mainnet],
   transports: {
-    [gnosis.id]: http("https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"),
+    [gnosis.id]: http(process.env.NEXT_PUBLIC_GNOSIS_RPC_URL),
     [gnosisChiado.id]: http(),
     [mainnet.id]: http(),
   },

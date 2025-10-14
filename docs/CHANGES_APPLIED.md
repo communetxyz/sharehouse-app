@@ -38,14 +38,14 @@ This document summarizes all the improvements and fixes applied to the sharehous
 - Better IDE autocomplete and refactoring support
 
 **Files Created:**
-```typescript
+\`\`\`typescript
 // lib/address-utils.ts
 - isValidAddress() - Type guard for addresses
 - assertAddress() - Throws if invalid
 - toAddress() - Safe conversion
 - toAddressOrNull() - Returns null if invalid
 - truncateAddress() - Display formatting
-```
+\`\`\`
 
 ### 3. Error Boundary
 **Status:** ✅ Completed
@@ -73,7 +73,7 @@ This document summarizes all the improvements and fixes applied to the sharehous
 - Foundation for eliminating code duplication (next step)
 
 **Features:**
-```typescript
+\`\`\`typescript
 // lib/transaction-utils.ts
 - waitForTransactionWithTimeout() - Wait with timeout
 - validateTransactionReceipt() - Check success/failure
@@ -85,7 +85,7 @@ This document summarizes all the improvements and fixes applied to the sharehous
 - Chain validation and auto-switch
 - Gas sponsorship support
 - Error handling and toast notifications
-```
+\`\`\`
 
 ### 5. ENS Lookup Fix
 **Status:** ✅ Completed
@@ -185,12 +185,12 @@ This document summarizes all the improvements and fixes applied to the sharehous
 - Easy to toggle debug output
 
 **Usage:**
-```typescript
+\`\`\`typescript
 import { debug } from '@/lib/debug'
 
 debug.log('Transaction sent:', hash) // Only in development
 debug.error('Error:', error) // Always logged
-```
+\`\`\`
 
 ## Files Created
 
@@ -313,7 +313,7 @@ The new utilities and hooks are additive. Existing code continues to work.
 
 ## Commit Message Suggestion
 
-```
+\`\`\`
 fix: address critical security, type safety, and performance issues
 
 Security:
@@ -349,7 +349,7 @@ Documentation:
 - Add changes applied summary
 
 Fixes: #[issue numbers if applicable]
-```
+\`\`\`
 
 ## Questions or Issues?
 

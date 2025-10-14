@@ -66,10 +66,10 @@ A full analysis identified **75+ issues** across 10 categories. Detailed documen
 **Before production deployment:**
 
 1. Set up environment variables (see `docs/MANUAL_ACTIONS_REQUIRED.md`):
-   ```bash
+   \`\`\`bash
    NEXT_PUBLIC_ALCHEMY_API_KEY=Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE
    NEXT_PUBLIC_RPC_URL=https://gnosis-mainnet.g.alchemy.com/v2
-   ```
+   \`\`\`
 
 2. Remove hardcoded Alchemy URL from `lib/contracts.ts` (marked with TODO)
 
@@ -132,11 +132,11 @@ Since the GitHub API is timing out, you can create the PR manually:
 3. Click "Create pull request"
 
 ### Option 2: Via Command Line (when network is available)
-```bash
+\`\`\`bash
 gh pr create --base main --head fix/codebase-improvements \
   --title "Fix: Critical security, type safety, and performance improvements" \
   --body-file docs/PR_DETAILS.md
-```
+\`\`\`
 
 ---
 

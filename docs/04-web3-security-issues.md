@@ -18,7 +18,7 @@ These issues can lead to failed transactions, security breaches, and poor user e
 
 ## Security Threat Model
 
-```mermaid
+\`\`\`mermaid
 graph TD
     A[User Initiates Transaction] --> B{Chain Check?}
     B -->|No Check| C[Wrong Network Transaction]
@@ -40,7 +40,7 @@ graph TD
     style H fill:#ff6b6b
     style K fill:#ff0000,color:#fff
     style L fill:#ff0000,color:#fff
-```
+\`\`\`
 
 ## Issues Found
 
@@ -54,7 +54,7 @@ graph TD
 **Description:**
 Alchemy API key is hardcoded in multiple client-side files:
 
-```typescript
+\`\`\`typescript
 // lib/contracts.ts
 const publicClient = createPublicClient({
   chain: gnosis,
@@ -71,7 +71,7 @@ export const config = createConfig({
   },
   // ...
 });
-```
+\`\`\`
 
 **Security Impact:**
 - ✗ API key visible in browser DevTools
@@ -82,7 +82,7 @@ export const config = createConfig({
 
 **Recommended Fix:**
 
-```typescript
+\`\`\`typescript
 // .env.local
 NEXT_PUBLIC_ALCHEMY_API_KEY=your_key_here
 NEXT_PUBLIC_RPC_URL=https://gnosis-mainnet.g.alchemy.com/v2
@@ -96,12 +96,12 @@ const publicClient = createPublicClient({
   chain: gnosis,
   transport: http(RPC_URL)
 });
-```
+\`\`\`
 
 **Better Alternative:**
 Use a proxy API route to hide the key completely:
 
-```typescript
+\`\`\`typescript
 // app/api/rpc/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -126,7 +126,7 @@ const publicClient = createPublicClient({
   chain: gnosis,
   transport: http('/api/rpc'), // API key never exposed!
 });
-```
+\`\`\`
 
 ### 2. Missing Chain Validation (Critical)
 
@@ -135,7 +135,7 @@ const publicClient = createPublicClient({
 **Description:**
 No validation that user is on the correct network (Gnosis) before transactions:
 
-```typescript
+\`\`\`typescript
 // Current - no chain check
 async function sendTransaction({ to, data }: SendTransactionParams) {
   const hash = await sendTransactionMutation.mutateAsync({
@@ -145,7 +145,7 @@ async function sendTransaction({ to, data }: SendTransactionParams) {
   });
   return hash;
 }
-```
+\`\`\`
 
 **Impact:**
 - Transactions fail with confusing errors
@@ -154,7 +154,7 @@ async function sendTransaction({ to, data }: SendTransactionParams) {
 
 **Recommended Fix:**
 
-```typescript
+\`\`\`typescript
 import { useAccount, useSwitchChain } from 'wagmi';
 import { gnosis } from 'viem/chains';
 
@@ -183,7 +183,7 @@ async function sendTransaction({ to, data }: SendTransactionParams) {
   });
   return hash;
 }
-```
+\`\`\`
 
 ### 3. Missing Transaction Receipt Validation (Major)
 
@@ -192,7 +192,7 @@ async function sendTransaction({ to, data }: SendTransactionParams) {
 **Description:**
 Transaction hashes are returned without validating success:
 
-```typescript
+\`\`\`typescript
 // Current - no validation
 const hash = await sendTransactionMutation.mutateAsync({
   to: toAddress,
@@ -200,7 +200,7 @@ const hash = await sendTransactionMutation.mutateAsync({
 });
 console.log('Transaction sent:', hash);
 return hash; // Could have failed!
-```
+\`\`\`
 
 **Impact:**
 - UI shows success for failed transactions
@@ -209,7 +209,7 @@ return hash; // Could have failed!
 
 **Recommended Fix:**
 
-```typescript
+\`\`\`typescript
 async function sendTransactionAndWait({ to, data }: SendTransactionParams) {
   // Send transaction
   const hash = await sendTransactionMutation.mutateAsync({
@@ -230,7 +230,7 @@ async function sendTransactionAndWait({ to, data }: SendTransactionParams) {
 
   return { hash, receipt };
 }
-```
+\`\`\`
 
 ### 4. ENS Lookup on Wrong Chain (Major)
 
@@ -239,7 +239,7 @@ async function sendTransactionAndWait({ to, data }: SendTransactionParams) {
 **Description:**
 ENS lookup uses mainnet but app is on Gnosis:
 
-```typescript
+\`\`\`typescript
 // use-ens-name.ts
 const publicClient = createPublicClient({
   chain: mainnet, // Wrong chain!
@@ -249,7 +249,7 @@ const publicClient = createPublicClient({
 const result = await publicClient.getEnsName({
   address: address as `0x${string}`,
 });
-```
+\`\`\`
 
 **Impact:**
 - ENS lookups will fail on Gnosis
@@ -260,7 +260,7 @@ const result = await publicClient.getEnsName({
 
 Either remove ENS lookup (Gnosis doesn't have ENS) or use a cross-chain ENS service:
 
-```typescript
+\`\`\`typescript
 // Option 1: Remove ENS entirely for Gnosis
 export function useEnsName(address: string | undefined) {
   return { ensName: null }; // Gnosis doesn't support ENS
@@ -285,7 +285,7 @@ export function useEnsName(address: string | undefined) {
 
   return { ensName };
 }
-```
+\`\`\`
 
 ### 5. No Gas Estimation (Major)
 
@@ -294,14 +294,14 @@ export function useEnsName(address: string | undefined) {
 **Description:**
 No gas estimation before sending transactions:
 
-```typescript
+\`\`\`typescript
 // Current - no gas estimation
 const hash = await sendTransaction({
   to: CONTRACT_ADDRESS,
   data,
 });
 // Could fail due to insufficient gas
-```
+\`\`\`
 
 **Impact:**
 - Transactions fail with "out of gas" errors
@@ -310,7 +310,7 @@ const hash = await sendTransaction({
 
 **Recommended Fix:**
 
-```typescript
+\`\`\`typescript
 async function sendTransaction({ to, data }: SendTransactionParams) {
   // Estimate gas
   const gasEstimate = await publicClient.estimateGas({
@@ -339,7 +339,7 @@ async function sendTransaction({ to, data }: SendTransactionParams) {
 
   return hash;
 }
-```
+\`\`\`
 
 ### 6. No Transaction Timeout (Critical)
 
@@ -348,7 +348,7 @@ async function sendTransaction({ to, data }: SendTransactionParams) {
 **Description:**
 Transaction polling has no timeout:
 
-```typescript
+\`\`\`typescript
 // Current - infinite loop risk
 let isSuccess = false;
 while (!isSuccess) {
@@ -360,7 +360,7 @@ while (!isSuccess) {
   }
 }
 // Loops forever if transaction never confirms!
-```
+\`\`\`
 
 **Impact:**
 - UI hangs indefinitely if transaction is stuck
@@ -369,7 +369,7 @@ while (!isSuccess) {
 
 **Recommended Fix:**
 
-```typescript
+\`\`\`typescript
 async function waitForTransaction(hash: `0x${string}`, timeoutMs = 60000) {
   const startTime = Date.now();
 
@@ -407,7 +407,7 @@ try {
     });
   }
 }
-```
+\`\`\`
 
 ### 7. Incorrect getCommuneExpenses Call (Critical)
 
@@ -416,13 +416,13 @@ try {
 **Description:**
 Function may not match ABI signature:
 
-```typescript
+\`\`\`typescript
 // Current
 const expenses = await contract.read.getCommuneExpenses([BigInt(commune.id)]);
 
 // But ABI may expect different parameters
 // Need to verify against actual contract
-```
+\`\`\`
 
 **Impact:**
 - Contract calls may fail
@@ -436,12 +436,12 @@ const expenses = await contract.read.getCommuneExpenses([BigInt(commune.id)]);
 **Description:**
 Move sensitive keys to environment variables:
 
-```bash
+\`\`\`bash
 # .env.local
 NEXT_PUBLIC_ALCHEMY_API_KEY=your_key
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x...
 NEXT_PUBLIC_PAYMASTER_ADDRESS=0x...
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Quick to implement
@@ -456,7 +456,7 @@ NEXT_PUBLIC_PAYMASTER_ADDRESS=0x...
 **Description:**
 Route all RPC calls through Next.js API routes:
 
-```typescript
+\`\`\`typescript
 // app/api/rpc/route.ts
 export async function POST(request: NextRequest) {
   // Validate request
@@ -464,7 +464,7 @@ export async function POST(request: NextRequest) {
   // Forward to Alchemy
   // Return response
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ API key completely hidden
@@ -480,7 +480,7 @@ export async function POST(request: NextRequest) {
 **Description:**
 Create a transaction middleware:
 
-```typescript
+\`\`\`typescript
 // lib/transaction-middleware.ts
 export async function sendSecureTransaction(params: TransactionParams) {
   // 1. Validate chain
@@ -505,7 +505,7 @@ export async function sendSecureTransaction(params: TransactionParams) {
 
   return { hash, receipt };
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Comprehensive error handling
@@ -521,7 +521,7 @@ export async function sendSecureTransaction(params: TransactionParams) {
 **Description:**
 Leverage wagmi's built-in hooks:
 
-```typescript
+\`\`\`typescript
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 
 function useCreateExpense() {
@@ -539,7 +539,7 @@ function useCreateExpense() {
 
   return { createExpense, isLoading, isSuccess };
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Built-in validation and error handling
@@ -593,7 +593,7 @@ function useCreateExpense() {
 
 ## Testing Security
 
-```typescript
+\`\`\`typescript
 // tests/security.test.ts
 describe('Security', () => {
   it('should not expose API keys', () => {
@@ -613,4 +613,4 @@ describe('Security', () => {
     // Should timeout after 60s
   });
 });
-```
+\`\`\`

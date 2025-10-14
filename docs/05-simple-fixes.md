@@ -20,14 +20,14 @@ This document contains minor issues that can be fixed quickly with low risk. The
 **Location:** `components/`, `hooks/`, `lib/`
 **Issue:** No index.ts files for cleaner imports
 **Fix:** Add index.ts files:
-```typescript
+\`\`\`typescript
 // components/index.ts
 export * from './chore-kanban';
 export * from './expense-list';
 // ...
 
 // Usage: import { ChoreKanban, ExpenseList } from '@/components';
-```
+\`\`\`
 **Impact:** Cleaner imports, better code organization
 
 ### 4. Contracts File Too Large
@@ -52,7 +52,7 @@ export * from './expense-list';
 **Location:** `components/chore-kanban.tsx:127-154`
 **Issue:** setTimeout without cleanup
 **Fix:**
-```typescript
+\`\`\`typescript
 useEffect(() => {
   const timer = setTimeout(() => {
     setSuccessStates(prev => ({ ...prev, [choreId]: false }));
@@ -60,50 +60,50 @@ useEffect(() => {
 
   return () => clearTimeout(timer); // Add cleanup
 }, [choreId]);
-```
+\`\`\`
 **Impact:** Prevents memory leaks
 
 ### 7. Refs for One-time Checks Anti-pattern
 **Location:** `app/join/page.tsx:24-25`
 **Issue:** Using refs to prevent effect runs
 **Fix:**
-```typescript
+\`\`\`typescript
 // Instead of refs, use proper state or dependency array
 useEffect(() => {
   // ... effect code
 }, []); // Empty array for one-time effect
-```
+\`\`\`
 **Impact:** Clearer code, follows React patterns
 
 ### 8. Using window.location Instead of Next Router
 **Location:** `hooks/use-join-commune.ts:195`
 **Issue:** Direct DOM manipulation
 **Fix:**
-```typescript
+\`\`\`typescript
 import { useRouter } from 'next/navigation';
 const router = useRouter();
 router.push('/dashboard');
-```
+\`\`\`
 **Impact:** Better Next.js integration, no page reload
 
 ### 9. Index as Key in Lists
 **Location:** `components/chore-calendar.tsx:131`
 **Issue:** Using array index as key
 **Fix:** Use unique ID if available:
-```typescript
+\`\`\`typescript
 {days.map(day => (
   <div key={`${day.date}-${day.month}`}>
     {/* ... */}
   </div>
 ))}
-```
+\`\`\`
 **Impact:** Better React reconciliation
 
 ### 10. Excessive console.log Statements
 **Location:** Multiple files throughout codebase
 **Issue:** Console logs in production code
 **Fix:** Create debug utility:
-```typescript
+\`\`\`typescript
 // lib/debug.ts
 export const debug = {
   log: (...args: any[]) => {
@@ -114,7 +114,7 @@ export const debug = {
 };
 
 // Usage: debug.log('Transaction sent:', hash);
-```
+\`\`\`
 **Impact:** Cleaner production console
 
 ## State Management
@@ -123,7 +123,7 @@ export const debug = {
 **Location:** `hooks/use-join-commune.ts:20-24`
 **Issue:** Multiple boolean states that should be enum
 **Fix:**
-```typescript
+\`\`\`typescript
 type JoinState = 'idle' | 'validating' | 'approving' | 'joining' | 'success';
 const [state, setState] = useState<JoinState>('idle');
 
@@ -131,28 +131,28 @@ const [state, setState] = useState<JoinState>('idle');
 // const [isValidating, setIsValidating] = useState(false);
 // const [isJoining, setIsJoining] = useState(false);
 // const [isApproving, setIsApproving] = useState(false);
-```
+\`\`\`
 **Impact:** Clearer state management, impossible states prevented
 
 ### 12. setTimeout Memory Leak
 **Location:** `components/wallet-connect-button.tsx:18-23`
 **Issue:** setTimeout without cleanup
 **Fix:**
-```typescript
+\`\`\`typescript
 useEffect(() => {
   if (copied) {
     const timer = setTimeout(() => setCopied(false), 2000);
     return () => clearTimeout(timer);
   }
 }, [copied]);
-```
+\`\`\`
 **Impact:** Prevents memory leaks on unmount
 
 ### 13. No Form Data Persistence
 **Location:** `app/join/page.tsx:20-23`
 **Issue:** Form data lost on refresh
 **Fix:**
-```typescript
+\`\`\`typescript
 const [communeId, setCommuneId] = useState(() => {
   if (typeof window !== 'undefined') {
     return sessionStorage.getItem('joinCommuneId') || '';
@@ -163,7 +163,7 @@ const [communeId, setCommuneId] = useState(() => {
 useEffect(() => {
   sessionStorage.setItem('joinCommuneId', communeId);
 }, [communeId]);
-```
+\`\`\`
 **Impact:** Better UX, form data survives refresh
 
 ## Error Handling
@@ -172,7 +172,7 @@ useEffect(() => {
 **Location:** `hooks/use-wallet.ts:152-161`
 **Issue:** Errors logged but not shown to user
 **Fix:**
-```typescript
+\`\`\`typescript
 } catch (error) {
   console.error('Error checking allowance:', error);
   toast({
@@ -182,14 +182,14 @@ useEffect(() => {
   });
   throw error; // Or return BigInt(0) with user notification
 }
-```
+\`\`\`
 **Impact:** Better user feedback
 
 ### 15. Missing localStorage Error Handling
 **Location:** `lib/i18n/context.tsx:17-27`
 **Issue:** No try-catch for localStorage access
 **Fix:**
-```typescript
+\`\`\`typescript
 const [language, setLanguage] = useState<Language>(() => {
   try {
     if (typeof window !== 'undefined') {
@@ -201,14 +201,14 @@ const [language, setLanguage] = useState<Language>(() => {
   }
   return 'en';
 });
-```
+\`\`\`
 **Impact:** Works in incognito/localStorage disabled
 
 ### 16. Missing Form Validation
 **Location:** `components/create-expense-dialog.tsx:47-53`
 **Issue:** Only checks truthy, not format
 **Fix:**
-```typescript
+\`\`\`typescript
 const amount = parseFloat(formData.amount);
 if (isNaN(amount) || amount <= 0) {
   toast({
@@ -218,7 +218,7 @@ if (isNaN(amount) || amount <= 0) {
   });
   return;
 }
-```
+\`\`\`
 **Impact:** Better data validation
 
 ## Accessibility
@@ -226,41 +226,41 @@ if (isNaN(amount) || amount <= 0) {
 ### 17. Missing aria-labels
 **Location:** `components/language-toggle.tsx:10`, `components/wallet-connect-button.tsx:46`
 **Fix:**
-```typescript
+\`\`\`typescript
 <Button aria-label="Toggle language between English and Español">
   {language === 'en' ? 'ES' : 'EN'}
 </Button>
-```
+\`\`\`
 **Impact:** Better screen reader support
 
 ### 18. Missing htmlFor on Labels
 **Location:** `components/dispute-expense-dialog.tsx:55`
 **Fix:**
-```typescript
+\`\`\`typescript
 <Label htmlFor="reason">Reason</Label>
 <Textarea id="reason" {...props} />
-```
+\`\`\`
 **Impact:** Better accessibility, clicking label focuses input
 
 ### 19. Missing alt Text on Avatars
 **Location:** `components/member-list.tsx:17`
 **Fix:**
-```typescript
+\`\`\`typescript
 <Avatar alt={`${member.username || member.address} avatar`}>
-```
+\`\`\`
 **Impact:** Screen reader support
 
 ### 20. No Skip to Main Content
 **Location:** `app/page.tsx`
 **Fix:**
-```typescript
+\`\`\`typescript
 <a href="#main-content" className="sr-only focus:not-sr-only">
   Skip to main content
 </a>
 <main id="main-content">
   {/* ... */}
 </main>
-```
+\`\`\`
 **Impact:** Better keyboard navigation
 
 ## Loading/Error States
@@ -268,7 +268,7 @@ if (isNaN(amount) || amount <= 0) {
 ### 21. No Skeleton Loaders
 **Location:** All component files
 **Fix:** Add skeleton components:
-```typescript
+\`\`\`typescript
 // components/ui/skeleton.tsx
 export function ExpenseListSkeleton() {
   return (
@@ -282,13 +282,13 @@ export function ExpenseListSkeleton() {
 
 // Usage
 {isLoading ? <ExpenseListSkeleton /> : <ExpenseList data={expenses} />}
-```
+\`\`\`
 **Impact:** Better perceived performance, no layout shift
 
 ### 22. Missing Loading State on ExpenseCard
 **Location:** `components/expense-list.tsx:126-204`
 **Fix:**
-```typescript
+\`\`\`typescript
 const [loadingId, setLoadingId] = useState<number | null>(null);
 
 <Button
@@ -297,26 +297,26 @@ const [loadingId, setLoadingId] = useState<number | null>(null);
 >
   {loadingId === expense.id ? <Spinner /> : 'Mark as Paid'}
 </Button>
-```
+\`\`\`
 **Impact:** User knows which item is processing
 
 ### 23. Incomplete Loading Display in ChoreCalendar
 **Location:** `components/chore-calendar.tsx:64`
 **Fix:**
-```typescript
+\`\`\`typescript
 {isLoading && (
   <div className="flex items-center justify-center h-64">
     <Spinner size="lg" />
     <p className="ml-2 text-sm text-gray-600">Loading chores...</p>
   </div>
 )}
-```
+\`\`\`
 **Impact:** Better loading UX
 
 ### 24. Missing Error State in WalletConnectButton
 **Location:** `components/wallet-connect-button.tsx`
 **Fix:**
-```typescript
+\`\`\`typescript
 const [error, setError] = useState<string | null>(null);
 
 const handleLogin = async () => {
@@ -327,7 +327,7 @@ const handleLogin = async () => {
     setTimeout(() => setError(null), 3000);
   }
 };
-```
+\`\`\`
 **Impact:** User knows if connection failed
 
 ## Performance (Minor)
@@ -335,14 +335,14 @@ const handleLogin = async () => {
 ### 25. Expensive Calendar Calculations
 **Location:** `components/chore-calendar.tsx:66-77`
 **Fix:**
-```typescript
+\`\`\`typescript
 const calendarDays = useMemo(() => {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   // ... calculation
   return days;
 }, [year, month]);
-```
+\`\`\`
 **Impact:** Avoids recalculation on every render
 
 ## Implementation Checklist

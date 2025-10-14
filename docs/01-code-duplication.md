@@ -16,7 +16,7 @@ This violates the DRY (Don't Repeat Yourself) principle and makes the codebase h
 
 ## Architecture Overview
 
-```mermaid
+\`\`\`mermaid
 graph TD
     A[Transaction Hooks] --> B[use-create-expense.ts]
     A --> C[use-mark-expense-paid.ts]
@@ -41,7 +41,7 @@ graph TD
     style J fill:#ff6b6b
     style L fill:#ff6b6b
     style M fill:#ff6b6b
-```
+\`\`\`
 
 ## Issues Found
 
@@ -62,7 +62,7 @@ All four hooks contain nearly identical transaction execution logic:
 5. Data refresh after success
 
 **Example from use-create-expense.ts:**
-```typescript
+\`\`\`typescript
 const data = encodeFunctionData({
   abi: CONTRACT_ABI,
   functionName: 'createExpense',
@@ -75,7 +75,7 @@ const hash = await sendTransaction({
   chain: gnosis,
   gasSponsorship: { paymasterAddress: PAYMASTER_ADDRESS }
 });
-```
+\`\`\`
 
 This pattern is repeated in all transaction hooks with minor variations.
 
@@ -88,7 +88,7 @@ This pattern is repeated in all transaction hooks with minor variations.
 **Description:**
 Both hooks map raw contract data to expense objects with the same transformation logic:
 
-```typescript
+\`\`\`typescript
 const mappedExpenses = expenses[0].map((expense: any, index: number) => ({
   id: Number(expense.id),
   creator: expense.creator,
@@ -100,7 +100,7 @@ const mappedExpenses = expenses[0].map((expense: any, index: number) => ({
   createdAt: Number(expense.createdAt),
   period: Number(expense.period),
 }));
-```
+\`\`\`
 
 ### 3. Duplicate Chore Data Fetching (Major)
 
@@ -136,7 +136,7 @@ Header with logo and navigation is duplicated instead of being a shared componen
 **Implementation:**
 Create a generic `useContractTransaction` hook that handles all transaction logic:
 
-```typescript
+\`\`\`typescript
 // hooks/use-contract-transaction.ts
 export function useContractTransaction() {
   const { sendTransaction, refreshData } = useWallet();
@@ -170,7 +170,7 @@ export function useContractTransaction() {
     }
   };
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Eliminates ~200 lines of duplicate code
@@ -184,7 +184,7 @@ export function useContractTransaction() {
 **Implementation:**
 Create utility functions for data transformation:
 
-```typescript
+\`\`\`typescript
 // lib/data-mappers.ts
 export function mapExpense(expense: any, assignedTo: string, index: number): Expense {
   return {
@@ -206,7 +206,7 @@ export function mapExpenses(rawData: any[]): Expense[] {
     mapExpense(expense, assignedToList[index], index)
   );
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Ensures consistent data transformation
@@ -220,7 +220,7 @@ export function mapExpenses(rawData: any[]): Expense[] {
 **Implementation:**
 Extract shared components:
 
-```typescript
+\`\`\`typescript
 // components/wallet-connection-guard.tsx
 export function WalletConnectionGuard({
   children,
@@ -253,7 +253,7 @@ export function AppHeader() {
     </header>
   );
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ DRY principle applied

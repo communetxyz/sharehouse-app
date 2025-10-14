@@ -17,7 +17,7 @@ These issues reduce the reliability of the application and make refactoring risk
 
 ## Type Flow Diagram
 
-```mermaid
+\`\`\`mermaid
 graph LR
     A[Smart Contract] -->|any| B[Contract Hook]
     B -->|incomplete type| C[Data Hook]
@@ -29,7 +29,7 @@ graph LR
     style C fill:#ff6b6b
     style D fill:#ff6b6b
     style E fill:#ff0000,color:#fff
-```
+\`\`\`
 
 ## Issues Found
 
@@ -42,7 +42,7 @@ graph LR
 **Description:**
 The `Expense` interface is incomplete:
 
-```typescript
+\`\`\`typescript
 // types/commune.ts
 export interface Expense {
   id: number;
@@ -62,7 +62,7 @@ export interface Expense {
   {expense.assignedToUsername || expense.assignedTo}
   {/* TypeScript doesn't catch this missing field! */}
 </p>
-```
+\`\`\`
 
 **Impact:**
 - Runtime errors when accessing undefined field
@@ -79,7 +79,7 @@ export interface Expense {
 **Description:**
 Similar issue with `creatorUsername`:
 
-```typescript
+\`\`\`typescript
 // types/commune.ts
 export interface Commune {
   id: number;
@@ -97,7 +97,7 @@ setCommune({
   members: communeData[3],
   creatorUsername: creatorUsername || communeData[1], // Field not in type!
 });
-```
+\`\`\`
 
 ### 3. Loose 'any' Types in Contract Interactions (Major)
 
@@ -109,7 +109,7 @@ setCommune({
 **Description:**
 Contract return values are typed as `any`:
 
-```typescript
+\`\`\`typescript
 // hooks/use-commune-data.ts
 const choreResult = await contract.getChores(BigInt(commune.id));
 const chores = choreResult as any; // No type safety!
@@ -120,11 +120,11 @@ chores[0].map((chore: any, index: number) => ({
   description: chore.description,
   // What if ABI changes? Silent failures!
 }));
-```
+\`\`\`
 
 **Should be:**
 
-```typescript
+\`\`\`typescript
 interface ContractChoreResult {
   id: bigint;
   description: string;
@@ -138,7 +138,7 @@ interface ContractChoreResult {
 type GetChoresResult = [ContractChoreResult[], string[], string[]];
 
 const choreResult = await contract.getChores(BigInt(commune.id)) as GetChoresResult;
-```
+\`\`\`
 
 ### 4. Unsafe Type Assertions (Major)
 
@@ -149,7 +149,7 @@ const choreResult = await contract.getChores(BigInt(commune.id)) as GetChoresRes
 **Description:**
 Addresses are asserted without validation:
 
-```typescript
+\`\`\`typescript
 // hooks/use-wallet.ts
 const fromAddress = address as `0x${string}`;
 // What if address is undefined? Runtime error!
@@ -163,17 +163,17 @@ await sendTransaction({
 const result = await publicClient.getEnsName({
   address: address as `0x${string}`, // No undefined check!
 });
-```
+\`\`\`
 
 **Should be:**
 
-```typescript
+\`\`\`typescript
 if (!address || !isAddress(address)) {
   throw new Error('Invalid address');
 }
 
 const fromAddress: `0x${string}` = address; // Type-safe
-```
+\`\`\`
 
 ### 5. Incorrect Allowance Type Handling (Major)
 
@@ -182,25 +182,25 @@ const fromAddress: `0x${string}` = address; // Type-safe
 **Description:**
 Returns potentially undefined value as bigint:
 
-```typescript
+\`\`\`typescript
 const allowance = await contract.read.allowance([
   fromAddress,
   CONTRACT_ADDRESS as `0x${string}`
 ]);
 
 return allowance as bigint; // What if allowance is undefined?
-```
+\`\`\`
 
 **Should be:**
 
-```typescript
+\`\`\`typescript
 const allowance = await contract.read.allowance([
   fromAddress,
   CONTRACT_ADDRESS as `0x${string}`
 ]);
 
 return allowance ?? BigInt(0); // Safe default
-```
+\`\`\`
 
 ### 6. Missing Optional Chaining (Minor)
 
@@ -211,14 +211,14 @@ return allowance ?? BigInt(0); // Safe default
 **Description:**
 Direct property access without optional chaining:
 
-```typescript
+\`\`\`typescript
 // member-list.tsx
 const initial = member.username.charAt(0).toUpperCase();
 // Crashes if member.username is undefined
 
 // Should be:
 const initial = member.username?.charAt(0).toUpperCase() ?? member.address.slice(0, 2);
-```
+\`\`\`
 
 ## Approaches and Tradeoffs
 
@@ -227,20 +227,20 @@ const initial = member.username?.charAt(0).toUpperCase() ?? member.address.slice
 **Description:**
 Use tools like `typechain` to generate TypeScript types from smart contract ABIs:
 
-```bash
+\`\`\`bash
 npm install --save-dev @typechain/ethers-v6 typechain
-```
+\`\`\`
 
-```json
+\`\`\`json
 // package.json
 {
   "scripts": {
     "typechain": "typechain --target ethers-v6 --out-dir types/contracts './lib/ShareHouse.json'"
   }
 }
-```
+\`\`\`
 
-```typescript
+\`\`\`typescript
 // hooks/use-commune-data.ts
 import { ShareHouse } from '@/types/contracts/ShareHouse';
 
@@ -252,7 +252,7 @@ const contract = getContract({
 
 // Now fully typed!
 const chores: Awaited<ReturnType<ShareHouse['getChores']>> = await contract.getChores(BigInt(commune.id));
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Guaranteed type accuracy matching contract
@@ -269,7 +269,7 @@ const chores: Awaited<ReturnType<ShareHouse['getChores']>> = await contract.getC
 **Description:**
 Create comprehensive manual type definitions:
 
-```typescript
+\`\`\`typescript
 // types/contracts.ts
 export interface ContractChore {
   id: bigint;
@@ -316,7 +316,7 @@ export interface Commune {
   name: string;
   members: string[];
 }
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Full control over types
@@ -333,7 +333,7 @@ export interface Commune {
 **Description:**
 Use libraries like `zod` for runtime type validation:
 
-```typescript
+\`\`\`typescript
 // lib/validators.ts
 import { z } from 'zod';
 
@@ -361,7 +361,7 @@ const expenses = rawExpenses[0].map((expense: any) =>
   })
 );
 // Throws descriptive error if validation fails
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Runtime safety in addition to compile-time
@@ -378,7 +378,7 @@ const expenses = rawExpenses[0].map((expense: any) =>
 **Description:**
 Create type guards and validation helpers:
 
-```typescript
+\`\`\`typescript
 // lib/address-utils.ts
 import { isAddress } from 'viem';
 
@@ -402,7 +402,7 @@ const fromAddress = toAddress(address); // Type-safe, throws if invalid
 const ensName = await publicClient.getEnsName({
   address: fromAddress, // No assertion needed
 });
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Centralized address validation
@@ -432,7 +432,7 @@ Combine multiple strategies for comprehensive type safety:
 
 **Implementation:**
 
-```typescript
+\`\`\`typescript
 // 1. Fix interfaces
 export interface Expense {
   id: number;
@@ -457,7 +457,7 @@ import { ShareHouse } from '@/types/contracts';
 
 const chores = await contract.getChores(BigInt(commune.id));
 // chores is now properly typed!
-```
+\`\`\`
 
 **Tradeoffs:**
 - ✅ Comprehensive type safety
@@ -472,7 +472,7 @@ const chores = await contract.getChores(BigInt(commune.id));
 
 Current `tsconfig.json` should be updated:
 
-```json
+\`\`\`json
 {
   "compilerOptions": {
     "strict": true,
@@ -484,7 +484,7 @@ Current `tsconfig.json` should be updated:
     "skipLibCheck": false // Change to false for stricter checking
   }
 }
-```
+\`\`\`
 
 ## Implementation Priority
 
@@ -499,7 +499,7 @@ Current `tsconfig.json` should be updated:
 
 ## Testing Type Safety
 
-```typescript
+\`\`\`typescript
 // tests/type-safety.test.ts
 import { describe, it, expect } from 'vitest';
 import { toAddress, toAddressOrNull } from '@/lib/address-utils';
@@ -520,4 +520,4 @@ describe('Address validation', () => {
     expect(toAddressOrNull(undefined)).toBeNull();
   });
 });
-```
+\`\`\`
