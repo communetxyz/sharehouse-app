@@ -87,6 +87,9 @@ export const translations = {
       yes: "はい",
       no: "いいえ",
     },
+    createSharehouse: {
+      title: "シェアハウスを作成",
+    },
     createCommune: {
       title: "コミューンを作成",
       subtitle: "新しいシェアハウスコミューンを作成",
@@ -249,6 +252,9 @@ export const translations = {
       collateralAmount: "Collateral Amount",
       yes: "Yes",
       no: "No",
+    },
+    createSharehouse: {
+      title: "Create ShareHouse",
     },
     createCommune: {
       title: "Create Commune",
