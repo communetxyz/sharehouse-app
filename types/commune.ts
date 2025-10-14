@@ -2,6 +2,7 @@ export interface Commune {
   id: string
   name: string
   creator: string
+  creatorUsername?: string // Added for display purposes
   collateralRequired: boolean
   collateralAmount: string
 }
@@ -38,6 +39,7 @@ export interface Expense {
   amount: string
   description: string
   assignedTo: string
+  assignedToUsername?: string // Added for display purposes
   dueDate: number
   paid: boolean
   disputed: boolean

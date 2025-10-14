@@ -12,19 +12,31 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("ja")
-
-  useEffect(() => {
-    // Load saved language preference from localStorage
-    const saved = localStorage.getItem("sharehouse-language") as Language
-    if (saved && (saved === "en" || saved === "ja")) {
-      setLanguageState(saved)
+  const [language, setLanguageState] = useState<Language>(() => {
+    // Load saved language preference from localStorage with error handling
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem("sharehouse-language") as Language
+        if (saved && (saved === "en" || saved === "ja")) {
+          return saved
+        }
+      } catch (error) {
+        console.warn('localStorage not available:', error)
+      }
     }
-  }, [])
+    return "ja" // Default language
+  })
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
-    localStorage.setItem("sharehouse-language", lang)
+    // Try to save to localStorage, but don't fail if unavailable
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem("sharehouse-language", lang)
+      } catch (error) {
+        console.warn('Failed to save language preference:', error)
+      }
+    }
   }
 
   const t = (key: string): string => {
