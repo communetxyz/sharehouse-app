@@ -20,6 +20,7 @@ export default function JoinPage() {
   const [communeId, setCommuneId] = useState("")
   const [nonce, setNonce] = useState("")
   const [signature, setSignature] = useState("")
+  const [username, setUsername] = useState("") // Added username state
   const hasLoadedParams = useRef(false)
   const hasAutoValidated = useRef(false)
 
@@ -89,7 +90,7 @@ export default function JoinPage() {
   }
 
   const handleJoin = async () => {
-    await joinCommune(communeId, nonce, signature)
+    await joinCommune(communeId, nonce, signature, username) // Pass username to joinCommune
   }
 
   return (
@@ -181,6 +182,17 @@ export default function JoinPage() {
                   disabled={isValidating || isJoining || !isConnected}
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="username">{t("join.username")}</Label>
+                <Input
+                  id="username"
+                  placeholder={t("join.enterUsername")}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isJoining || !isConnected}
+                />
+              </div>
             </div>
 
             {!communeData && (
@@ -242,7 +254,7 @@ export default function JoinPage() {
                 {(!communeData.collateralRequired || hasAllowance) && !isCheckingAllowance && (
                   <Button
                     onClick={handleJoin}
-                    disabled={isJoining || !isConnected}
+                    disabled={isJoining || !isConnected || !username.trim()}
                     className="w-full bg-sage hover:bg-sage/90 text-cream"
                   >
                     {isJoining && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

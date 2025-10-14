@@ -156,9 +156,14 @@ export function useJoinCommune() {
     }
   }
 
-  const joinCommune = async (communeId: string, nonce: string, signature: string) => {
+  const joinCommune = async (communeId: string, nonce: string, signature: string, username: string) => {
     if (!address) {
       setError("Please connect your wallet first")
+      return
+    }
+
+    if (!communeData) {
+      setError("Please validate invite first")
       return
     }
 
@@ -166,7 +171,20 @@ export function useJoinCommune() {
     setError(null)
 
     try {
-      await executeTransaction("joinCommune", [BigInt(communeId), BigInt(nonce), signature])
+      // Calculate collateral amount from commune data
+      const collateralAmount = communeData.collateralRequired
+        ? BigInt(Math.floor(Number.parseFloat(communeData.collateralAmount) * 1e18))
+        : BigInt(0)
+
+      console.log("[v0] Joining commune with params:", {
+        communeId: BigInt(communeId),
+        collateralAmount,
+        signature,
+        username,
+      })
+
+      // Call joinCommune with correct parameters: communeId, collateralAmount, signature, username
+      await executeTransaction("joinCommune", [BigInt(communeId), collateralAmount, signature, username])
 
       // Wait for confirmation
       await new Promise((resolve) => {
