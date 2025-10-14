@@ -7,9 +7,10 @@ export const COLLATERAL_MANAGER_ADDRESS = (process.env.NEXT_PUBLIC_COLLATERAL_MA
 
 // Use environment variables for RPC URL to avoid exposing API key
 // Format: NEXT_PUBLIC_RPC_URL should be the base URL, NEXT_PUBLIC_ALCHEMY_API_KEY should be the key
+// TODO: Move to environment variables before production deployment
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL && process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
   ? `${process.env.NEXT_PUBLIC_RPC_URL}/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
-  : "https://rpc.gnosischain.com" // Fallback to public RPC
+  : "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE" // Temporary fallback for testing
 
 export const ERC20_ABI = [
   {
