@@ -15,7 +15,7 @@ import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import { useExpenseData } from "@/hooks/use-expense-data"
 import { useWallet } from "@/hooks/use-wallet"
-import { Loader2 } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
 
 export default function DashboardPage() {
   const { t } = useI18n()
@@ -111,6 +111,12 @@ export default function DashboardPage() {
           </Link>
           <div className="flex items-center gap-3">
             <LanguageToggle />
+            <Link href="/create-commune">
+              <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                <Plus className="w-4 h-4 mr-2" />
+                {t("createCommune.title")}
+              </Button>
+            </Link>
             <Button
               onClick={() => {
                 refreshData()
