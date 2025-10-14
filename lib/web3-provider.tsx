@@ -3,13 +3,13 @@
 import { PrivyProvider } from "@privy-io/react-auth"
 import { WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { type ReactNode, useState } from "react"
+import type { ReactNode } from "react"
 import { gnosis, gnosisChiado } from "wagmi/chains"
 import { config } from "./wagmi-config"
 
-export function Web3Provider({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+const queryClient = new QueryClient()
 
+export function Web3Provider({ children }: { children: ReactNode }) {
   return (
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
