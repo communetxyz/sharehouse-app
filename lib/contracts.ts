@@ -1,11 +1,16 @@
 import { ethers } from "ethers"
 
-export const COMMUNE_OS_ADDRESS = "0x05e7feed5b5db8a7b394d02e9de809b057fd6ee6"
+export const COMMUNE_OS_ADDRESS = (process.env.NEXT_PUBLIC_COMMUNE_OS_ADDRESS || "0x05e7feed5b5db8a7b394d02e9de809b057fd6ee6") as `0x${string}`
 
-export const BREAD_TOKEN_ADDRESS = "0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3"
-export const COLLATERAL_MANAGER_ADDRESS = "0x61Ba220071184886710A8F2814B7c6eDecbcaA82"
+export const BREAD_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_BREAD_TOKEN_ADDRESS || "0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3") as `0x${string}`
+export const COLLATERAL_MANAGER_ADDRESS = (process.env.NEXT_PUBLIC_COLLATERAL_MANAGER_ADDRESS || "0x61Ba220071184886710A8F2814B7c6eDecbcaA82") as `0x${string}`
 
-export const RPC_URL = "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"
+// Use environment variables for RPC URL to avoid exposing API key
+// Format: NEXT_PUBLIC_RPC_URL should be the base URL, NEXT_PUBLIC_ALCHEMY_API_KEY should be the key
+// TODO: Move to environment variables before production deployment
+export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL && process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
+  ? `${process.env.NEXT_PUBLIC_RPC_URL}/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+  : "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE" // Temporary fallback for testing
 
 export const ERC20_ABI = [
   {

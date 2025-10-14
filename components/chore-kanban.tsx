@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Circle, Loader2, Sparkles } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback, memo } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
 import type { ChoreInstance } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
@@ -17,7 +17,22 @@ interface ChoreKanbanProps {
   filterMyChores?: boolean
 }
 
-function ChoreCard({
+// Helper functions extracted and memoized
+const getFrequencyLabel = (frequency: number) => {
+  const days = frequency / (24 * 60 * 60)
+  if (days === 1) return "Daily"
+  if (days === 7) return "Weekly"
+  if (days === 30) return "Monthly"
+  return `Every ${days} days`
+}
+
+const formatPeriodDate = (periodStart: number) => {
+  const start = new Date(periodStart * 1000)
+  return start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+}
+
+// Memoize ChoreCard to prevent unnecessary re-renders
+const ChoreCard = memo(function ChoreCard({
   chore,
   onComplete,
   isCompleting,
@@ -30,18 +45,6 @@ function ChoreCard({
   showCompleteButton?: boolean
   isSuccess?: boolean
 }) {
-  const getFrequencyLabel = (frequency: number) => {
-    const days = frequency / (24 * 60 * 60)
-    if (days === 1) return "Daily"
-    if (days === 7) return "Weekly"
-    if (days === 30) return "Monthly"
-    return `Every ${days} days`
-  }
-
-  const formatPeriodDate = (periodStart: number) => {
-    const start = new Date(periodStart * 1000)
-    return start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-  }
 
   return (
     <motion.div
@@ -115,7 +118,15 @@ function ChoreCard({
       </Card>
     </motion.div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison for better performance
+  return (
+    prevProps.chore.scheduleId === nextProps.chore.scheduleId &&
+    prevProps.chore.completed === nextProps.chore.completed &&
+    prevProps.isCompleting === nextProps.isCompleting &&
+    prevProps.isSuccess === nextProps.isSuccess
+  )
+})
 
 export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { markComplete, isMarking, isConfirmed, error } = useMarkChoreComplete()
@@ -134,12 +145,16 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
       })
 
       // Show success animation for 1.5 seconds before refreshing
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setSuccessId(null)
         setCompletingId(null)
         onRefresh()
       }, 1500)
+
+      // Cleanup timeout when effect re-runs or component unmounts
+      return () => clearTimeout(timer)
     }
+    // No cleanup needed if condition is false
   }, [isConfirmed, completingId, onRefresh, toast])
 
   useEffect(() => {
@@ -153,15 +168,20 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
     }
   }, [error, completingId, toast])
 
-  const sortByDate = (a: ChoreInstance, b: ChoreInstance) => a.periodStart - b.periodStart
+  // Memoize expensive computations
+  const sevenDaysAgo = useMemo(() => Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60, [])
 
-  const sevenDaysAgo = Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60
+  const { assignedToMe, notStarted, completed } = useMemo(() => {
+    const sortByDate = (a: ChoreInstance, b: ChoreInstance) => a.periodStart - b.periodStart
 
-  const assignedToMe = chores.filter((c) => c.isAssignedToUser === true && c.completed === false).sort(sortByDate)
-  const notStarted = chores.filter((c) => c.isAssignedToUser === false && c.completed === false).sort(sortByDate)
-  const completed = chores.filter((c) => c.completed === true && c.periodStart >= sevenDaysAgo).sort(sortByDate)
+    return {
+      assignedToMe: chores.filter((c) => c.isAssignedToUser === true && c.completed === false).sort(sortByDate),
+      notStarted: chores.filter((c) => c.isAssignedToUser === false && c.completed === false).sort(sortByDate),
+      completed: chores.filter((c) => c.completed === true && c.periodStart >= sevenDaysAgo).sort(sortByDate),
+    }
+  }, [chores, sevenDaysAgo])
 
-  const handleComplete = async (chore: ChoreInstance) => {
+  const handleComplete = useCallback(async (chore: ChoreInstance) => {
     setCompletingId(chore.scheduleId.toString())
     try {
       await markComplete(chore.scheduleId, {
@@ -174,7 +194,7 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
     } catch (err) {
       setCompletingId(null)
     }
-  }
+  }, [markComplete])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"

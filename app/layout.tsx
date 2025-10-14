@@ -8,6 +8,7 @@ import { Suspense } from "react"
 import { Web3Provider } from "@/lib/web3-provider"
 import { I18nProvider } from "@/lib/i18n/context"
 import { Toaster } from "@/components/ui/toaster"
+import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
 const notoSerifJP = Noto_Serif_JP({
@@ -30,12 +31,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${notoSerifJP.variable}`}>
-        <I18nProvider>
-          <Web3Provider>
-            <Suspense fallback={null}>{children}</Suspense>
-            <Toaster />
-          </Web3Provider>
-        </I18nProvider>
+        <ErrorBoundary>
+          <I18nProvider>
+            <Web3Provider>
+              <Suspense fallback={null}>{children}</Suspense>
+              <Toaster />
+            </Web3Provider>
+          </I18nProvider>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>
