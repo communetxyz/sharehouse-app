@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { WalletConnectButton } from "@/components/wallet-connect-button"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n/context"
+import { Plus } from "lucide-react"
 
 export default function HomePage() {
   const { t } = useI18n()
@@ -34,6 +35,12 @@ export default function HomePage() {
             <Link href="/dashboard">
               <Button variant="ghost" className="text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5">
                 {t("common.dashboard")}
+              </Button>
+            </Link>
+            <Link href="/create-sharehouse">
+              <Button variant="outline" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                <Plus className="w-4 h-4 mr-2" />
+                {t("createSharehouse.title")}
               </Button>
             </Link>
             <WalletConnectButton />
