@@ -15,6 +15,7 @@ export interface CommuneStatistics extends Commune {
 export interface Member {
   address: string
   collateral: string
+  username?: string
   isCurrentUser: boolean
 }
 
@@ -26,6 +27,7 @@ export interface ChoreInstance {
   periodStart: number
   periodEnd: number
   assignedTo: string
+  assignedToUsername?: string
   completed: boolean
   isAssignedToUser: boolean
 }

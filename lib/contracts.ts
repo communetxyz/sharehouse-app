@@ -1,6 +1,6 @@
 import { ethers } from "ethers"
 
-export const COMMUNE_OS_ADDRESS = "0x85Bf115AEba1E32d3EBB96E88AC3D3A900f238A7"
+export const COMMUNE_OS_ADDRESS = "0x05e7feed5b5db8a7b394d02e9de809b057fd6ee6"
 
 export const BREAD_TOKEN_ADDRESS = "0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3"
 export const COLLATERAL_MANAGER_ADDRESS = "0x61Ba220071184886710A8F2814B7c6eDecbcaA82"
@@ -39,12 +39,24 @@ export const ERC20_ABI = [
 
 export const COMMUNE_OS_ABI = [
   {
+    type: "constructor",
+    inputs: [
+      {
+        name: "collateralToken",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
     type: "function",
     name: "joinCommune",
     inputs: [
       { name: "communeId", type: "uint256" },
       { name: "nonce", type: "uint256" },
       { name: "signature", type: "bytes" },
+      { name: "username", type: "string" },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -68,6 +80,7 @@ export const COMMUNE_OS_ABI = [
       },
       { name: "members", type: "address[]" },
       { name: "memberCollaterals", type: "uint256[]" },
+      { name: "memberUsernames", type: "string[]" },
     ],
     stateMutability: "view",
   },
@@ -92,6 +105,7 @@ export const COMMUNE_OS_ABI = [
           { name: "periodStart", type: "uint256" },
           { name: "periodEnd", type: "uint256" },
           { name: "assignedTo", type: "address" },
+          { name: "assignedToUsername", type: "string" },
           { name: "completed", type: "bool" },
         ],
       },
@@ -192,10 +206,57 @@ export const COMMUNE_OS_ABI = [
   {
     type: "function",
     name: "getCommuneExpenses",
-    inputs: [{ name: "communeId", type: "uint256" }],
+    inputs: [
+      { name: "user", type: "address" },
+      { name: "monthStart", type: "uint256" },
+      { name: "monthEnd", type: "uint256" },
+    ],
     outputs: [
+      { name: "communeId", type: "uint256" },
       {
-        name: "expenses",
+        name: "paidExpenses",
+        type: "tuple[]",
+        components: [
+          { name: "id", type: "uint256" },
+          { name: "communeId", type: "uint256" },
+          { name: "amount", type: "uint256" },
+          { name: "description", type: "string" },
+          { name: "assignedTo", type: "address" },
+          { name: "dueDate", type: "uint256" },
+          { name: "paid", type: "bool" },
+          { name: "disputed", type: "bool" },
+        ],
+      },
+      {
+        name: "pendingExpenses",
+        type: "tuple[]",
+        components: [
+          { name: "id", type: "uint256" },
+          { name: "communeId", type: "uint256" },
+          { name: "amount", type: "uint256" },
+          { name: "description", type: "string" },
+          { name: "assignedTo", type: "address" },
+          { name: "dueDate", type: "uint256" },
+          { name: "paid", type: "bool" },
+          { name: "disputed", type: "bool" },
+        ],
+      },
+      {
+        name: "disputedExpenses",
+        type: "tuple[]",
+        components: [
+          { name: "id", type: "uint256" },
+          { name: "communeId", type: "uint256" },
+          { name: "amount", type: "uint256" },
+          { name: "description", type: "string" },
+          { name: "assignedTo", type: "address" },
+          { name: "dueDate", type: "uint256" },
+          { name: "paid", type: "bool" },
+          { name: "disputed", type: "bool" },
+        ],
+      },
+      {
+        name: "overdueExpenses",
         type: "tuple[]",
         components: [
           { name: "id", type: "uint256" },
@@ -210,6 +271,23 @@ export const COMMUNE_OS_ABI = [
       },
     ],
     stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getUsernames",
+    inputs: [{ name: "addresses", type: "address[]" }],
+    outputs: [{ name: "usernames", type: "string[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "error",
+    name: "InsufficientCollateral",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NotAMember",
+    inputs: [],
   },
 ]
 
