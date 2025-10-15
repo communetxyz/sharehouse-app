@@ -66,6 +66,23 @@ export default function DashboardPage() {
     ))
   }
 
+  // Local optimistic state for chores
+  const [optimisticChores, setOptimisticChores] = useState(chores)
+
+  // Sync fetched chores with local state
+  useEffect(() => {
+    setOptimisticChores(chores)
+  }, [chores])
+
+  // Optimistic chore completion
+  const handleChoreCompleteOptimistic = (choreId: string) => {
+    setOptimisticChores(prev => prev.map(chore =>
+      chore.scheduleId.toString() === choreId
+        ? { ...chore, completed: true }
+        : chore
+    ))
+  }
+
   if (status === "reconnecting" || status === "connecting") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cream via-sage/20 to-cream flex items-center justify-center">
@@ -196,15 +213,24 @@ export default function DashboardPage() {
           </TabsList>
 
           <TabsContent value="my-chores" className="space-y-6">
-            <ChoreKanban chores={chores} onRefresh={refreshData} filterMyChores />
+            <ChoreKanban
+              chores={optimisticChores}
+              onOptimisticComplete={handleChoreCompleteOptimistic}
+              onRefresh={refreshData}
+              filterMyChores
+            />
           </TabsContent>
 
           <TabsContent value="all-chores" className="space-y-6">
-            <ChoreKanban chores={chores} onRefresh={refreshData} />
+            <ChoreKanban
+              chores={optimisticChores}
+              onOptimisticComplete={handleChoreCompleteOptimistic}
+              onRefresh={refreshData}
+            />
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">
-            <ChoreCalendar chores={chores} />
+            <ChoreCalendar chores={optimisticChores} />
           </TabsContent>
 
           <TabsContent value="expenses" className="space-y-6">

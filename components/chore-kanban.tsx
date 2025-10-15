@@ -14,6 +14,7 @@ import { Confetti } from "@/components/ui/confetti"
 
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
+  onOptimisticComplete?: (choreId: string) => void
   onRefresh: () => void
   filterMyChores?: boolean
 }
@@ -132,7 +133,7 @@ const ChoreCard = memo(function ChoreCard({
   )
 })
 
-export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
+export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { markComplete, isMarking, isConfirmed, error } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
@@ -186,7 +187,15 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
   }, [chores, sevenDaysAgo])
 
   const handleComplete = useCallback(async (chore: ChoreInstance) => {
-    setCompletingId(chore.scheduleId.toString())
+    const choreIdStr = chore.scheduleId.toString()
+    setCompletingId(choreIdStr)
+
+    // Optimistically update UI immediately
+    if (onOptimisticComplete) {
+      onOptimisticComplete(choreIdStr)
+    }
+    setSuccessId(choreIdStr)
+
     try {
       await markComplete(chore.scheduleId, {
         scheduleId: chore.scheduleId,
@@ -195,13 +204,13 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
         assignedTo: chore.assignedTo,
         completed: chore.completed,
       }, () => {
-        // Optimistic update - immediately show as success
-        setSuccessId(chore.scheduleId.toString())
+        // Keep success animation
       }, onRefresh)
     } catch (err) {
       setCompletingId(null)
+      setSuccessId(null)
     }
-  }, [markComplete, onRefresh])
+  }, [markComplete, onOptimisticComplete, onRefresh])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"
