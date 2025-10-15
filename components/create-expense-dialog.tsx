@@ -35,14 +35,15 @@ export function CreateExpenseDialog({ communeId, members, onSuccess }: CreateExp
   const [assignedTo, setAssignedTo] = useState("")
   const [dueDate, setDueDate] = useState("")
 
-  const { createExpense, isCreating } = useCreateExpense(communeId, () => {
+  const handleClose = () => {
     setOpen(false)
     setAmount("")
     setDescription("")
     setAssignedTo("")
     setDueDate("")
-    onSuccess()
-  })
+  }
+
+  const { createExpense, isCreating } = useCreateExpense(communeId, handleClose, onSuccess)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

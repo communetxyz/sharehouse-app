@@ -7,7 +7,7 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
+export function useDisputeExpense(communeId: string, onClose?: () => void, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isDisputing, setIsDisputing] = useState(false)
@@ -24,9 +24,9 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
       return
     }
 
-    // Call onSuccess IMMEDIATELY before any async operations
-    if (onSuccess) {
-      onSuccess()
+    // Close dialog IMMEDIATELY before any async operations
+    if (onClose) {
+      onClose()
     }
 
     setIsDisputing(true)
@@ -69,6 +69,11 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
         title: "Dispute initiated",
         description: "Your dispute has been submitted for voting",
       })
+
+      // Refresh AFTER transaction succeeds
+      if (onRefresh) {
+        onRefresh()
+      }
     } catch (error: any) {
       console.error("[v0] ===== DISPUTE EXPENSE FAILED =====")
       console.error("[v0] Error disputing expense:", error)

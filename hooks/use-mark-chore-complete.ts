@@ -16,12 +16,12 @@ export function useMarkChoreComplete() {
 
   const { sendTransaction } = useSendTransaction()
 
-  const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void) => {
+  const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void) => {
     if (!commune) {
       throw new Error("No commune data available")
     }
 
-    // Call onSuccess IMMEDIATELY before any async operations
+    // Call onSuccess IMMEDIATELY before any async operations (for animations)
     if (onSuccess) {
       onSuccess()
     }
@@ -68,6 +68,11 @@ export function useMarkChoreComplete() {
       )
 
       console.log("[v0] ===== MARK CHORE COMPLETE SUCCESS =====")
+
+      // Refresh AFTER transaction succeeds
+      if (onRefresh) {
+        onRefresh()
+      }
     } catch (err: any) {
       console.error("[v0] ===== MARK CHORE COMPLETE FAILED =====")
       console.error("[v0] Error:", err)

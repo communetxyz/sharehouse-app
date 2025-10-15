@@ -7,7 +7,7 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useCreateExpense(communeId: string, onSuccess?: () => void) {
+export function useCreateExpense(communeId: string, onClose?: () => void, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isCreating, setIsCreating] = useState(false)
@@ -23,9 +23,9 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
       return
     }
 
-    // Call onSuccess IMMEDIATELY before any async operations
-    if (onSuccess) {
-      onSuccess()
+    // Close dialog IMMEDIATELY before any async operations
+    if (onClose) {
+      onClose()
     }
 
     setIsCreating(true)
@@ -74,6 +74,11 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
         title: "Expense created",
         description: "Your expense has been created successfully",
       })
+
+      // Refresh AFTER transaction succeeds
+      if (onRefresh) {
+        onRefresh()
+      }
     } catch (error: any) {
       console.error("[v0] ===== CREATE EXPENSE FAILED =====")
       console.error("[v0] Error creating expense:", error)

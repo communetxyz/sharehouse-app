@@ -197,11 +197,11 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
       }, () => {
         // Optimistic update - immediately show as success
         setSuccessId(chore.scheduleId.toString())
-      })
+      }, onRefresh)
     } catch (err) {
       setCompletingId(null)
     }
-  }, [markComplete])
+  }, [markComplete, onRefresh])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"

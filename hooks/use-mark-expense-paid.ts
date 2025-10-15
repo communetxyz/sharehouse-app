@@ -7,7 +7,7 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
+export function useMarkExpensePaid(communeId: string, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isMarking, setIsMarking] = useState(false)
@@ -22,11 +22,6 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
         variant: "destructive",
       })
       return
-    }
-
-    // Call onSuccess IMMEDIATELY before any async operations
-    if (onSuccess) {
-      onSuccess()
     }
 
     setIsMarking(true)
@@ -56,6 +51,11 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
         title: "Expense marked as paid",
         description: "The expense has been marked as paid successfully",
       })
+
+      // Refresh AFTER transaction succeeds
+      if (onRefresh) {
+        onRefresh()
+      }
     } catch (error: any) {
       console.error("Error marking expense as paid:", error)
       setIsConfirmed(false)
