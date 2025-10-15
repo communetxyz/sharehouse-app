@@ -52,10 +52,7 @@ export function useMarkExpensePaid(communeId: string, onRefresh?: () => void) {
         description: "The expense has been marked as paid successfully",
       })
 
-      // Refresh AFTER transaction succeeds
-      if (onRefresh) {
-        onRefresh()
-      }
+      // Don't refresh - UI already updated optimistically
     } catch (error: any) {
       console.error("Error marking expense as paid:", error)
       setIsConfirmed(false)

@@ -69,10 +69,7 @@ export function useMarkChoreComplete() {
 
       console.log("[v0] ===== MARK CHORE COMPLETE SUCCESS =====")
 
-      // Refresh AFTER transaction succeeds
-      if (onRefresh) {
-        onRefresh()
-      }
+      // Don't refresh - UI already updated optimistically
     } catch (err: any) {
       console.error("[v0] ===== MARK CHORE COMPLETE FAILED =====")
       console.error("[v0] Error:", err)

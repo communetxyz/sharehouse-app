@@ -70,10 +70,7 @@ export function useDisputeExpense(communeId: string, onClose?: () => void, onRef
         description: "Your dispute has been submitted for voting",
       })
 
-      // Refresh AFTER transaction succeeds
-      if (onRefresh) {
-        onRefresh()
-      }
+      // Don't refresh - UI already updated optimistically
     } catch (error: any) {
       console.error("[v0] ===== DISPUTE EXPENSE FAILED =====")
       console.error("[v0] Error disputing expense:", error)
