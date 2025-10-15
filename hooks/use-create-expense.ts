@@ -89,11 +89,9 @@ export function useCreateExpense(communeId: string, onClose?: () => void, onRefr
       })
       toast({
         title: "Failed to create expense",
-        description: error.message || "An error occurred. Refreshing page...",
+        description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
-      // Refresh page on error
-      setTimeout(() => window.location.reload(), 2000)
     } finally {
       setIsCreating(false)
     }

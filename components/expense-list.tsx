@@ -25,10 +25,11 @@ interface ExpenseListProps {
 
 export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, onOptimisticMarkPaid, onRefresh, pendingCreateIds, confirmedCreateIds }: ExpenseListProps) {
   const { t } = useI18n()
-  const { markPaid, isMarking } = useMarkExpensePaid(communeId, onRefresh)
+  const { markPaid } = useMarkExpensePaid(communeId, onRefresh)
   const [successExpenseId, setSuccessExpenseId] = useState<string | null>(null)
   const [pendingExpenseIds, setPendingExpenseIds] = useState<Set<string>>(new Set())
   const [confirmedExpenseIds, setConfirmedExpenseIds] = useState<Set<string>>(new Set())
+  const [markingExpenseId, setMarkingExpenseId] = useState<string | null>(null)
 
   const filteredExpenses = filterAssignedToMe ? expenses.filter((e) => e.isAssignedToUser) : expenses
 
@@ -43,6 +44,9 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
     }
     setSuccessExpenseId(expenseId)
     setTimeout(() => setSuccessExpenseId(null), 1500)
+
+    // Track which expense is being marked
+    setMarkingExpenseId(expenseId)
 
     // Track pending transaction
     setPendingExpenseIds(prev => new Set(prev).add(expenseId))
@@ -72,6 +76,9 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
         newSet.delete(expenseId)
         return newSet
       })
+    } finally {
+      // Clear marking state
+      setMarkingExpenseId(null)
     }
   }
 
@@ -82,7 +89,7 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
         expenses={unpaidExpenses}
         communeId={communeId}
         onMarkPaid={handleMarkPaid}
-        isMarking={isMarking}
+        markingExpenseId={markingExpenseId}
         onRefresh={onRefresh}
         successExpenseId={successExpenseId}
         pendingExpenseIds={pendingExpenseIds}
@@ -121,7 +128,7 @@ interface ExpenseColumnProps {
   isPaid?: boolean
   isDisputed?: boolean
   onMarkPaid?: (expenseId: string) => void
-  isMarking?: boolean
+  markingExpenseId?: string | null
   onRefresh?: () => void
   successExpenseId?: string | null
   pendingExpenseIds?: Set<string>
@@ -138,7 +145,7 @@ function ExpenseColumn({
   isPaid,
   isDisputed,
   onMarkPaid,
-  isMarking,
+  markingExpenseId,
   onRefresh,
   successExpenseId,
   pendingExpenseIds,
@@ -168,11 +175,19 @@ function ExpenseColumn({
               isPaid={isPaid}
               isDisputed={isDisputed}
               onMarkPaid={onMarkPaid}
-              isMarking={isMarking}
+              isMarking={markingExpenseId === expense.id}
               onRefresh={onRefresh}
               isSuccess={successExpenseId === expense.id}
-              isPending={pendingExpenseIds?.has(expense.id) || pendingCreateIds?.has(expense.id) || false}
-              isConfirmed={confirmedExpenseIds?.has(expense.id) || confirmedCreateIds?.has(expense.id) || false}
+              isPending={
+                expense.id.startsWith('temp-')
+                  ? (pendingCreateIds?.has(expense.id) || false)
+                  : (pendingExpenseIds?.has(expense.id) || false)
+              }
+              isConfirmed={
+                expense.id.startsWith('temp-')
+                  ? (confirmedCreateIds?.has(expense.id) || false)
+                  : (confirmedExpenseIds?.has(expense.id) || false)
+              }
             />
           ))
         )}

@@ -80,11 +80,9 @@ export function useCreateCommune() {
       setError(error)
       toast({
         title: "Error",
-        description: error.message || "Failed to create commune. Refreshing page...",
+        description: error.message || "Failed to create commune. Please try again.",
         variant: "destructive",
       })
-      // Refresh page on error
-      setTimeout(() => window.location.reload(), 2000)
       throw error
     } finally {
       setIsLoading(false)

@@ -85,11 +85,9 @@ export function useDisputeExpense(communeId: string, onClose?: () => void, onRef
       setIsConfirmed(false)
       toast({
         title: "Failed to dispute expense",
-        description: error.message || "An error occurred. Refreshing page...",
+        description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
-      // Refresh page on error
-      setTimeout(() => window.location.reload(), 2000)
     } finally {
       setIsDisputing(false)
     }

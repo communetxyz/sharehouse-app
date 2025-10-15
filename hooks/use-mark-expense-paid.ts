@@ -61,11 +61,9 @@ export function useMarkExpensePaid(communeId: string, onRefresh?: () => void) {
       setIsConfirmed(false)
       toast({
         title: "Failed to mark expense as paid",
-        description: error.message || "An error occurred. Refreshing page...",
+        description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
-      // Refresh page on error
-      setTimeout(() => window.location.reload(), 2000)
     } finally {
       setIsMarking(false)
     }

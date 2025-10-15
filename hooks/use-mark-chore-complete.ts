@@ -86,11 +86,9 @@ export function useMarkChoreComplete() {
       setIsConfirmed(false)
       toast({
         title: "Failed to mark chore complete",
-        description: err.message || "An error occurred. Refreshing page...",
+        description: err.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
-      // Refresh page on error
-      setTimeout(() => window.location.reload(), 2000)
       throw new Error(err.message || "Failed to mark chore complete")
     } finally {
       setIsMarking(false)
