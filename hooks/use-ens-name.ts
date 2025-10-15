@@ -1,16 +1,21 @@
 "use client"
 
+import { useEnsName } from "wagmi"
+import { mainnet } from "wagmi/chains"
 import { truncateAddress, isValidAddress } from "@/lib/address-utils"
 
 /**
- * Note: ENS is not available on Gnosis Chain
- * This hook has been simplified to just return truncated addresses
- * If cross-chain ENS resolution is needed in the future, consider using a service like ens.domains API
+ * Resolves ENS name from mainnet or returns truncated address
+ * Since Gnosis doesn't have ENS, we check mainnet for ENS names
  */
 export function useEnsNameOrAddress(address: string | undefined) {
+  const { data: ensName } = useEnsName({
+    address: address as `0x${string}` | undefined,
+    chainId: mainnet.id, // Always check mainnet for ENS
+  })
+
   if (!address || !isValidAddress(address)) return ""
 
-  // For now, just return truncated address since Gnosis doesn't have ENS
-  // In the future, could check mainnet ENS if needed
-  return truncateAddress(address)
+  // Return ENS name if available, otherwise truncated address
+  return ensName || truncateAddress(address)
 }
