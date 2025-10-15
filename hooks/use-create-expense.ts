@@ -23,12 +23,12 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
       return
     }
 
-    setIsCreating(true)
-
-    // Optimistically call onSuccess
+    // Call onSuccess IMMEDIATELY before any async operations
     if (onSuccess) {
       onSuccess()
     }
+
+    setIsCreating(true)
 
     try {
       console.log("[v0] ===== CREATE EXPENSE START =====")

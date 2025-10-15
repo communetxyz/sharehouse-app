@@ -24,15 +24,16 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
       return
     }
 
+    // Call onSuccess IMMEDIATELY before any async operations
+    if (onSuccess) {
+      onSuccess()
+    }
+
     setIsDisputing(true)
     setIsConfirmed(false)
 
     // Optimistically mark as confirmed
     setIsConfirmed(true)
-
-    if (onSuccess) {
-      onSuccess()
-    }
 
     try {
       console.log("[v0] ===== DISPUTE EXPENSE START =====")

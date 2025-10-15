@@ -24,15 +24,16 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
       return
     }
 
+    // Call onSuccess IMMEDIATELY before any async operations
+    if (onSuccess) {
+      onSuccess()
+    }
+
     setIsMarking(true)
     setIsConfirmed(false)
 
     // Optimistically mark as confirmed
     setIsConfirmed(true)
-
-    if (onSuccess) {
-      onSuccess()
-    }
 
     try {
       const data = encodeFunctionData({
