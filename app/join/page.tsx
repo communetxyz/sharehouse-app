@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Loader2 } from "lucide-react"
-import { WalletConnectButton } from "@/components/wallet-connect-button"
+import { AccountButton } from "@/components/account-button"
 import { useJoinCommune } from "@/hooks/use-join-commune"
 import { useWallet } from "@/hooks/use-wallet"
 import { useI18n } from "@/lib/i18n/context"
@@ -109,7 +109,7 @@ export default function JoinPage() {
                 {t("common.back", "Back")}
               </Button>
             </Link>
-            <WalletConnectButton />
+            <AccountButton />
           </div>
         </div>
       </header>
@@ -126,11 +126,11 @@ export default function JoinPage() {
         {!isConnected && (
           <Card className="border-charcoal/10 mb-6">
             <CardHeader>
-              <CardTitle className="font-serif">{t("dashboard.connectWallet")}</CardTitle>
-              <CardDescription>{t("dashboard.connectWalletDesc")}</CardDescription>
+              <CardTitle className="font-serif">{t("dashboard.signIn")}</CardTitle>
+              <CardDescription>{t("dashboard.signInDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <WalletConnectButton />
+              <AccountButton />
             </CardContent>
           </Card>
         )}

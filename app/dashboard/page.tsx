@@ -9,7 +9,7 @@ import { MemberList } from "@/components/member-list"
 import { CommuneInfo } from "@/components/commune-info"
 import { ExpenseList } from "@/components/expense-list"
 import { CreateExpenseDialog } from "@/components/create-expense-dialog"
-import { WalletConnectButton } from "@/components/wallet-connect-button"
+import { AccountButton } from "@/components/account-button"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
@@ -28,7 +28,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-gradient-to-br from-cream via-sage/20 to-cream flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 animate-spin text-sage mx-auto" />
-          <p className="text-charcoal/70">{t("dashboard.connectingWallet")}</p>
+          <p className="text-charcoal/70">{t("dashboard.signingIn")}</p>
         </div>
       </div>
     )
@@ -45,18 +45,18 @@ export default function DashboardPage() {
             </Link>
             <div className="flex items-center gap-3">
               <LanguageToggle />
-              <WalletConnectButton />
+              <AccountButton />
             </div>
           </div>
         </header>
         <div className="flex items-center justify-center min-h-[80vh]">
           <Card className="max-w-md">
             <CardHeader>
-              <CardTitle className="font-serif text-charcoal">{t("dashboard.connectWallet")}</CardTitle>
+              <CardTitle className="font-serif text-charcoal">{t("dashboard.signIn")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-charcoal/70">{t("dashboard.connectWalletDesc")}</p>
-              <WalletConnectButton />
+              <p className="text-charcoal/70">{t("dashboard.signInDesc")}</p>
+              <AccountButton />
             </CardContent>
           </Card>
         </div>
@@ -111,10 +111,10 @@ export default function DashboardPage() {
           </Link>
           <div className="flex items-center gap-3">
             <LanguageToggle />
-            <Link href="/create-commune">
+            <Link href="/create-sharehouse">
               <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
                 <Plus className="w-4 h-4 mr-2" />
-                {t("createCommune.title")}
+                {t("createSharehouse.title")}
               </Button>
             </Link>
             <Button
@@ -128,7 +128,7 @@ export default function DashboardPage() {
             >
               {t("common.refresh")}
             </Button>
-            <WalletConnectButton />
+            <AccountButton />
           </div>
         </div>
       </header>

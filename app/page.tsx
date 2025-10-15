@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { WalletConnectButton } from "@/components/wallet-connect-button"
+import { AccountButton } from "@/components/account-button"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n/context"
 import { Plus } from "lucide-react"
@@ -43,7 +43,7 @@ export default function HomePage() {
                 {t("createSharehouse.title")}
               </Button>
             </Link>
-            <WalletConnectButton />
+            <AccountButton />
           </div>
         </div>
       </header>
@@ -190,7 +190,7 @@ export default function HomePage() {
               <div className="text-lg font-sans tracking-wide text-cream">ShareHouse</div>
             </div>
             <div className="text-sm text-center md:text-right">
-              <p>Built on Gnosis Chain with WalletConnect</p>
+              <p>Built on Gnosis Chain</p>
               <p className="text-cream/50 mt-1">{t("home.footerTagline")}</p>
             </div>
           </div>

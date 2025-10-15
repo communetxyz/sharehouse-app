@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { WalletConnectButton } from "@/components/wallet-connect-button"
+import { AccountButton } from "@/components/account-button"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n/context"
 import { useWallet } from "@/hooks/use-wallet"
@@ -48,7 +48,7 @@ export default function CreateCommunePage() {
       <div className="min-h-screen bg-gradient-to-br from-cream via-sage/20 to-cream flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 animate-spin text-sage mx-auto" />
-          <p className="text-charcoal/70">{t("dashboard.connectingWallet")}</p>
+          <p className="text-charcoal/70">{t("dashboard.signingIn")}</p>
         </div>
       </div>
     )
@@ -65,18 +65,18 @@ export default function CreateCommunePage() {
             </Link>
             <div className="flex items-center gap-3">
               <LanguageToggle />
-              <WalletConnectButton />
+              <AccountButton />
             </div>
           </div>
         </header>
         <div className="flex items-center justify-center min-h-[80vh]">
           <Card className="max-w-md">
             <CardHeader>
-              <CardTitle className="font-serif text-charcoal">{t("dashboard.connectWallet")}</CardTitle>
+              <CardTitle className="font-serif text-charcoal">{t("dashboard.signIn")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-charcoal/70">{t("dashboard.connectWalletDesc")}</p>
-              <WalletConnectButton />
+              <p className="text-charcoal/70">{t("dashboard.signInDesc")}</p>
+              <AccountButton />
             </CardContent>
           </Card>
         </div>
@@ -95,7 +95,7 @@ export default function CreateCommunePage() {
           </Link>
           <div className="flex items-center gap-3">
             <LanguageToggle />
-            <WalletConnectButton />
+            <AccountButton />
           </div>
         </div>
       </header>
@@ -107,8 +107,8 @@ export default function CreateCommunePage() {
             <ArrowLeft className="w-4 h-4" />
             {t("common.back")}
           </Link>
-          <h1 className="text-3xl md:text-4xl font-serif text-charcoal mb-2">{t("createCommune.title")}</h1>
-          <p className="text-charcoal/70">{t("createCommune.subtitle")}</p>
+          <h1 className="text-3xl md:text-4xl font-serif text-charcoal mb-2">{t("createSharehouse.title")}</h1>
+          <p className="text-charcoal/70">{t("createSharehouse.subtitle")}</p>
         </div>
 
         {/* Progress Indicator */}
@@ -122,7 +122,7 @@ export default function CreateCommunePage() {
               1
             </div>
             <span className={`text-sm ${currentStep === 1 ? "text-charcoal" : "text-charcoal/50"}`}>
-              {t("createCommune.step1")}
+              {t("createSharehouse.step1")}
             </span>
           </div>
           <div className="w-12 h-px bg-charcoal/20" />
@@ -135,7 +135,7 @@ export default function CreateCommunePage() {
               2
             </div>
             <span className={`text-sm ${currentStep === 2 ? "text-charcoal" : "text-charcoal/50"}`}>
-              {t("createCommune.step2")}
+              {t("createSharehouse.step2")}
             </span>
           </div>
         </div>
@@ -144,27 +144,27 @@ export default function CreateCommunePage() {
         {currentStep === 1 && (
           <Card>
             <CardHeader>
-              <CardTitle className="font-serif text-charcoal">{t("createCommune.step1")}</CardTitle>
-              <CardDescription>{t("createCommune.subtitle")}</CardDescription>
+              <CardTitle className="font-serif text-charcoal">{t("createSharehouse.step1")}</CardTitle>
+              <CardDescription>{t("createSharehouse.subtitle")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">{t("createCommune.communeName")}</Label>
+                <Label htmlFor="name">{t("createSharehouse.communeName")}</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => updateFormData({ name: e.target.value })}
-                  placeholder={t("createCommune.enterCommuneName")}
+                  placeholder={t("createSharehouse.enterCommuneName")}
                   disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="username">{t("createCommune.username")}</Label>
+                <Label htmlFor="username">{t("createSharehouse.username")}</Label>
                 <Input
                   id="username"
                   value={formData.username}
                   onChange={(e) => updateFormData({ username: e.target.value })}
-                  placeholder={t("createCommune.enterUsername")}
+                  placeholder={t("createSharehouse.enterUsername")}
                   disabled={isLoading}
                 />
               </div>
@@ -175,7 +175,7 @@ export default function CreateCommunePage() {
                 disabled={!canProceedStep1 || isLoading}
                 className="w-full bg-sage hover:bg-sage/90 text-cream"
               >
-                {t("createCommune.next")}
+                {t("createSharehouse.next")}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardFooter>
@@ -186,13 +186,13 @@ export default function CreateCommunePage() {
         {currentStep === 2 && (
           <Card>
             <CardHeader>
-              <CardTitle className="font-serif text-charcoal">{t("createCommune.step2")}</CardTitle>
-              <CardDescription>{t("createCommune.subtitle")}</CardDescription>
+              <CardTitle className="font-serif text-charcoal">{t("createSharehouse.step2")}</CardTitle>
+              <CardDescription>{t("createSharehouse.subtitle")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="collateral-toggle">{t("createCommune.requireCollateral")}</Label>
+                  <Label htmlFor="collateral-toggle">{t("createSharehouse.requireCollateral")}</Label>
                   <p className="text-sm text-charcoal/60">Members must deposit collateral to join</p>
                 </div>
                 <Switch
@@ -205,14 +205,14 @@ export default function CreateCommunePage() {
 
               {formData.collateralRequired && (
                 <div className="space-y-2">
-                  <Label htmlFor="amount">{t("createCommune.collateralAmount")}</Label>
+                  <Label htmlFor="amount">{t("createSharehouse.collateralAmount")}</Label>
                   <div className="flex gap-2">
                     <Input
                       id="amount"
                       type="number"
                       value={formData.collateralAmount}
                       onChange={(e) => updateFormData({ collateralAmount: e.target.value })}
-                      placeholder={t("createCommune.enterCollateralAmount")}
+                      placeholder={t("createSharehouse.enterCollateralAmount")}
                       disabled={isLoading}
                       className="flex-1"
                     />
@@ -222,7 +222,7 @@ export default function CreateCommunePage() {
                       disabled={isLoading}
                       className="border-sage text-sage hover:bg-sage/10"
                     >
-                      {t("createCommune.preset10")}
+                      {t("createSharehouse.preset10")}
                     </Button>
                   </div>
                 </div>
@@ -236,7 +236,7 @@ export default function CreateCommunePage() {
                 className="flex-1 border-charcoal/20"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                {t("createCommune.back")}
+                {t("createSharehouse.back")}
               </Button>
               <Button
                 onClick={handleSubmit}
@@ -246,10 +246,10 @@ export default function CreateCommunePage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t("createCommune.creating")}
+                    {t("createSharehouse.creating")}
                   </>
                 ) : (
-                  t("createCommune.createCommune")
+                  t("createSharehouse.createSharehouse")
                 )}
               </Button>
             </CardFooter>
