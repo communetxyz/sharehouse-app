@@ -27,6 +27,9 @@ export default function DashboardPage() {
 
   // Local optimistic state for expenses
   const [expenses, setExpenses] = useState<Expense[]>([])
+  const [pendingCreateIds, setPendingCreateIds] = useState<Set<string>>(new Set())
+  const [confirmedCreateIds, setConfirmedCreateIds] = useState<Set<string>>(new Set())
+  const [currentTempId, setCurrentTempId] = useState<string | null>(null)
 
   // Sync fetched expenses with local state
   useEffect(() => {
@@ -40,8 +43,9 @@ export default function DashboardPage() {
     dueDate: Date
     assignedTo: string
   }) => {
+    const tempId = `temp-${Date.now()}`
     const newExpense: Expense = {
-      id: `temp-${Date.now()}`, // Temporary ID
+      id: tempId, // Temporary ID
       communeId: commune?.id || "",
       amount: expenseData.amount,
       description: expenseData.description,
@@ -55,6 +59,13 @@ export default function DashboardPage() {
 
     // Add to local state immediately
     setExpenses(prev => [...prev, newExpense])
+
+    // Track as pending
+    setPendingCreateIds(prev => new Set(prev).add(tempId))
+    setCurrentTempId(tempId)
+
+    // Return the temp ID so we can track it
+    return tempId
   }
 
   // Optimistic mark paid
@@ -240,7 +251,27 @@ export default function DashboardPage() {
                 communeId={commune.id}
                 members={members}
                 onOptimisticCreate={handleCreateExpenseOptimistic}
-                onSuccess={refreshExpenses}
+                onSuccess={() => {
+                  // Mark as confirmed when transaction succeeds
+                  if (currentTempId) {
+                    setConfirmedCreateIds(prev => new Set(prev).add(currentTempId))
+                    setPendingCreateIds(prev => {
+                      const newSet = new Set(prev)
+                      newSet.delete(currentTempId)
+                      return newSet
+                    })
+
+                    // Clear confirmed status after 2 seconds
+                    setTimeout(() => {
+                      setConfirmedCreateIds(prev => {
+                        const newSet = new Set(prev)
+                        newSet.delete(currentTempId)
+                        return newSet
+                      })
+                    }, 2000)
+                  }
+                  refreshExpenses()
+                }}
               />}
             </div>
             {isLoadingExpenses ? (
@@ -253,6 +284,8 @@ export default function DashboardPage() {
                 communeId={commune.id}
                 onOptimisticMarkPaid={handleMarkPaidOptimistic}
                 onRefresh={refreshExpenses}
+                pendingCreateIds={pendingCreateIds}
+                confirmedCreateIds={confirmedCreateIds}
               />
             )}
           </TabsContent>

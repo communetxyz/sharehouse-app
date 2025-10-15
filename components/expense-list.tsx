@@ -19,9 +19,11 @@ interface ExpenseListProps {
   filterAssignedToMe?: boolean
   onOptimisticMarkPaid?: (expenseId: string) => void
   onRefresh: () => void
+  pendingCreateIds?: Set<string>
+  confirmedCreateIds?: Set<string>
 }
 
-export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, onOptimisticMarkPaid, onRefresh }: ExpenseListProps) {
+export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, onOptimisticMarkPaid, onRefresh, pendingCreateIds, confirmedCreateIds }: ExpenseListProps) {
   const { t } = useI18n()
   const { markPaid, isMarking } = useMarkExpensePaid(communeId, onRefresh)
   const [successExpenseId, setSuccessExpenseId] = useState<string | null>(null)
@@ -85,6 +87,8 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
         successExpenseId={successExpenseId}
         pendingExpenseIds={pendingExpenseIds}
         confirmedExpenseIds={confirmedExpenseIds}
+        pendingCreateIds={pendingCreateIds}
+        confirmedCreateIds={confirmedCreateIds}
         emptyMessage={t("expenses.noExpenses")}
       />
       <ExpenseColumn
@@ -94,6 +98,8 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
         isPaid
         pendingExpenseIds={pendingExpenseIds}
         confirmedExpenseIds={confirmedExpenseIds}
+        pendingCreateIds={pendingCreateIds}
+        confirmedCreateIds={confirmedCreateIds}
         emptyMessage={t("expenses.noPaidExpenses")}
       />
       <ExpenseColumn
@@ -120,6 +126,8 @@ interface ExpenseColumnProps {
   successExpenseId?: string | null
   pendingExpenseIds?: Set<string>
   confirmedExpenseIds?: Set<string>
+  pendingCreateIds?: Set<string>
+  confirmedCreateIds?: Set<string>
   emptyMessage: string
 }
 
@@ -135,6 +143,8 @@ function ExpenseColumn({
   successExpenseId,
   pendingExpenseIds,
   confirmedExpenseIds,
+  pendingCreateIds,
+  confirmedCreateIds,
   emptyMessage,
 }: ExpenseColumnProps) {
   const { t } = useI18n()
@@ -161,8 +171,8 @@ function ExpenseColumn({
               isMarking={isMarking}
               onRefresh={onRefresh}
               isSuccess={successExpenseId === expense.id}
-              isPending={pendingExpenseIds?.has(expense.id) || false}
-              isConfirmed={confirmedExpenseIds?.has(expense.id) || false}
+              isPending={pendingExpenseIds?.has(expense.id) || pendingCreateIds?.has(expense.id) || false}
+              isConfirmed={confirmedExpenseIds?.has(expense.id) || confirmedCreateIds?.has(expense.id) || false}
             />
           ))
         )}

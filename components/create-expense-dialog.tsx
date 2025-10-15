@@ -29,7 +29,7 @@ interface CreateExpenseDialogProps {
     description: string
     dueDate: Date
     assignedTo: string
-  }) => void
+  }) => string // Returns temp ID
   onSuccess: () => void
 }
 
@@ -40,6 +40,7 @@ export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, on
   const [description, setDescription] = useState("")
   const [assignedTo, setAssignedTo] = useState("")
   const [dueDate, setDueDate] = useState("")
+  const [currentTempId, setCurrentTempId] = useState<string | null>(null)
 
   const handleClose = () => {
     setOpen(false)
@@ -47,9 +48,14 @@ export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, on
     setDescription("")
     setAssignedTo("")
     setDueDate("")
+    setCurrentTempId(null)
   }
 
-  const { createExpense, isCreating } = useCreateExpense(communeId, handleClose, onSuccess)
+  const { createExpense, isCreating } = useCreateExpense(
+    communeId,
+    handleClose,
+    onSuccess
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,13 +63,15 @@ export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, on
 
     const dueDateObj = new Date(dueDate)
 
-    // Optimistically add expense to UI immediately
-    onOptimisticCreate({
+    // Optimistically add expense to UI immediately and get temp ID
+    const tempId = onOptimisticCreate({
       amount,
       description,
       dueDate: dueDateObj,
       assignedTo,
     })
+
+    setCurrentTempId(tempId)
 
     // Then send the transaction
     await createExpense(amount, description, dueDateObj, assignedTo)
