@@ -38,6 +38,12 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
   const disputedExpenses = filteredExpenses.filter((e) => e.disputed)
 
   const handleMarkPaid = async (expenseId: string) => {
+    // Don't allow marking temporary expenses as paid
+    if (expenseId.startsWith('temp-')) {
+      console.warn('Cannot mark temporary expense as paid')
+      return
+    }
+
     // Optimistically update UI immediately
     if (onOptimisticMarkPaid) {
       onOptimisticMarkPaid(expenseId)
@@ -319,7 +325,7 @@ function ExpenseCard({
               </div>
             </div>
 
-            {!isPaid && !isDisputed && expense.isAssignedToUser && onMarkPaid && (
+            {!isPaid && !isDisputed && expense.isAssignedToUser && onMarkPaid && !expense.id.startsWith('temp-') && (
               <Button
                 onClick={() => onMarkPaid(expense.id)}
                 disabled={isMarking}
@@ -330,7 +336,7 @@ function ExpenseCard({
               </Button>
             )}
 
-            {!isDisputed && !expense.isAssignedToUser && (
+            {!isDisputed && !expense.isAssignedToUser && !expense.id.startsWith('temp-') && (
               <Button onClick={() => setShowDisputeDialog(true)} size="sm" variant="outline" className="w-full">
                 {t("expenses.dispute")}
               </Button>

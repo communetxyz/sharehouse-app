@@ -29,7 +29,6 @@ export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [pendingCreateIds, setPendingCreateIds] = useState<Set<string>>(new Set())
   const [confirmedCreateIds, setConfirmedCreateIds] = useState<Set<string>>(new Set())
-  const [currentTempId, setCurrentTempId] = useState<string | null>(null)
 
   // Sync fetched expenses with local state
   useEffect(() => {
@@ -62,10 +61,29 @@ export default function DashboardPage() {
 
     // Track as pending
     setPendingCreateIds(prev => new Set(prev).add(tempId))
-    setCurrentTempId(tempId)
 
     // Return the temp ID so we can track it
     return tempId
+  }
+
+  // Handle expense creation confirmation
+  const handleExpenseCreateConfirmed = (tempId: string) => {
+    // Move from pending to confirmed
+    setPendingCreateIds(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(tempId)
+      return newSet
+    })
+    setConfirmedCreateIds(prev => new Set(prev).add(tempId))
+
+    // Clear confirmed status after 2 seconds
+    setTimeout(() => {
+      setConfirmedCreateIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(tempId)
+        return newSet
+      })
+    }, 2000)
   }
 
   // Optimistic mark paid
@@ -251,26 +269,9 @@ export default function DashboardPage() {
                 communeId={commune.id}
                 members={members}
                 onOptimisticCreate={handleCreateExpenseOptimistic}
-                onSuccess={() => {
+                onSuccess={(tempId) => {
                   // Mark as confirmed when transaction succeeds
-                  if (currentTempId) {
-                    setConfirmedCreateIds(prev => new Set(prev).add(currentTempId))
-                    setPendingCreateIds(prev => {
-                      const newSet = new Set(prev)
-                      newSet.delete(currentTempId)
-                      return newSet
-                    })
-
-                    // Clear confirmed status after 2 seconds
-                    setTimeout(() => {
-                      setConfirmedCreateIds(prev => {
-                        const newSet = new Set(prev)
-                        newSet.delete(currentTempId)
-                        return newSet
-                      })
-                    }, 2000)
-                  }
-                  refreshExpenses()
+                  handleExpenseCreateConfirmed(tempId)
                 }}
               />}
             </div>

@@ -30,7 +30,7 @@ interface CreateExpenseDialogProps {
     dueDate: Date
     assignedTo: string
   }) => string // Returns temp ID
-  onSuccess: () => void
+  onSuccess: (tempId: string) => void
 }
 
 export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, onSuccess }: CreateExpenseDialogProps) {
@@ -54,7 +54,7 @@ export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, on
   const { createExpense, isCreating } = useCreateExpense(
     communeId,
     handleClose,
-    onSuccess
+    () => currentTempId && onSuccess(currentTempId)
   )
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -75,7 +75,10 @@ export function useCreateExpense(communeId: string, onClose?: () => void, onRefr
         description: "Your expense has been created successfully",
       })
 
-      // Don't refresh - UI already updated optimistically
+      // Notify parent that transaction succeeded
+      if (onRefresh) {
+        onRefresh()
+      }
     } catch (error: any) {
       console.error("[v0] ===== CREATE EXPENSE FAILED =====")
       console.error("[v0] Error creating expense:", error)

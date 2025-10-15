@@ -52,7 +52,7 @@ export function useMarkExpensePaid(communeId: string, onRefresh?: () => void) {
         description: "The expense has been marked as paid successfully",
       })
 
-      // Don't refresh - UI already updated optimistically
+      // Don't call onRefresh - ExpenseList handles confirmation internally
     } catch (error: any) {
       console.error("Error marking expense as paid:", error)
       setIsConfirmed(false)
