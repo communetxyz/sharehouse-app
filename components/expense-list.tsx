@@ -7,10 +7,11 @@ import { useI18n } from "@/lib/i18n/context"
 import { useMarkExpensePaid } from "@/hooks/use-mark-expense-paid"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import type { Expense } from "@/types/commune"
-import { DollarSign, Calendar, User, AlertCircle } from "lucide-react"
-import { motion } from "framer-motion"
+import { DollarSign, Calendar, User, AlertCircle, Sparkles } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
 import { DisputeExpenseDialog } from "@/components/dispute-expense-dialog"
+import { Confetti } from "@/components/ui/confetti"
 
 interface ExpenseListProps {
   expenses: Expense[]
@@ -22,6 +23,7 @@ interface ExpenseListProps {
 export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, onRefresh }: ExpenseListProps) {
   const { t } = useI18n()
   const { markPaid, isMarking } = useMarkExpensePaid(communeId, onRefresh)
+  const [successExpenseId, setSuccessExpenseId] = useState<string | null>(null)
 
   const filteredExpenses = filterAssignedToMe ? expenses.filter((e) => e.isAssignedToUser) : expenses
 
@@ -29,15 +31,22 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
   const paidExpenses = filteredExpenses.filter((e) => e.paid && !e.disputed)
   const disputedExpenses = filteredExpenses.filter((e) => e.disputed)
 
+  const handleMarkPaid = (expenseId: string) => {
+    setSuccessExpenseId(expenseId)
+    setTimeout(() => setSuccessExpenseId(null), 1500)
+    markPaid(expenseId)
+  }
+
   return (
     <div className="grid gap-6 md:grid-cols-3">
       <ExpenseColumn
         title={t("expenses.unpaid")}
         expenses={unpaidExpenses}
         communeId={communeId}
-        onMarkPaid={markPaid}
+        onMarkPaid={handleMarkPaid}
         isMarking={isMarking}
         onRefresh={onRefresh}
+        successExpenseId={successExpenseId}
         emptyMessage={t("expenses.noExpenses")}
       />
       <ExpenseColumn
@@ -68,6 +77,7 @@ interface ExpenseColumnProps {
   onMarkPaid?: (expenseId: string) => void
   isMarking?: boolean
   onRefresh?: () => void
+  successExpenseId?: string | null
   emptyMessage: string
 }
 
@@ -80,6 +90,7 @@ function ExpenseColumn({
   onMarkPaid,
   isMarking,
   onRefresh,
+  successExpenseId,
   emptyMessage,
 }: ExpenseColumnProps) {
   const { t } = useI18n()
@@ -105,6 +116,7 @@ function ExpenseColumn({
               onMarkPaid={onMarkPaid}
               isMarking={isMarking}
               onRefresh={onRefresh}
+              isSuccess={successExpenseId === expense.id}
             />
           ))
         )}
@@ -121,9 +133,10 @@ interface ExpenseCardProps {
   onMarkPaid?: (expenseId: string) => void
   isMarking?: boolean
   onRefresh?: () => void
+  isSuccess?: boolean
 }
 
-function ExpenseCard({ expense, communeId, isPaid, isDisputed, onMarkPaid, isMarking, onRefresh }: ExpenseCardProps) {
+function ExpenseCard({ expense, communeId, isPaid, isDisputed, onMarkPaid, isMarking, onRefresh, isSuccess }: ExpenseCardProps) {
   const { t } = useI18n()
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const { members } = useCommuneData()
@@ -138,7 +151,28 @@ function ExpenseCard({ expense, communeId, isPaid, isDisputed, onMarkPaid, isMar
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.2 }}
       >
-        <Card className={isOverdue ? "border-red-300 bg-red-50/50" : ""}>
+        <Card className={`${isOverdue ? "border-red-300 bg-red-50/50" : ""} ${isSuccess ? "ring-2 ring-sage/50" : ""} relative overflow-hidden`}>
+          <AnimatePresence>
+            {isSuccess && (
+              <>
+                <Confetti active={isSuccess} />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute top-4 right-4 z-10"
+                >
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", duration: 0.6 }}
+                  >
+                    <Sparkles className="w-6 h-6 text-sage" />
+                  </motion.div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <CardTitle className="text-base font-medium text-charcoal">{expense.description}</CardTitle>

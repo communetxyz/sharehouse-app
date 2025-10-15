@@ -16,9 +16,14 @@ export function useMarkChoreComplete() {
 
   const { sendTransaction } = useSendTransaction()
 
-  const markComplete = async (choreId: string, choreData?: any) => {
+  const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void) => {
     if (!commune) {
       throw new Error("No commune data available")
+    }
+
+    // Call onSuccess IMMEDIATELY before any async operations
+    if (onSuccess) {
+      onSuccess()
     }
 
     setIsMarking(true)

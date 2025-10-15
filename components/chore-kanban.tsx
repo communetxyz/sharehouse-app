@@ -10,6 +10,7 @@ import type { ChoreInstance } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useToast } from "@/hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
+import { Confetti } from "@/components/ui/confetti"
 
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
@@ -55,25 +56,28 @@ const ChoreCard = memo(function ChoreCard({
       transition={{ duration: 0.3 }}
     >
       <Card
-        className={`border-charcoal/10 ${chore.completed ? "border-sage/20 bg-sage/5" : "bg-white/50"} ${isSuccess ? "ring-2 ring-sage/50" : ""}`}
+        className={`border-charcoal/10 ${chore.completed ? "border-sage/20 bg-sage/5" : "bg-white/50"} ${isSuccess ? "ring-2 ring-sage/50" : ""} relative overflow-hidden`}
       >
         <CardContent className="p-4 space-y-3">
           <AnimatePresence>
             {isSuccess && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center bg-sage/10 rounded-lg z-10"
-              >
+              <>
+                <Confetti active={isSuccess} />
                 <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", duration: 0.6 }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex items-center justify-center bg-sage/10 rounded-lg z-10"
                 >
-                  <Sparkles className="w-12 h-12 text-sage" />
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", duration: 0.6 }}
+                  >
+                    <Sparkles className="w-12 h-12 text-sage" />
+                  </motion.div>
                 </motion.div>
-              </motion.div>
+              </>
             )}
           </AnimatePresence>
 
@@ -190,6 +194,9 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
         title: chore.title,
         assignedTo: chore.assignedTo,
         completed: chore.completed,
+      }, () => {
+        // Optimistic update - immediately show as success
+        setSuccessId(chore.scheduleId.toString())
       })
     } catch (err) {
       setCompletingId(null)
