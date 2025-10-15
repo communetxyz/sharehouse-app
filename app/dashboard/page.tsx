@@ -68,6 +68,7 @@ export default function DashboardPage() {
 
   // Handle expense creation confirmation
   const handleExpenseCreateConfirmed = (tempId: string) => {
+    console.log('[v0] handleExpenseCreateConfirmed called with tempId:', tempId)
     // Move from pending to confirmed
     setPendingCreateIds(prev => {
       const newSet = new Set(prev)

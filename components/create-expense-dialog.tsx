@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import {
   Dialog,
   DialogContent,
@@ -40,7 +40,7 @@ export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, on
   const [description, setDescription] = useState("")
   const [assignedTo, setAssignedTo] = useState("")
   const [dueDate, setDueDate] = useState("")
-  const [currentTempId, setCurrentTempId] = useState<string | null>(null)
+  const pendingTempIdRef = useRef<string | null>(null)
 
   const handleClose = () => {
     setOpen(false)
@@ -48,13 +48,20 @@ export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, on
     setDescription("")
     setAssignedTo("")
     setDueDate("")
-    setCurrentTempId(null)
+    // Don't clear the ref here - it needs to persist until the transaction completes
   }
 
   const { createExpense, isCreating } = useCreateExpense(
     communeId,
     handleClose,
-    () => currentTempId && onSuccess(currentTempId)
+    () => {
+      // Call onSuccess with the pending temp ID when transaction succeeds
+      console.log('[v0] Success callback triggered, pendingTempIdRef.current:', pendingTempIdRef.current)
+      if (pendingTempIdRef.current) {
+        onSuccess(pendingTempIdRef.current)
+        pendingTempIdRef.current = null
+      }
+    }
   )
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,7 +78,8 @@ export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, on
       assignedTo,
     })
 
-    setCurrentTempId(tempId)
+    // Store the temp ID for the success callback
+    pendingTempIdRef.current = tempId
 
     // Then send the transaction
     await createExpense(amount, description, dueDateObj, assignedTo)

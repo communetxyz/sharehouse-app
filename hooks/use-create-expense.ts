@@ -76,6 +76,7 @@ export function useCreateExpense(communeId: string, onClose?: () => void, onRefr
       })
 
       // Notify parent that transaction succeeded
+      console.log("[v0] Calling onRefresh callback")
       if (onRefresh) {
         onRefresh()
       }
