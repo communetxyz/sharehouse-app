@@ -7,9 +7,9 @@ import { useI18n } from "@/lib/i18n/context"
 import { useMarkExpensePaid } from "@/hooks/use-mark-expense-paid"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import type { Expense } from "@/types/commune"
-import { DollarSign, Calendar, User, AlertCircle, Sparkles } from "lucide-react"
+import { DollarSign, Calendar, User, AlertCircle, Sparkles, Loader2, CheckCircle2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DisputeExpenseDialog } from "@/components/dispute-expense-dialog"
 import { Confetti } from "@/components/ui/confetti"
 
@@ -17,13 +17,16 @@ interface ExpenseListProps {
   expenses: Expense[]
   communeId: string
   filterAssignedToMe?: boolean
+  onOptimisticMarkPaid?: (expenseId: string) => void
   onRefresh: () => void
 }
 
-export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, onRefresh }: ExpenseListProps) {
+export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, onOptimisticMarkPaid, onRefresh }: ExpenseListProps) {
   const { t } = useI18n()
   const { markPaid, isMarking } = useMarkExpensePaid(communeId, onRefresh)
   const [successExpenseId, setSuccessExpenseId] = useState<string | null>(null)
+  const [pendingExpenseIds, setPendingExpenseIds] = useState<Set<string>>(new Set())
+  const [confirmedExpenseIds, setConfirmedExpenseIds] = useState<Set<string>>(new Set())
 
   const filteredExpenses = filterAssignedToMe ? expenses.filter((e) => e.isAssignedToUser) : expenses
 
@@ -31,10 +34,43 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
   const paidExpenses = filteredExpenses.filter((e) => e.paid && !e.disputed)
   const disputedExpenses = filteredExpenses.filter((e) => e.disputed)
 
-  const handleMarkPaid = (expenseId: string) => {
+  const handleMarkPaid = async (expenseId: string) => {
+    // Optimistically update UI immediately
+    if (onOptimisticMarkPaid) {
+      onOptimisticMarkPaid(expenseId)
+    }
     setSuccessExpenseId(expenseId)
     setTimeout(() => setSuccessExpenseId(null), 1500)
-    markPaid(expenseId)
+
+    // Track pending transaction
+    setPendingExpenseIds(prev => new Set(prev).add(expenseId))
+
+    try {
+      await markPaid(expenseId)
+      // Transaction confirmed
+      setConfirmedExpenseIds(prev => new Set(prev).add(expenseId))
+      setPendingExpenseIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(expenseId)
+        return newSet
+      })
+
+      // Clear confirmed status after 2 seconds
+      setTimeout(() => {
+        setConfirmedExpenseIds(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(expenseId)
+          return newSet
+        })
+      }, 2000)
+    } catch (error) {
+      // Remove from pending on error
+      setPendingExpenseIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(expenseId)
+        return newSet
+      })
+    }
   }
 
   return (
@@ -47,6 +83,8 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
         isMarking={isMarking}
         onRefresh={onRefresh}
         successExpenseId={successExpenseId}
+        pendingExpenseIds={pendingExpenseIds}
+        confirmedExpenseIds={confirmedExpenseIds}
         emptyMessage={t("expenses.noExpenses")}
       />
       <ExpenseColumn
@@ -54,6 +92,8 @@ export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, o
         expenses={paidExpenses}
         communeId={communeId}
         isPaid
+        pendingExpenseIds={pendingExpenseIds}
+        confirmedExpenseIds={confirmedExpenseIds}
         emptyMessage={t("expenses.noPaidExpenses")}
       />
       <ExpenseColumn
@@ -78,6 +118,8 @@ interface ExpenseColumnProps {
   isMarking?: boolean
   onRefresh?: () => void
   successExpenseId?: string | null
+  pendingExpenseIds?: Set<string>
+  confirmedExpenseIds?: Set<string>
   emptyMessage: string
 }
 
@@ -91,6 +133,8 @@ function ExpenseColumn({
   isMarking,
   onRefresh,
   successExpenseId,
+  pendingExpenseIds,
+  confirmedExpenseIds,
   emptyMessage,
 }: ExpenseColumnProps) {
   const { t } = useI18n()
@@ -117,6 +161,8 @@ function ExpenseColumn({
               isMarking={isMarking}
               onRefresh={onRefresh}
               isSuccess={successExpenseId === expense.id}
+              isPending={pendingExpenseIds?.has(expense.id) || false}
+              isConfirmed={confirmedExpenseIds?.has(expense.id) || false}
             />
           ))
         )}
@@ -134,9 +180,22 @@ interface ExpenseCardProps {
   isMarking?: boolean
   onRefresh?: () => void
   isSuccess?: boolean
+  isPending?: boolean
+  isConfirmed?: boolean
 }
 
-function ExpenseCard({ expense, communeId, isPaid, isDisputed, onMarkPaid, isMarking, onRefresh, isSuccess }: ExpenseCardProps) {
+function ExpenseCard({
+  expense,
+  communeId,
+  isPaid,
+  isDisputed,
+  onMarkPaid,
+  isMarking,
+  onRefresh,
+  isSuccess,
+  isPending,
+  isConfirmed
+}: ExpenseCardProps) {
   const { t } = useI18n()
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const { members } = useCommuneData()
@@ -173,6 +232,37 @@ function ExpenseCard({ expense, communeId, isPaid, isDisputed, onMarkPaid, isMar
               </>
             )}
           </AnimatePresence>
+
+          {/* Transaction status indicator */}
+          {(isPending || isConfirmed) && (
+            <div className="absolute top-3 right-3 z-20">
+              {isPending && !isConfirmed && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                >
+                  <div className="flex items-center gap-2 bg-sage/10 rounded-full px-3 py-1">
+                    <Loader2 className="w-3 h-3 animate-spin text-sage" />
+                    <span className="text-xs text-sage font-medium">Processing...</span>
+                  </div>
+                </motion.div>
+              )}
+              {isConfirmed && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                >
+                  <div className="flex items-center gap-2 bg-green-100 rounded-full px-3 py-1">
+                    <CheckCircle2 className="w-3 h-3 text-green-600" />
+                    <span className="text-xs text-green-600 font-medium">Confirmed!</span>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          )}
+
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <CardTitle className="text-base font-medium text-charcoal">{expense.description}</CardTitle>
