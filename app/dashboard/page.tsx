@@ -16,12 +16,55 @@ import { useCommuneData } from "@/hooks/use-commune-data"
 import { useExpenseData } from "@/hooks/use-expense-data"
 import { useWallet } from "@/hooks/use-wallet"
 import { Loader2, Plus } from "lucide-react"
+import { useState, useEffect } from "react"
+import type { Expense } from "@/types/commune"
 
 export default function DashboardPage() {
   const { t } = useI18n()
   const { address, isConnected, status } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
-  const { expenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
+  const { expenses: fetchedExpenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
+
+  // Local optimistic state for expenses
+  const [expenses, setExpenses] = useState<Expense[]>([])
+
+  // Sync fetched expenses with local state
+  useEffect(() => {
+    setExpenses(fetchedExpenses)
+  }, [fetchedExpenses])
+
+  // Optimistic expense creation
+  const handleCreateExpenseOptimistic = (expenseData: {
+    amount: string
+    description: string
+    dueDate: Date
+    assignedTo: string
+  }) => {
+    const newExpense: Expense = {
+      id: `temp-${Date.now()}`, // Temporary ID
+      communeId: commune?.id || "",
+      amount: expenseData.amount,
+      description: expenseData.description,
+      dueDate: Math.floor(expenseData.dueDate.getTime() / 1000),
+      assignedTo: expenseData.assignedTo,
+      assignedToUsername: members.find(m => m.address === expenseData.assignedTo)?.username || expenseData.assignedTo,
+      paid: false,
+      disputed: false,
+      isAssignedToUser: expenseData.assignedTo.toLowerCase() === address?.toLowerCase(),
+    }
+
+    // Add to local state immediately
+    setExpenses(prev => [...prev, newExpense])
+  }
+
+  // Optimistic mark paid
+  const handleMarkPaidOptimistic = (expenseId: string) => {
+    setExpenses(prev => prev.map(expense =>
+      expense.id === expenseId
+        ? { ...expense, paid: true }
+        : expense
+    ))
+  }
 
   if (status === "reconnecting" || status === "connecting") {
     return (
@@ -167,14 +210,24 @@ export default function DashboardPage() {
           <TabsContent value="expenses" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif text-charcoal">{t("expenses.title")}</h2>
-              {commune && <CreateExpenseDialog communeId={commune.id} members={members} onSuccess={refreshExpenses} />}
+              {commune && <CreateExpenseDialog
+                communeId={commune.id}
+                members={members}
+                onOptimisticCreate={handleCreateExpenseOptimistic}
+                onSuccess={refreshExpenses}
+              />}
             </div>
             {isLoadingExpenses ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-sage" />
               </div>
             ) : (
-              commune && <ExpenseList expenses={expenses} communeId={commune.id} onRefresh={refreshExpenses} />
+              commune && <ExpenseList
+                expenses={expenses}
+                communeId={commune.id}
+                onOptimisticMarkPaid={handleMarkPaidOptimistic}
+                onRefresh={refreshExpenses}
+              />
             )}
           </TabsContent>
 

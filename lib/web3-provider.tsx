@@ -35,10 +35,6 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         },
         embeddedWallets: {
           createOnLogin: "users-without-wallets",
-          showWalletUIs: false,
-        },
-        externalWallets: {
-          showWalletUIs: false,
         },
         supportedChains: [gnosis, gnosisChiado],
       }}

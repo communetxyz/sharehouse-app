@@ -24,10 +24,16 @@ import { Plus } from "lucide-react"
 interface CreateExpenseDialogProps {
   communeId: string
   members: Member[]
+  onOptimisticCreate: (expenseData: {
+    amount: string
+    description: string
+    dueDate: Date
+    assignedTo: string
+  }) => void
   onSuccess: () => void
 }
 
-export function CreateExpenseDialog({ communeId, members, onSuccess }: CreateExpenseDialogProps) {
+export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, onSuccess }: CreateExpenseDialogProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState("")
@@ -50,6 +56,16 @@ export function CreateExpenseDialog({ communeId, members, onSuccess }: CreateExp
     if (!amount || !description || !assignedTo || !dueDate) return
 
     const dueDateObj = new Date(dueDate)
+
+    // Optimistically add expense to UI immediately
+    onOptimisticCreate({
+      amount,
+      description,
+      dueDate: dueDateObj,
+      assignedTo,
+    })
+
+    // Then send the transaction
     await createExpense(amount, description, dueDateObj, assignedTo)
   }
 
