@@ -31,9 +31,14 @@ export function Web3Provider({ children }: { children: ReactNode }) {
           theme: "light",
           accentColor: "#8B7355",
           logo: "https://avatars.githubusercontent.com/u/37784886",
+          showWalletLoginFirst: false,
         },
         embeddedWallets: {
           createOnLogin: "users-without-wallets",
+          showWalletUIs: false,
+        },
+        externalWallets: {
+          showWalletUIs: false,
         },
         supportedChains: [gnosis, gnosisChiado],
       }}

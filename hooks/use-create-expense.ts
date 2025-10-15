@@ -25,6 +25,11 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
 
     setIsCreating(true)
 
+    // Optimistically call onSuccess
+    if (onSuccess) {
+      onSuccess()
+    }
+
     try {
       console.log("[v0] ===== CREATE EXPENSE START =====")
       console.log("[v0] Creating expense:", {
@@ -53,7 +58,7 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      const result = await sendTransaction(
+      await sendTransaction(
         {
           to: COMMUNE_OS_ADDRESS as `0x${string}`,
           data,
@@ -63,18 +68,12 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
         },
       )
 
-      console.log("[v0] Transaction result:", result)
-      console.log("[v0] Transaction hash:", result.hash)
       console.log("[v0] ===== CREATE EXPENSE SUCCESS =====")
 
       toast({
         title: "Expense created",
         description: "Your expense has been created successfully",
       })
-
-      if (onSuccess) {
-        onSuccess()
-      }
     } catch (error: any) {
       console.error("[v0] ===== CREATE EXPENSE FAILED =====")
       console.error("[v0] Error creating expense:", error)
@@ -85,9 +84,11 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
       })
       toast({
         title: "Failed to create expense",
-        description: error.message || "An error occurred",
+        description: error.message || "An error occurred. Refreshing page...",
         variant: "destructive",
       })
+      // Refresh page on error
+      setTimeout(() => window.location.reload(), 2000)
     } finally {
       setIsCreating(false)
     }

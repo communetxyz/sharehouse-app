@@ -5,12 +5,14 @@ import { useSendTransaction } from "@privy-io/react-auth"
 import { encodeFunctionData } from "viem"
 import { useCommuneData } from "./use-commune-data"
 import { COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI } from "@/lib/contracts"
+import { useToast } from "./use-toast"
 
 export function useMarkChoreComplete() {
   const { commune } = useCommuneData()
   const [isMarking, setIsMarking] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const { toast } = useToast()
 
   const { sendTransaction } = useSendTransaction()
 
@@ -22,6 +24,9 @@ export function useMarkChoreComplete() {
     setIsMarking(true)
     setIsConfirmed(false)
     setError(null)
+
+    // Optimistically mark as confirmed
+    setIsConfirmed(true)
 
     try {
       console.log("[v0] ===== MARK CHORE COMPLETE START =====")
@@ -47,7 +52,7 @@ export function useMarkChoreComplete() {
       })
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      const result = await sendTransaction(
+      await sendTransaction(
         {
           to: COMMUNE_OS_ADDRESS as `0x${string}`,
           data,
@@ -57,11 +62,7 @@ export function useMarkChoreComplete() {
         },
       )
 
-      console.log("[v0] Transaction result:", result)
-      console.log("[v0] Transaction hash:", result.hash)
       console.log("[v0] ===== MARK CHORE COMPLETE SUCCESS =====")
-
-      setIsConfirmed(true)
     } catch (err: any) {
       console.error("[v0] ===== MARK CHORE COMPLETE FAILED =====")
       console.error("[v0] Error:", err)
@@ -72,6 +73,14 @@ export function useMarkChoreComplete() {
         cause: err.cause,
       })
       setError(err)
+      setIsConfirmed(false)
+      toast({
+        title: "Failed to mark chore complete",
+        description: err.message || "An error occurred. Refreshing page...",
+        variant: "destructive",
+      })
+      // Refresh page on error
+      setTimeout(() => window.location.reload(), 2000)
       throw new Error(err.message || "Failed to mark chore complete")
     } finally {
       setIsMarking(false)

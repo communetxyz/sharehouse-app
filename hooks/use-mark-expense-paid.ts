@@ -27,6 +27,13 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
     setIsMarking(true)
     setIsConfirmed(false)
 
+    // Optimistically mark as confirmed
+    setIsConfirmed(true)
+
+    if (onSuccess) {
+      onSuccess()
+    }
+
     try {
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
@@ -44,23 +51,20 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
         },
       )
 
-      setIsConfirmed(true)
-
       toast({
         title: "Expense marked as paid",
         description: "The expense has been marked as paid successfully",
       })
-
-      if (onSuccess) {
-        onSuccess()
-      }
     } catch (error: any) {
       console.error("Error marking expense as paid:", error)
+      setIsConfirmed(false)
       toast({
         title: "Failed to mark expense as paid",
-        description: error.message || "An error occurred",
+        description: error.message || "An error occurred. Refreshing page...",
         variant: "destructive",
       })
+      // Refresh page on error
+      setTimeout(() => window.location.reload(), 2000)
     } finally {
       setIsMarking(false)
     }
