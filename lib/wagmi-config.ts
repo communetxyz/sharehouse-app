@@ -9,6 +9,6 @@ export const config = createConfig({
   transports: {
     [gnosis.id]: http(process.env.NEXT_PUBLIC_GNOSIS_RPC_URL),
     [gnosisChiado.id]: http(),
-    [mainnet.id]: http(),
+    [mainnet.id]: http(process.env.NEXT_PUBLIC_MAINNET_RPC_URL || "https://cloudflare-eth.com"),
   },
 })
