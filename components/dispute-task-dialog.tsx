@@ -5,28 +5,28 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useI18n } from "@/lib/i18n/context"
-import { useDisputeExpense } from "@/hooks/use-dispute-expense"
+import { useDisputeTask } from "@/hooks/use-dispute-task"
 import type { Member } from "@/types/commune"
 
-interface DisputeExpenseDialogProps {
+interface DisputeTaskDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  expenseId: string
+  taskId: string
   currentAssignee: string
   communeId: string
   members: Member[]
   onRefresh: () => void
 }
 
-export function DisputeExpenseDialog({
+export function DisputeTaskDialog({
   open,
   onOpenChange,
-  expenseId,
+  taskId,
   currentAssignee,
   communeId,
   members,
   onRefresh,
-}: DisputeExpenseDialogProps) {
+}: DisputeTaskDialogProps) {
   const { t } = useI18n()
   const [selectedMember, setSelectedMember] = useState<string>("")
 
@@ -35,12 +35,12 @@ export function DisputeExpenseDialog({
     setSelectedMember("")
   }
 
-  const { disputeExpense, isDisputing } = useDisputeExpense(communeId, handleClose, onRefresh)
+  const { disputeTask, isDisputing } = useDisputeTask(communeId, handleClose, onRefresh)
 
   const handleDispute = async () => {
     if (!selectedMember) return
 
-    await disputeExpense(expenseId, selectedMember)
+    await disputeTask(taskId, selectedMember)
   }
 
   // Filter out the current assignee from the member list
@@ -50,16 +50,16 @@ export function DisputeExpenseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("expenses.disputeExpense")}</DialogTitle>
-          <DialogDescription>{t("expenses.selectNewAssignee")}</DialogDescription>
+          <DialogTitle>{t("tasks.disputeTask")}</DialogTitle>
+          <DialogDescription>{t("tasks.selectNewAssignee")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("expenses.newAssignee")}</label>
+            <label className="text-sm font-medium">{t("tasks.newAssignee")}</label>
             <Select value={selectedMember} onValueChange={setSelectedMember}>
               <SelectTrigger>
-                <SelectValue placeholder={t("expenses.selectMember")} />
+                <SelectValue placeholder={t("tasks.selectMember")} />
               </SelectTrigger>
               <SelectContent>
                 {availableMembers.map((member) => (
@@ -81,7 +81,7 @@ export function DisputeExpenseDialog({
             disabled={!selectedMember || isDisputing}
             className="bg-sage hover:bg-sage/90"
           >
-            {isDisputing ? t("expenses.disputing") : t("expenses.submitDispute")}
+            {isDisputing ? t("tasks.disputing") : t("tasks.submitDispute")}
           </Button>
         </div>
       </DialogContent>

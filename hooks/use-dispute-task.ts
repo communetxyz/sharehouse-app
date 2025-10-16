@@ -7,18 +7,18 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useDisputeExpense(communeId: string, onClose?: () => void, onRefresh?: () => void) {
+export function useDisputeTask(communeId: string, onClose?: () => void, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isDisputing, setIsDisputing] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
   const { toast } = useToast()
 
-  const disputeExpense = async (expenseId: string, newAssignee: string) => {
+  const disputeTask = async (taskId: string, newAssignee: string) => {
     if (!isConnected || !address) {
       toast({
         title: "Wallet not connected",
-        description: "Please connect your wallet to dispute an expense",
+        description: "Please connect your wallet to dispute an task",
         variant: "destructive",
       })
       return
@@ -37,8 +37,8 @@ export function useDisputeExpense(communeId: string, onClose?: () => void, onRef
 
     try {
       console.log("[v0] ===== DISPUTE EXPENSE START =====")
-      console.log("[v0] Disputing expense:", {
-        expenseId,
+      console.log("[v0] Disputing task:", {
+        taskId,
         newAssignee,
         communeId,
         contractAddress: COMMUNE_OS_ADDRESS,
@@ -46,8 +46,8 @@ export function useDisputeExpense(communeId: string, onClose?: () => void, onRef
 
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
-        functionName: "disputeExpense",
-        args: [BigInt(communeId), BigInt(expenseId), newAssignee as `0x${string}`],
+        functionName: "disputeTask",
+        args: [BigInt(communeId), BigInt(taskId), newAssignee as `0x${string}`],
       })
 
       console.log("[v0] Encoded data:", data)
@@ -73,7 +73,7 @@ export function useDisputeExpense(communeId: string, onClose?: () => void, onRef
       // Don't refresh - UI already updated optimistically
     } catch (error: any) {
       console.error("[v0] ===== DISPUTE EXPENSE FAILED =====")
-      console.error("[v0] Error disputing expense:", error)
+      console.error("[v0] Error disputing task:", error)
       console.error("[v0] Error details:", {
         message: error.message,
         code: error.code,
@@ -81,7 +81,7 @@ export function useDisputeExpense(communeId: string, onClose?: () => void, onRef
       })
       setIsConfirmed(false)
       toast({
-        title: "Failed to dispute expense",
+        title: "Failed to dispute task",
         description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
@@ -91,7 +91,7 @@ export function useDisputeExpense(communeId: string, onClose?: () => void, onRef
   }
 
   return {
-    disputeExpense,
+    disputeTask,
     isDisputing,
     isConfirmed,
   }

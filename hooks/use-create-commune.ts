@@ -73,7 +73,7 @@ export function useCreateCommune() {
         description: "Commune created successfully!",
       })
 
-      // Redirect to dashboard after transaction succeeds
+      // Redirect to dashboard after successful transaction
       router.push("/dashboard")
     } catch (err) {
       console.error("[v0] Create commune error:", err)

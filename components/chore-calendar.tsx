@@ -2,10 +2,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import type { ChoreInstance, Expense } from "@/types/commune"
+import type { ChoreInstance, Task } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useCalendarChores } from "@/hooks/use-calendar-chores"
-import { useCalendarExpenses } from "@/hooks/use-calendar-expenses"
+import { useCalendarTasks } from "@/hooks/use-calendar-tasks"
 import { useState, useEffect } from "react"
 import { Calendar, CalendarDays, CalendarRange } from "lucide-react"
 
@@ -47,22 +47,22 @@ function ChoreItem({ chore }: { chore: ChoreInstance }) {
   )
 }
 
-function ExpenseItem({ expense }: { expense: Expense }) {
+function TaskItem({ task }: { task: Task }) {
   return (
     <div
       className={`text-xs p-1.5 rounded mb-1 border-l-2 ${
-        expense.disputed
+        task.disputed
           ? "bg-red-50 border-red-400"
-          : expense.paid
+          : task.done
             ? "bg-green-50 border-green-400"
-            : expense.isAssignedToUser
+            : task.isAssignedToUser
               ? "bg-blue-50 border-blue-400"
               : "bg-amber-50 border-amber-400"
       }`}
     >
-      <div className="font-medium truncate">💰 {expense.description}</div>
-      <div className="text-charcoal/60 truncate">¥{expense.amount}</div>
-      <div className="text-charcoal/60 truncate">{expense.assignedToUsername}</div>
+      <div className="font-medium truncate">💰 {task.description}</div>
+      <div className="text-charcoal/60 truncate">{task.budget} Collateral Currency</div>
+      <div className="text-charcoal/60 truncate">{task.assignedToUsername}</div>
     </div>
   )
 }
@@ -80,9 +80,9 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const month = today.getMonth()
 
   const { chores: fetchedChores, isLoading: isLoadingChores } = useCalendarChores(year, month)
-  const { expenses, isLoading: isLoadingExpenses } = useCalendarExpenses()
+  const { tasks, isLoading: isLoadingTasks } = useCalendarTasks()
 
-  const isLoading = isLoadingChores || isLoadingExpenses
+  const isLoading = isLoadingChores || isLoadingTasks
 
   const firstDayOfMonth = new Date(year, month, 1)
   const lastDayOfMonth = new Date(year, month + 1, 0)
@@ -97,9 +97,14 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
     days.push(i)
   }
 
-  // Get month and day names from translations to avoid duplication
-  const monthNames = t("calendar.monthNames") as unknown as string[]
-  const dayNames = t("calendar.dayNames") as unknown as string[]
+  // Get month and day names based on language
+  const monthNames = language === "ja"
+    ? ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+  const dayNames = language === "ja"
+    ? ["日", "月", "火", "水", "木", "金", "土"]
+    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
   const isToday = (day: number | null) => {
     if (!day) return false
@@ -161,13 +166,13 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                   .map((chore) => (
                     <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
                   ))}
-                {expenses
-                  .filter((expense) => isSameUTCDay(expense.dueDate, year, month, today.getDate()))
-                  .map((expense) => (
-                    <ExpenseItem key={expense.id} expense={expense} />
+                {tasks
+                  .filter((task) => isSameUTCDay(task.dueDate, year, month, today.getDate()))
+                  .map((task) => (
+                    <TaskItem key={task.id} task={task} />
                   ))}
                 {fetchedChores.filter((c) => isSameUTCDay(c.periodStart, year, month, today.getDate())).length === 0 &&
-                  expenses.filter((e) => isSameUTCDay(e.dueDate, year, month, today.getDate())).length === 0 && (
+                  tasks.filter((t) => isSameUTCDay(t.dueDate, year, month, today.getDate())).length === 0 && (
                     <p className="text-sm text-charcoal/60 text-center py-4">{t("calendar.noItemsToday")}</p>
                   )}
               </div>
@@ -186,8 +191,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                 const dayChores = isCurrentMonth
                   ? fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, date.getMonth(), day))
                   : []
-                const dayExpenses = isCurrentMonth
-                  ? expenses.filter((expense) => isSameUTCDay(expense.dueDate, year, date.getMonth(), day))
+                const dayTasks = isCurrentMonth
+                  ? tasks.filter((task) => isSameUTCDay(task.dueDate, year, date.getMonth(), day))
                   : []
                 const isCurrentDay = date.toDateString() === today.toDateString()
 
@@ -206,8 +211,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                       {dayChores.map((chore) => (
                         <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
                       ))}
-                      {dayExpenses.map((expense) => (
-                        <ExpenseItem key={expense.id} expense={expense} />
+                      {dayTasks.map((task) => (
+                        <TaskItem key={task.id} task={task} />
                       ))}
                     </div>
                   </div>
@@ -219,7 +224,6 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
 
         {view === "monthly" && (
           <>
-            {/* Day headers */}
             <div className="grid grid-cols-7 gap-2 mb-2">
               {dayNames.map((day) => (
                 <div key={day} className="text-center text-xs font-medium text-charcoal/60 py-2">
@@ -227,83 +231,39 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                 </div>
               ))}
             </div>
-
-            {/* Calendar grid */}
             <div className="grid grid-cols-7 gap-2">
-          {days.map((day, index) => {
-            const dayChores = day
-              ? fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, month, day))
-              : []
-            const dayExpenses = day ? expenses.filter((expense) => isSameUTCDay(expense.dueDate, year, month, day)) : []
+              {days.map((day, index) => {
+                if (!day) {
+                  return <div key={`empty-${index}`} className="aspect-square" />
+                }
 
-            return (
-              <div
-                key={index}
-                className={`min-h-[120px] p-2 rounded-lg border ${
-                  day
-                    ? isToday(day)
-                      ? "bg-sage/10 border-sage/40"
-                      : "bg-white/50 border-charcoal/10"
-                    : "bg-transparent border-transparent"
-                }`}
-              >
-                {day && (
-                  <>
-                    <div
-                      className={`text-sm font-medium mb-1 ${
-                        isToday(day) ? "text-sage font-bold" : "text-charcoal/70"
-                      }`}
-                    >
-                      {day}
-                    </div>
-                    <div className="space-y-1 overflow-y-auto max-h-[90px]">
+                const dayChores = fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, month, day))
+                const dayTasks = tasks.filter((task) => isSameUTCDay(task.dueDate, year, month, day))
+
+                return (
+                  <div
+                    key={day}
+                    className={`aspect-square border rounded-lg p-1 overflow-hidden ${
+                      isToday(day)
+                        ? "bg-sage/10 border-sage/40"
+                        : "border-charcoal/10 hover:bg-charcoal/5"
+                    }`}
+                  >
+                    <div className="text-xs font-medium text-charcoal mb-1">{day}</div>
+                    <div className="space-y-1 max-h-[80px] overflow-y-auto">
                       {dayChores.map((chore) => (
                         <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
                       ))}
-                      {dayExpenses.map((expense) => (
-                        <ExpenseItem key={expense.id} expense={expense} />
+                      {dayTasks.map((task) => (
+                        <TaskItem key={task.id} task={task} />
                       ))}
                     </div>
-                  </>
-                )}
-              </div>
-            )
-          })}
+                  </div>
+                )
+              })}
             </div>
           </>
         )}
-
-        {/* Legend */}
-        <div className="mt-4 pt-4 border-t border-charcoal/10 flex flex-wrap gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-sage/10 border border-sage/40" />
-            <span className="text-charcoal/70">{t("chores.myChores")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-charcoal/5 border border-charcoal/10" />
-            <span className="text-charcoal/70">{t("chores.otherChores")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-sage/20 border border-sage/30" />
-            <span className="text-charcoal/70">{t("chores.completed")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-blue-50 border-l-2 border-blue-400" />
-            <span className="text-charcoal/70">{t("expenses.myExpenses")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-amber-50 border-l-2 border-amber-400" />
-            <span className="text-charcoal/70">{t("expenses.otherExpenses")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-green-50 border-l-2 border-green-400" />
-            <span className="text-charcoal/70">{t("expenses.paid")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-red-50 border-l-2 border-red-400" />
-            <span className="text-charcoal/70">{t("expenses.disputed")}</span>
-          </div>
-        </div>
       </CardContent>
     </Card>
   )
