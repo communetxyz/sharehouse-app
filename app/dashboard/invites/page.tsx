@@ -62,15 +62,9 @@ export default function InviteGenerationPage() {
       // The message format should match what the smart contract expects
       const message = `Join Commune ${commune.id} with nonce ${nonce}`
 
-      // Request signature from wallet
-      const signResult = await signMessage(message, {
-        title: "Sign Invite",
-        description: `Sign this message to generate an invite link for ${commune.name}`,
-        buttonText: "Sign",
-      })
-
-      // Extract signature from result
-      const signature = typeof signResult === 'string' ? signResult : signResult.signature
+      // Request signature from wallet using Privy's signMessage
+      // signMessage returns a promise that resolves to the signature string
+      const signature = await signMessage(message)
 
       // Construct invite URL
       const baseUrl = "https://www.share-house.fun"
