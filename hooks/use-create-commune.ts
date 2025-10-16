@@ -54,6 +54,7 @@ export function useCreateCommune() {
       console.log("[v0] Encoded transaction data:", data)
 
       // Send transaction with gas sponsorship
+      // Note: sendTransaction resolves when transaction is submitted and confirmed on-chain
       await sendTransaction(
         {
           to: COMMUNE_OS_ADDRESS as `0x${string}`,

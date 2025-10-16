@@ -170,7 +170,7 @@ function TaskColumn({
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-lg text-charcoal">{title}</h3>
-      <div className="space-y-3">
+      <div className="max-h-[600px] overflow-y-auto space-y-3">
         {tasks.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex items-center justify-center py-8">
