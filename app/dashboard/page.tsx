@@ -34,11 +34,16 @@ export default function DashboardPage() {
 
   // Optimistic chore completion
   const handleChoreCompleteOptimistic = (choreId: string) => {
-    setOptimisticChores(prev => prev.map(chore =>
-      chore.scheduleId.toString() === choreId
-        ? { ...chore, completed: true }
-        : chore
-    ))
+    console.log("[dashboard] Optimistically completing chore:", choreId)
+    setOptimisticChores(prev => {
+      const updated = prev.map(chore => {
+        const matches = chore.scheduleId.toString() === choreId
+        console.log(`[dashboard] Chore ${chore.scheduleId} (${chore.title}): matches=${matches}`)
+        return matches ? { ...chore, completed: true } : chore
+      })
+      console.log("[dashboard] Updated chores:", updated.map(c => ({ id: c.scheduleId, title: c.title, completed: c.completed })))
+      return updated
+    })
   }
 
   if (status === "reconnecting" || status === "connecting") {
