@@ -15,7 +15,7 @@ import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import { useTaskData } from "@/hooks/use-task-data"
 import { useWallet } from "@/hooks/use-wallet"
-import { Loader2, Plus, Mail } from "lucide-react"
+import { Loader2, Plus, Mail, CalendarPlus } from "lucide-react"
 import { useState, useEffect } from "react"
 import type { Task } from "@/types/commune"
 
@@ -208,12 +208,20 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <LanguageToggle />
             {commune && address && commune.creator.toLowerCase() === address.toLowerCase() && (
-              <Link href="/dashboard/invites">
-                <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Invites
-                </Button>
-              </Link>
+              <>
+                <Link href="/dashboard/add-chores">
+                  <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                    <CalendarPlus className="w-4 h-4 mr-2" />
+                    Add Chores
+                  </Button>
+                </Link>
+                <Link href="/dashboard/invites">
+                  <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Invites
+                  </Button>
+                </Link>
+              </>
             )}
             <Link href="/create-sharehouse">
               <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
