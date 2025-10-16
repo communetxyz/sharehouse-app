@@ -40,6 +40,7 @@ const ChoreCard = memo(function ChoreCard({
   chore,
   onComplete,
   isCompleting,
+  isConfirming,
   showCompleteButton,
   isSuccess,
   locale,
@@ -48,6 +49,7 @@ const ChoreCard = memo(function ChoreCard({
   chore: ChoreInstance
   onComplete?: () => void
   isCompleting?: boolean
+  isConfirming?: boolean
   showCompleteButton?: boolean
   isSuccess?: boolean
   locale?: string
@@ -127,14 +129,14 @@ const ChoreCard = memo(function ChoreCard({
           {showCompleteButton && onComplete && (
             <Button
               onClick={onComplete}
-              disabled={isCompleting}
+              disabled={isCompleting || isConfirming}
               size="sm"
               className="w-full bg-sage hover:bg-sage/90 text-cream"
             >
-              {isCompleting ? (
+              {isCompleting || isConfirming ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Marking...
+                  {isConfirming ? "Confirming..." : "Marking..."}
                 </>
               ) : (
                 <>
@@ -154,13 +156,14 @@ const ChoreCard = memo(function ChoreCard({
     prevProps.chore.scheduleId === nextProps.chore.scheduleId &&
     prevProps.chore.completed === nextProps.chore.completed &&
     prevProps.isCompleting === nextProps.isCompleting &&
+    prevProps.isConfirming === nextProps.isConfirming &&
     prevProps.isSuccess === nextProps.isSuccess &&
     prevProps.locale === nextProps.locale
   )
 })
 
 export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
-  const { markComplete, isMarking, isConfirmed, error } = useMarkChoreComplete()
+  const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
   const { t, language } = useLanguage()
@@ -264,7 +267,8 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                         key={choreKey}
                         chore={chore}
                         onComplete={() => handleComplete(chore)}
-                        isCompleting={completingId === choreKey}
+                        isCompleting={completingId === choreKey && isMarking}
+                        isConfirming={completingId === choreKey && isConfirming}
                         isSuccess={successId === choreKey}
                         showCompleteButton
                         locale={language}
