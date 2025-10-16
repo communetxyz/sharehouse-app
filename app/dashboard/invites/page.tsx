@@ -9,7 +9,7 @@ import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import { useWallet } from "@/hooks/use-wallet"
-import { usePrivy } from "@privy-io/react-auth"
+import { useSignMessage, useWallets } from "@privy-io/react-auth"
 import { Loader2, ArrowLeft, Copy, Check, Mail } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { ethers } from "ethers"
@@ -26,7 +26,8 @@ export default function InviteGenerationPage() {
   const { t } = useI18n()
   const { address, isConnected, status } = useWallet()
   const { commune, isLoading: isLoadingCommune, error: communeError } = useCommuneData()
-  const { signMessage } = usePrivy()
+  const { wallets } = useWallets()
+  const { signMessage } = useSignMessage()
   const [invite, setInvite] = useState<Invite | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -62,9 +63,24 @@ export default function InviteGenerationPage() {
       // The message format should match what the smart contract expects
       const message = `Join Commune ${commune.id} with nonce ${nonce}`
 
-      // Request signature from wallet using Privy's signMessage
-      // signMessage returns a promise that resolves to the signature string
-      const signature = await signMessage(message)
+      console.log("[Invite] Signing message:", message)
+      console.log("[Invite] Message type:", typeof message)
+      console.log("[Invite] Commune ID:", commune.id, typeof commune.id)
+
+      // Request signature from wallet using Privy's useSignMessage hook
+      // signMessage expects an object with a message property
+      const { signature } = await signMessage(
+        { message },
+        {
+          uiOptions: {
+            title: "Sign Invite",
+            description: `Sign this message to generate an invite link for ${commune.name}`,
+          },
+          address: wallets[0]?.address,
+        }
+      )
+
+      console.log("[Invite] Signature received:", signature)
 
       // Construct invite URL
       const baseUrl = "https://www.share-house.fun"
