@@ -55,16 +55,6 @@ export function CommuneInfo({ commune, members }: CommuneInfoProps) {
           </div>
         </CardContent>
       </Card>
-
-      <Card className="border-sage/30 bg-sage/5">
-        <CardHeader>
-          <CardTitle className="font-serif text-charcoal">{t("commune.aboutSharehouse")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-charcoal/70 leading-relaxed">
-          <p>{t("commune.aboutDescription1")}</p>
-          <p>{t("commune.aboutDescription2")}</p>
-        </CardContent>
-      </Card>
     </div>
   )
 }

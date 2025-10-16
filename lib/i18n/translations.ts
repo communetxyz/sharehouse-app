@@ -60,6 +60,14 @@ export const translations = {
       signingIn: "サインイン中...",
       loadingSharehouse: "シェアハウスを読み込み中..."
     },
+    calendar: {
+      daily: "日",
+      weekly: "週",
+      monthly: "月",
+      loading: "読み込み中...",
+      monthNames: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+      dayNames: ["日", "月", "火", "水", "木", "金", "土"],
+    },
     chores: {
       pending: "保留中",
       inProgress: "進行中",
@@ -72,6 +80,8 @@ export const translations = {
       noAssignedChores: "現在割り当てられている家事はありません",
       noPendingChores: "保留中の家事はありません",
       noCompletedChores: "完了した家事はまだありません",
+      myChores: "私の家事",
+      otherChores: "他の家事",
     },
     members: {
       title: "メンバー",
@@ -173,6 +183,8 @@ export const translations = {
       selectNewAssignee: "この経費を再割り当てする新しいメンバーを選択してください",
       newAssignee: "新しい担当者",
       submitDispute: "異議を提出",
+      myExpenses: "私の経費",
+      otherExpenses: "他の経費",
     },
   },
   en: {
@@ -236,6 +248,14 @@ export const translations = {
       signingIn: "Signing in...",
       loadingSharehouse: "Loading your ShareHouse..."
     },
+    calendar: {
+      daily: "Daily",
+      weekly: "Weekly",
+      monthly: "Monthly",
+      loading: "Loading...",
+      monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+      dayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    },
     chores: {
       pending: "Pending",
       inProgress: "In Progress",
@@ -248,6 +268,8 @@ export const translations = {
       noAssignedChores: "No chores assigned to you right now",
       noPendingChores: "No pending chores",
       noCompletedChores: "No completed chores yet",
+      myChores: "My chores",
+      otherChores: "Other chores",
     },
     members: {
       title: "Members",
@@ -349,6 +371,8 @@ export const translations = {
       selectNewAssignee: "Select a new member to reassign this expense to",
       newAssignee: "New Assignee",
       submitDispute: "Submit Dispute",
+      myExpenses: "My expenses",
+      otherExpenses: "Other expenses",
     },
   },
 }

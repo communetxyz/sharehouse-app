@@ -73,7 +73,7 @@ function isSameUTCDay(timestamp: number, year: number, month: number, day: numbe
 }
 
 export function ChoreCalendar({ chores }: ChoreCalendarProps) {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [view, setView] = useState<CalendarView>("monthly")
   const today = new Date()
   const year = today.getFullYear()
@@ -97,22 +97,13 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
     days.push(i)
   }
 
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ]
+  const monthNames = language === "ja"
+    ? ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const dayNames = language === "ja"
+    ? ["日", "月", "火", "水", "木", "金", "土"]
+    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
   const isToday = (day: number | null) => {
     if (!day) return false
@@ -124,8 +115,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="font-serif text-charcoal">
-            {monthNames[month]} {year}
-            {isLoading && <span className="text-sm font-normal text-charcoal/60 ml-2">Loading...</span>}
+            {language === "ja" ? `${year}年 ${monthNames[month]}` : `${monthNames[month]} ${year}`}
+            {isLoading && <span className="text-sm font-normal text-charcoal/60 ml-2">{t("calendar.loading")}</span>}
           </CardTitle>
           <div className="flex gap-2">
             <Button
@@ -135,7 +126,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
               className={view === "daily" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
             >
               <Calendar className="w-4 h-4 mr-2" />
-              Daily
+              {t("calendar.daily")}
             </Button>
             <Button
               variant={view === "weekly" ? "default" : "outline"}
@@ -144,7 +135,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
               className={view === "weekly" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
             >
               <CalendarDays className="w-4 h-4 mr-2" />
-              Weekly
+              {t("calendar.weekly")}
             </Button>
             <Button
               variant={view === "monthly" ? "default" : "outline"}
@@ -153,7 +144,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
               className={view === "monthly" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
             >
               <CalendarRange className="w-4 h-4 mr-2" />
-              Monthly
+              {t("calendar.monthly")}
             </Button>
           </div>
         </div>
@@ -287,31 +278,31 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
         <div className="mt-4 pt-4 border-t border-charcoal/10 flex flex-wrap gap-4 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-sage/10 border border-sage/40" />
-            <span className="text-charcoal/70">My chores</span>
+            <span className="text-charcoal/70">{t("chores.myChores")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-charcoal/5 border border-charcoal/10" />
-            <span className="text-charcoal/70">Other chores</span>
+            <span className="text-charcoal/70">{t("chores.otherChores")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-sage/20 border border-sage/30" />
-            <span className="text-charcoal/70">Completed</span>
+            <span className="text-charcoal/70">{t("chores.completed")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-blue-50 border-l-2 border-blue-400" />
-            <span className="text-charcoal/70">My expenses</span>
+            <span className="text-charcoal/70">{t("expenses.myExpenses")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-amber-50 border-l-2 border-amber-400" />
-            <span className="text-charcoal/70">Other expenses</span>
+            <span className="text-charcoal/70">{t("expenses.otherExpenses")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-green-50 border-l-2 border-green-400" />
-            <span className="text-charcoal/70">Paid</span>
+            <span className="text-charcoal/70">{t("expenses.paid")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-red-50 border-l-2 border-red-400" />
-            <span className="text-charcoal/70">Disputed</span>
+            <span className="text-charcoal/70">{t("expenses.disputed")}</span>
           </div>
         </div>
       </CardContent>
