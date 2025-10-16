@@ -27,7 +27,7 @@ export function useCalendarTasks() {
         taskData.map((task: any) => ({
           id: task.id.toString(),
           communeId: task.communeId.toString(),
-          amount: (Number(task.amount) / 1e18).toString(),
+          budget: (Number(task.budget) / 1e18).toString(),
           description: task.description,
           assignedTo: task.assignedTo,
           dueDate: Number(task.dueDate),
