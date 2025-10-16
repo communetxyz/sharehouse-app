@@ -10,7 +10,7 @@ export interface Commune {
 export interface CommuneStatistics extends Commune {
   memberCount: string
   choreCount: string
-  expenseCount: string
+  taskCount: string
 }
 
 export interface Member {
@@ -33,22 +33,22 @@ export interface ChoreInstance {
   isAssignedToUser: boolean
 }
 
-export interface Expense {
+export interface Task {
   id: string
   communeId: string // Added communeId field to match contract structure
-  amount: string
+  budget: string
   description: string
   assignedTo: string
   assignedToUsername?: string // Added for display purposes
   dueDate: number
-  paid: boolean
+  done: boolean
   disputed: boolean
   isAssignedToUser: boolean
 }
 
-export interface ExpenseDispute {
+export interface TaskDispute {
   id: string
-  expenseId: string
+  taskId: string
   newAssignee: string
   votes: number
   resolved: boolean

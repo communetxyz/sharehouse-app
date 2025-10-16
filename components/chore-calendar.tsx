@@ -1,10 +1,10 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { ChoreInstance, Expense } from "@/types/commune"
+import type { ChoreInstance, Task } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useCalendarChores } from "@/hooks/use-calendar-chores"
-import { useCalendarExpenses } from "@/hooks/use-calendar-expenses"
+import { useCalendarTasks } from "@/hooks/use-calendar-tasks"
 
 interface ChoreCalendarProps {
   chores: ChoreInstance[]
@@ -27,22 +27,22 @@ function ChoreItem({ chore }: { chore: ChoreInstance }) {
   )
 }
 
-function ExpenseItem({ expense }: { expense: Expense }) {
+function TaskItem({ task }: { expense: Expense }) {
   return (
     <div
       className={`text-xs p-1.5 rounded mb-1 border-l-2 ${
-        expense.disputed
+        task.disputed
           ? "bg-red-50 border-red-400"
-          : expense.paid
+          : task.paid
             ? "bg-green-50 border-green-400"
-            : expense.isAssignedToUser
+            : task.isAssignedToUser
               ? "bg-blue-50 border-blue-400"
               : "bg-amber-50 border-amber-400"
       }`}
     >
-      <div className="font-medium truncate">💰 {expense.description}</div>
-      <div className="text-charcoal/60 truncate">{expense.amount} Collateral Currency</div>
-      <div className="text-charcoal/60 truncate">{expense.assignedToUsername}</div>
+      <div className="font-medium truncate">💰 {task.description}</div>
+      <div className="text-charcoal/60 truncate">{task.budget} Collateral Currency</div>
+      <div className="text-charcoal/60 truncate">{task.assignedToUsername}</div>
     </div>
   )
 }
@@ -59,9 +59,9 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const month = today.getMonth()
 
   const { chores: fetchedChores, isLoading: isLoadingChores } = useCalendarChores(year, month)
-  const { expenses, isLoading: isLoadingExpenses } = useCalendarExpenses()
+  const { tasks, isLoading: isLoadingTasks } = useCalendarTasks()
 
-  const isLoading = isLoadingChores || isLoadingExpenses
+  const isLoading = isLoadingChores || isLoadingTasks
 
   const firstDayOfMonth = new Date(year, month, 1)
   const lastDayOfMonth = new Date(year, month + 1, 0)
@@ -124,7 +124,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
             const dayChores = day
               ? fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, month, day))
               : []
-            const dayExpenses = day ? expenses.filter((expense) => isSameUTCDay(expense.dueDate, year, month, day)) : []
+            const dayTasks = day ? tasks.filter((expense) => isSameUTCDay(task.dueDate, year, month, day)) : []
 
             return (
               <div
@@ -150,8 +150,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                       {dayChores.map((chore) => (
                         <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
                       ))}
-                      {dayExpenses.map((expense) => (
-                        <ExpenseItem key={expense.id} expense={expense} />
+                      {dayTasks.map((expense) => (
+                        <TaskItem key={task.id} expense={expense} />
                       ))}
                     </div>
                   </>
@@ -177,11 +177,11 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-blue-50 border-l-2 border-blue-400" />
-            <span className="text-charcoal/70">My expenses</span>
+            <span className="text-charcoal/70">My tasks</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-amber-50 border-l-2 border-amber-400" />
-            <span className="text-charcoal/70">Other expenses</span>
+            <span className="text-charcoal/70">Other tasks</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-green-50 border-l-2 border-green-400" />

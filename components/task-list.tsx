@@ -4,195 +4,195 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useI18n } from "@/lib/i18n/context"
-import { useMarkExpensePaid } from "@/hooks/use-mark-expense-paid"
+import { useMarkTaskDone } from "@/hooks/use-mark-task-done"
 import { useCommuneData } from "@/hooks/use-commune-data"
-import type { Expense } from "@/types/commune"
+import type { Task } from "@/types/commune"
 import { DollarSign, Calendar, User, AlertCircle, Sparkles, Loader2, CheckCircle2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
-import { DisputeExpenseDialog } from "@/components/dispute-expense-dialog"
+import { DisputeTaskDialog } from "@/components/dispute-task-dialog"
 import { Confetti } from "@/components/ui/confetti"
 
-interface ExpenseListProps {
-  expenses: Expense[]
+interface TaskListProps {
+  tasks: Task[]
   communeId: string
   filterAssignedToMe?: boolean
-  onOptimisticMarkPaid?: (expenseId: string) => void
+  onOptimisticMarkDone?: (taskId: string) => void
   onRefresh: () => void
   pendingCreateIds?: Set<string>
   confirmedCreateIds?: Set<string>
 }
 
-export function ExpenseList({ expenses, communeId, filterAssignedToMe = false, onOptimisticMarkPaid, onRefresh, pendingCreateIds, confirmedCreateIds }: ExpenseListProps) {
+export function TaskList({ tasks, communeId, filterAssignedToMe = false, onOptimisticMarkDone, onRefresh, pendingCreateIds, confirmedCreateIds }: TaskListProps) {
   const { t } = useI18n()
-  const { markPaid } = useMarkExpensePaid(communeId, onRefresh)
-  const [successExpenseId, setSuccessExpenseId] = useState<string | null>(null)
-  const [pendingExpenseIds, setPendingExpenseIds] = useState<Set<string>>(new Set())
-  const [confirmedExpenseIds, setConfirmedExpenseIds] = useState<Set<string>>(new Set())
-  const [markingExpenseId, setMarkingExpenseId] = useState<string | null>(null)
+  const { markDone } = useMarkTaskDone(communeId, onRefresh)
+  const [successTaskId, setSuccessTaskId] = useState<string | null>(null)
+  const [pendingTaskIds, setPendingTaskIds] = useState<Set<string>>(new Set())
+  const [confirmedTaskIds, setConfirmedTaskIds] = useState<Set<string>>(new Set())
+  const [markingTaskId, setMarkingTaskId] = useState<string | null>(null)
 
-  const filteredExpenses = filterAssignedToMe ? expenses.filter((e) => e.isAssignedToUser) : expenses
+  const filteredTasks = filterAssignedToMe ? tasks.filter((e) => e.isAssignedToUser) : tasks
 
-  const unpaidExpenses = filteredExpenses.filter((e) => !e.paid && !e.disputed)
-  const paidExpenses = filteredExpenses.filter((e) => e.paid && !e.disputed)
-  const disputedExpenses = filteredExpenses.filter((e) => e.disputed)
+  const undoneTasks = filteredTasks.filter((e) => !e.done && !e.disputed)
+  const doneTasks = filteredTasks.filter((e) => e.done && !e.disputed)
+  const disputedTasks = filteredTasks.filter((e) => e.disputed)
 
-  const handleMarkPaid = async (expenseId: string) => {
-    // Don't allow marking temporary expenses as paid
-    if (expenseId.startsWith('temp-')) {
-      console.warn('Cannot mark temporary expense as paid')
+  const handleMarkDone = async (taskId: string) => {
+    // Don't allow marking temporary tasks as done
+    if (taskId.startsWith('temp-')) {
+      console.warn('Cannot mark temporary task as done')
       return
     }
 
     // Optimistically update UI immediately
-    if (onOptimisticMarkPaid) {
-      onOptimisticMarkPaid(expenseId)
+    if (onOptimisticMarkDone) {
+      onOptimisticMarkDone(taskId)
     }
-    setSuccessExpenseId(expenseId)
-    setTimeout(() => setSuccessExpenseId(null), 1500)
+    setSuccessTaskId(taskId)
+    setTimeout(() => setSuccessTaskId(null), 1500)
 
-    // Track which expense is being marked
-    setMarkingExpenseId(expenseId)
+    // Track which task is being marked
+    setMarkingTaskId(taskId)
 
     // Track pending transaction
-    setPendingExpenseIds(prev => new Set(prev).add(expenseId))
+    setPendingTaskIds(prev => new Set(prev).add(taskId))
 
     try {
-      await markPaid(expenseId)
+      await markDone(taskId)
       // Transaction confirmed
-      setConfirmedExpenseIds(prev => new Set(prev).add(expenseId))
-      setPendingExpenseIds(prev => {
+      setConfirmedTaskIds(prev => new Set(prev).add(taskId))
+      setPendingTaskIds(prev => {
         const newSet = new Set(prev)
-        newSet.delete(expenseId)
+        newSet.delete(taskId)
         return newSet
       })
 
       // Clear confirmed status after 2 seconds
       setTimeout(() => {
-        setConfirmedExpenseIds(prev => {
+        setConfirmedTaskIds(prev => {
           const newSet = new Set(prev)
-          newSet.delete(expenseId)
+          newSet.delete(taskId)
           return newSet
         })
       }, 2000)
     } catch (error) {
       // Remove from pending on error
-      setPendingExpenseIds(prev => {
+      setPendingTaskIds(prev => {
         const newSet = new Set(prev)
-        newSet.delete(expenseId)
+        newSet.delete(taskId)
         return newSet
       })
     } finally {
       // Clear marking state
-      setMarkingExpenseId(null)
+      setMarkingTaskId(null)
     }
   }
 
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      <ExpenseColumn
-        title={t("expenses.unpaid")}
-        expenses={unpaidExpenses}
+      <TaskColumn
+        title={t("tasks.undone")}
+        tasks={undoneTasks}
         communeId={communeId}
-        onMarkPaid={handleMarkPaid}
-        markingExpenseId={markingExpenseId}
+        onMarkDone={handleMarkDone}
+        markingTaskId={markingTaskId}
         onRefresh={onRefresh}
-        successExpenseId={successExpenseId}
-        pendingExpenseIds={pendingExpenseIds}
-        confirmedExpenseIds={confirmedExpenseIds}
+        successTaskId={successTaskId}
+        pendingTaskIds={pendingTaskIds}
+        confirmedTaskIds={confirmedTaskIds}
         pendingCreateIds={pendingCreateIds}
         confirmedCreateIds={confirmedCreateIds}
-        emptyMessage={t("expenses.noExpenses")}
+        emptyMessage={t("tasks.noTasks")}
       />
-      <ExpenseColumn
-        title={t("expenses.paid")}
-        expenses={paidExpenses}
+      <TaskColumn
+        title={t("tasks.done")}
+        tasks={doneTasks}
         communeId={communeId}
-        isPaid
-        pendingExpenseIds={pendingExpenseIds}
-        confirmedExpenseIds={confirmedExpenseIds}
+        isDone
+        pendingTaskIds={pendingTaskIds}
+        confirmedTaskIds={confirmedTaskIds}
         pendingCreateIds={pendingCreateIds}
         confirmedCreateIds={confirmedCreateIds}
-        emptyMessage={t("expenses.noPaidExpenses")}
+        emptyMessage={t("tasks.noDoneTasks")}
       />
-      <ExpenseColumn
-        title={t("expenses.disputed")}
-        expenses={disputedExpenses}
+      <TaskColumn
+        title={t("tasks.disputed")}
+        tasks={disputedTasks}
         communeId={communeId}
         isDisputed
         onRefresh={onRefresh}
-        emptyMessage={t("expenses.noExpenses")}
+        emptyMessage={t("tasks.noTasks")}
       />
     </div>
   )
 }
 
-interface ExpenseColumnProps {
+interface TaskColumnProps {
   title: string
-  expenses: Expense[]
+  tasks: Task[]
   communeId: string
-  isPaid?: boolean
+  isDone?: boolean
   isDisputed?: boolean
-  onMarkPaid?: (expenseId: string) => void
-  markingExpenseId?: string | null
+  onMarkDone?: (taskId: string) => void
+  markingTaskId?: string | null
   onRefresh?: () => void
-  successExpenseId?: string | null
-  pendingExpenseIds?: Set<string>
-  confirmedExpenseIds?: Set<string>
+  successTaskId?: string | null
+  pendingTaskIds?: Set<string>
+  confirmedTaskIds?: Set<string>
   pendingCreateIds?: Set<string>
   confirmedCreateIds?: Set<string>
   emptyMessage: string
 }
 
-function ExpenseColumn({
+function TaskColumn({
   title,
-  expenses,
+  tasks,
   communeId,
-  isPaid,
+  isDone,
   isDisputed,
-  onMarkPaid,
-  markingExpenseId,
+  onMarkDone,
+  markingTaskId,
   onRefresh,
-  successExpenseId,
-  pendingExpenseIds,
-  confirmedExpenseIds,
+  successTaskId,
+  pendingTaskIds,
+  confirmedTaskIds,
   pendingCreateIds,
   confirmedCreateIds,
   emptyMessage,
-}: ExpenseColumnProps) {
+}: TaskColumnProps) {
   const { t } = useI18n()
 
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-lg text-charcoal">{title}</h3>
       <div className="space-y-3">
-        {expenses.length === 0 ? (
+        {tasks.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex items-center justify-center py-8">
               <p className="text-sm text-charcoal/50">{emptyMessage}</p>
             </CardContent>
           </Card>
         ) : (
-          expenses.map((expense) => (
-            <ExpenseCard
-              key={expense.id}
-              expense={expense}
+          tasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
               communeId={communeId}
-              isPaid={isPaid}
+              isDone={isDone}
               isDisputed={isDisputed}
-              onMarkPaid={onMarkPaid}
-              isMarking={markingExpenseId === expense.id}
+              onMarkDone={onMarkDone}
+              isMarking={markingTaskId === task.id}
               onRefresh={onRefresh}
-              isSuccess={successExpenseId === expense.id}
+              isSuccess={successTaskId === task.id}
               isPending={
-                expense.id.startsWith('temp-')
-                  ? (pendingCreateIds?.has(expense.id) || false)
-                  : (pendingExpenseIds?.has(expense.id) || false)
+                task.id.startsWith('temp-')
+                  ? (pendingCreateIds?.has(task.id) || false)
+                  : (pendingTaskIds?.has(task.id) || false)
               }
               isConfirmed={
-                expense.id.startsWith('temp-')
-                  ? (confirmedCreateIds?.has(expense.id) || false)
-                  : (confirmedExpenseIds?.has(expense.id) || false)
+                task.id.startsWith('temp-')
+                  ? (confirmedCreateIds?.has(task.id) || false)
+                  : (confirmedTaskIds?.has(task.id) || false)
               }
             />
           ))
@@ -202,12 +202,12 @@ function ExpenseColumn({
   )
 }
 
-interface ExpenseCardProps {
-  expense: Expense
+interface TaskCardProps {
+  task: Task
   communeId: string
-  isPaid?: boolean
+  isDone?: boolean
   isDisputed?: boolean
-  onMarkPaid?: (expenseId: string) => void
+  onMarkDone?: (taskId: string) => void
   isMarking?: boolean
   onRefresh?: () => void
   isSuccess?: boolean
@@ -215,23 +215,23 @@ interface ExpenseCardProps {
   isConfirmed?: boolean
 }
 
-function ExpenseCard({
-  expense,
+function TaskCard({
+  task,
   communeId,
-  isPaid,
+  isDone,
   isDisputed,
-  onMarkPaid,
+  onMarkDone,
   isMarking,
   onRefresh,
   isSuccess,
   isPending,
   isConfirmed
-}: ExpenseCardProps) {
+}: TaskCardProps) {
   const { t } = useI18n()
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const { members } = useCommuneData()
 
-  const isOverdue = !expense.paid && expense.dueDate < Date.now() / 1000
+  const isOverdue = !task.done && task.dueDate < Date.now() / 1000
 
   return (
     <>
@@ -296,22 +296,22 @@ function ExpenseCard({
 
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
-              <CardTitle className="text-base font-medium text-charcoal">{expense.description}</CardTitle>
+              <CardTitle className="text-base font-medium text-charcoal">{task.description}</CardTitle>
               {isDisputed && (
                 <Badge variant="destructive" className="ml-2">
                   <AlertCircle className="mr-1 h-3 w-3" />
-                  {t("expenses.disputed")}
+                  {t("tasks.disputed")}
                 </Badge>
               )}
             </div>
             <CardDescription className="flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1">
                 <DollarSign className="h-3 w-3" />
-                {expense.amount} Collateral Currency
+                {task.budget} Collateral Currency
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                {new Date(expense.dueDate * 1000).toLocaleDateString()}
+                {new Date(task.dueDate * 1000).toLocaleDateString()}
               </span>
             </CardDescription>
           </CardHeader>
@@ -320,36 +320,36 @@ function ExpenseCard({
               <div className="flex items-center gap-1">
                 <User className="h-3 w-3" />
                 <span>
-                  {t("expenses.assignedTo")}: {expense.assignedToUsername}
+                  {t("tasks.assignedTo")}: {task.assignedToUsername}
                 </span>
               </div>
             </div>
 
-            {!isPaid && !isDisputed && expense.isAssignedToUser && onMarkPaid && !expense.id.startsWith('temp-') && (
+            {!isDone && !isDisputed && task.isAssignedToUser && onMarkDone && !task.id.startsWith('temp-') && (
               <Button
-                onClick={() => onMarkPaid(expense.id)}
+                onClick={() => onMarkDone(task.id)}
                 disabled={isMarking}
                 size="sm"
                 className="w-full bg-sage hover:bg-sage/90"
               >
-                {isMarking ? t("expenses.markingPaid") : t("expenses.markPaid")}
+                {isMarking ? t("tasks.markingDone") : t("tasks.markDone")}
               </Button>
             )}
 
-            {!isDisputed && !expense.isAssignedToUser && !expense.id.startsWith('temp-') && (
+            {!isDisputed && !task.isAssignedToUser && !task.id.startsWith('temp-') && (
               <Button onClick={() => setShowDisputeDialog(true)} size="sm" variant="outline" className="w-full">
-                {t("expenses.dispute")}
+                {t("tasks.dispute")}
               </Button>
             )}
           </CardContent>
         </Card>
       </motion.div>
 
-      <DisputeExpenseDialog
+      <DisputeTaskDialog
         open={showDisputeDialog}
         onOpenChange={setShowDisputeDialog}
-        expenseId={expense.id}
-        currentAssignee={expense.assignedTo}
+        taskId={task.id}
+        currentAssignee={task.assignedTo}
         communeId={communeId}
         members={members}
         onRefresh={onRefresh || (() => {})}

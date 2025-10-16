@@ -30,9 +30,6 @@ export function useCreateCommune() {
     setIsLoading(true)
     setError(null)
 
-    // Optimistically redirect to dashboard
-    router.push("/dashboard")
-
     try {
       console.log("[v0] Creating commune with data:", input)
 
@@ -74,6 +71,9 @@ export function useCreateCommune() {
         title: "Success",
         description: "Commune created successfully!",
       })
+
+      // Redirect to dashboard after successful transaction
+      router.push("/dashboard")
     } catch (err) {
       console.error("[v0] Create commune error:", err)
       const error = err as Error

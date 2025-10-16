@@ -7,18 +7,18 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useMarkExpensePaid(communeId: string, onRefresh?: () => void) {
+export function useMarkTaskDone(communeId: string, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isMarking, setIsMarking] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
   const { toast } = useToast()
 
-  const markPaid = async (expenseId: string) => {
+  const markDone = async (taskId: string) => {
     if (!isConnected || !address) {
       toast({
         title: "Wallet not connected",
-        description: "Please connect your wallet to mark expense as paid",
+        description: "Please connect your wallet to mark task as done",
         variant: "destructive",
       })
       return
@@ -33,8 +33,8 @@ export function useMarkExpensePaid(communeId: string, onRefresh?: () => void) {
     try {
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
-        functionName: "markExpensePaid",
-        args: [BigInt(communeId), BigInt(expenseId)],
+        functionName: "markTaskDone",
+        args: [BigInt(communeId), BigInt(taskId)],
       })
 
       await sendTransaction(
@@ -48,16 +48,16 @@ export function useMarkExpensePaid(communeId: string, onRefresh?: () => void) {
       )
 
       toast({
-        title: "Expense marked as paid",
-        description: "The expense has been marked as paid successfully",
+        title: "Task marked as done",
+        description: "The task has been marked as done successfully",
       })
 
-      // Don't call onRefresh - ExpenseList handles confirmation internally
+      // Don't call onRefresh - TaskList handles confirmation internally
     } catch (error: any) {
-      console.error("Error marking expense as paid:", error)
+      console.error("Error marking task as done:", error)
       setIsConfirmed(false)
       toast({
-        title: "Failed to mark expense as paid",
+        title: "Failed to mark task as done",
         description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
@@ -67,7 +67,7 @@ export function useMarkExpensePaid(communeId: string, onRefresh?: () => void) {
   }
 
   return {
-    markPaid,
+    markDone,
     isMarking,
     isConfirmed,
   }
