@@ -1,10 +1,15 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import type { ChoreInstance, Expense } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useCalendarChores } from "@/hooks/use-calendar-chores"
 import { useCalendarExpenses } from "@/hooks/use-calendar-expenses"
+import { useState } from "react"
+import { Calendar, CalendarDays, CalendarRange } from "lucide-react"
+
+type CalendarView = "daily" | "weekly" | "monthly"
 
 interface ChoreCalendarProps {
   chores: ChoreInstance[]
@@ -54,6 +59,7 @@ function isSameUTCDay(timestamp: number, year: number, month: number, day: numbe
 
 export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   const { t } = useLanguage()
+  const [view, setView] = useState<CalendarView>("monthly")
   const today = new Date()
   const year = today.getFullYear()
   const month = today.getMonth()
@@ -106,20 +112,119 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
             {monthNames[month]} {year}
             {isLoading && <span className="text-sm font-normal text-charcoal/60 ml-2">Loading...</span>}
           </CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant={view === "daily" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setView("daily")}
+              className={view === "daily" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Daily
+            </Button>
+            <Button
+              variant={view === "weekly" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setView("weekly")}
+              className={view === "weekly" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
+            >
+              <CalendarDays className="w-4 h-4 mr-2" />
+              Weekly
+            </Button>
+            <Button
+              variant={view === "monthly" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setView("monthly")}
+              className={view === "monthly" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
+            >
+              <CalendarRange className="w-4 h-4 mr-2" />
+              Monthly
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        {/* Day headers */}
-        <div className="grid grid-cols-7 gap-2 mb-2">
-          {dayNames.map((day) => (
-            <div key={day} className="text-center text-xs font-medium text-charcoal/60 py-2">
-              {day}
+        {view === "daily" && (
+          <div className="space-y-4">
+            <div className="bg-sage/10 border border-sage/40 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-charcoal mb-3">
+                {today.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+              </h3>
+              <div className="space-y-2">
+                {fetchedChores
+                  .filter((chore) => isSameUTCDay(chore.periodStart, year, month, today.getDate()))
+                  .map((chore) => (
+                    <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
+                  ))}
+                {expenses
+                  .filter((expense) => isSameUTCDay(expense.dueDate, year, month, today.getDate()))
+                  .map((expense) => (
+                    <ExpenseItem key={expense.id} expense={expense} />
+                  ))}
+                {fetchedChores.filter((c) => isSameUTCDay(c.periodStart, year, month, today.getDate())).length === 0 &&
+                  expenses.filter((e) => isSameUTCDay(e.dueDate, year, month, today.getDate())).length === 0 && (
+                    <p className="text-sm text-charcoal/60 text-center py-4">No chores or expenses today</p>
+                  )}
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
 
-        {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-2">
+        {view === "weekly" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-7 gap-2">
+              {Array.from({ length: 7 }, (_, i) => {
+                const date = new Date(today)
+                date.setDate(today.getDate() - today.getDay() + i)
+                const day = date.getDate()
+                const isCurrentMonth = date.getMonth() === month
+                const dayChores = isCurrentMonth
+                  ? fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, date.getMonth(), day))
+                  : []
+                const dayExpenses = isCurrentMonth
+                  ? expenses.filter((expense) => isSameUTCDay(expense.dueDate, year, date.getMonth(), day))
+                  : []
+                const isCurrentDay = date.toDateString() === today.toDateString()
+
+                return (
+                  <div
+                    key={i}
+                    className={`min-h-[200px] p-3 rounded-lg border ${
+                      isCurrentDay ? "bg-sage/10 border-sage/40" : "bg-white/50 border-charcoal/10"
+                    }`}
+                  >
+                    <div className={`text-center mb-2 ${isCurrentDay ? "text-sage font-bold" : "text-charcoal/70"}`}>
+                      <div className="text-xs font-medium">{dayNames[i]}</div>
+                      <div className="text-lg">{day}</div>
+                    </div>
+                    <div className="space-y-1 overflow-y-auto max-h-[150px]">
+                      {dayChores.map((chore) => (
+                        <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
+                      ))}
+                      {dayExpenses.map((expense) => (
+                        <ExpenseItem key={expense.id} expense={expense} />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {view === "monthly" && (
+          <>
+            {/* Day headers */}
+            <div className="grid grid-cols-7 gap-2 mb-2">
+              {dayNames.map((day) => (
+                <div key={day} className="text-center text-xs font-medium text-charcoal/60 py-2">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar grid */}
+            <div className="grid grid-cols-7 gap-2">
           {days.map((day, index) => {
             const dayChores = day
               ? fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, month, day))
@@ -159,7 +264,9 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
               </div>
             )
           })}
-        </div>
+            </div>
+          </>
+        )}
 
         {/* Legend */}
         <div className="mt-4 pt-4 border-t border-charcoal/10 flex flex-wrap gap-4 text-xs">

@@ -11,6 +11,7 @@ import { useLanguage } from "@/lib/i18n/context"
 import { useToast } from "@/hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
 import { Confetti } from "@/components/ui/confetti"
+import { EmojiPickerDialog } from "@/components/emoji-picker-dialog"
 
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
@@ -28,9 +29,9 @@ const getFrequencyLabel = (frequency: number) => {
   return `Every ${days} days`
 }
 
-const formatPeriodDate = (periodStart: number) => {
+const formatPeriodDate = (periodStart: number, locale: string = "en-US") => {
   const start = new Date(periodStart * 1000)
-  return start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+  return start.toLocaleDateString(locale === "ja" ? "ja-JP" : "en-US", { weekday: "short", month: "short", day: "numeric" })
 }
 
 // Memoize ChoreCard to prevent unnecessary re-renders
@@ -40,13 +41,26 @@ const ChoreCard = memo(function ChoreCard({
   isCompleting,
   showCompleteButton,
   isSuccess,
+  locale,
 }: {
   chore: ChoreInstance
   onComplete?: () => void
   isCompleting?: boolean
   showCompleteButton?: boolean
   isSuccess?: boolean
+  locale?: string
 }) {
+  const [choreEmoji, setChoreEmoji] = useState("")
+
+  useEffect(() => {
+    // Load emoji from localStorage
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(`chore-emoji-${chore.scheduleId}`)
+      if (stored) {
+        setChoreEmoji(stored)
+      }
+    }
+  }, [chore.scheduleId])
 
   return (
     <motion.div
@@ -83,14 +97,22 @@ const ChoreCard = memo(function ChoreCard({
           </AnimatePresence>
 
           <div>
-            <h4 className={`font-medium text-charcoal mb-1 ${chore.completed ? "line-through opacity-60" : ""}`}>
-              {chore.title}
-            </h4>
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h4 className={`font-medium text-charcoal flex-1 ${chore.completed ? "line-through opacity-60" : ""}`}>
+                {choreEmoji && <span className="mr-2">{choreEmoji}</span>}
+                {chore.title}
+              </h4>
+              <EmojiPickerDialog
+                choreId={chore.scheduleId.toString()}
+                currentEmoji={choreEmoji}
+                onSelect={setChoreEmoji}
+              />
+            </div>
             <div className="flex flex-wrap gap-2 text-xs text-charcoal/60">
               <Badge variant="outline" className={chore.completed ? "border-sage/30 text-sage" : "border-charcoal/20"}>
                 {getFrequencyLabel(chore.frequency)}
               </Badge>
-              <span>{formatPeriodDate(chore.periodStart)}</span>
+              <span>{formatPeriodDate(chore.periodStart, locale)}</span>
             </div>
           </div>
           {!showCompleteButton && (
@@ -137,7 +159,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
   const { markComplete, isMarking, isConfirmed, error } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -238,6 +260,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                       isCompleting={completingId === chore.scheduleId.toString()}
                       isSuccess={successId === chore.scheduleId.toString()}
                       showCompleteButton
+                      locale={language}
                     />
                   ))
                 )}
@@ -260,7 +283,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                 {completed.length === 0 ? (
                   <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
                 ) : (
-                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
+                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} />)
                 )}
               </AnimatePresence>
             </div>
@@ -287,7 +310,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {notStarted.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noPendingChores")}</p>
               ) : (
-                notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
+                notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} />)
               )}
             </AnimatePresence>
           </div>
@@ -308,7 +331,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {completed.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
               ) : (
-                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
+                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} />)
               )}
             </AnimatePresence>
           </div>
