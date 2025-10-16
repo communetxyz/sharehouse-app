@@ -85,6 +85,9 @@ export default function InviteGenerationPage() {
 
       console.log("[Invite] Signature received:", signature)
 
+      // Wait a moment for the signature to fully process
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
       // Construct invite URL
       const baseUrl = "https://www.share-house.fun"
       const inviteUrl = `${baseUrl}/join?communeId=${commune.id}&nonce=${nonce}&signature=${signature}`
@@ -99,6 +102,9 @@ export default function InviteGenerationPage() {
       }
 
       setInvite(newInvite)
+
+      // Wait another moment before showing success
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       toast({
         title: "Success",
