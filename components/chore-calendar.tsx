@@ -124,7 +124,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
             const dayChores = day
               ? fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, month, day))
               : []
-            const dayTasks = day ? tasks.filter((expense) => isSameUTCDay(task.dueDate, year, month, day)) : []
+            const dayTasks = day ? tasks.filter((task) => isSameUTCDay(task.dueDate, year, month, day)) : []
 
             return (
               <div
@@ -150,8 +150,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                       {dayChores.map((chore) => (
                         <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
                       ))}
-                      {dayTasks.map((expense) => (
-                        <TaskItem key={task.id} expense={expense} />
+                      {dayTasks.map((task) => (
+                        <TaskItem key={task.id} task={task} />
                       ))}
                     </div>
                   </>
@@ -185,7 +185,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-green-50 border-l-2 border-green-400" />
-            <span className="text-charcoal/70">Paid</span>
+            <span className="text-charcoal/70">Done</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-red-50 border-l-2 border-red-400" />

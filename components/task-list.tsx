@@ -67,13 +67,17 @@ export function TaskList({ tasks, communeId, filterAssignedToMe = false, onOptim
         return newSet
       })
 
-      // Clear confirmed status after 2 seconds
+      // Clear confirmed status and refresh data after 2 seconds
       setTimeout(() => {
         setConfirmedTaskIds(prev => {
           const newSet = new Set(prev)
           newSet.delete(taskId)
           return newSet
         })
+        // Refresh data to get updated state from blockchain
+        if (onRefresh) {
+          onRefresh()
+        }
       }, 2000)
     } catch (error) {
       // Remove from pending on error

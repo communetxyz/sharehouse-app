@@ -145,7 +145,7 @@ export function useJoinCommune() {
         collateralAmount: communeInfo.collateralAmount ? (Number(communeInfo.collateralAmount) / 1e18).toString() : "0",
         memberCount: totalMembers?.toString() || "0",
         choreCount: totalChores?.toString() || "0",
-        expenseCount: activeChores?.toString() || "0",
+        taskCount: activeChores?.toString() || "0",
       })
     } catch (err: any) {
       console.error("[v0] Validation error:", err)

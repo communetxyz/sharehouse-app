@@ -251,7 +251,7 @@ export default function DashboardPage() {
             <TabsTrigger value="my-chores">{t("dashboard.myChores")}</TabsTrigger>
             <TabsTrigger value="all-chores">{t("dashboard.allChores")}</TabsTrigger>
             <TabsTrigger value="calendar">{t("dashboard.calendar")}</TabsTrigger>
-            <TabsTrigger value="expenses">{t("dashboard.tasks")}</TabsTrigger>
+            <TabsTrigger value="tasks">{t("dashboard.tasks")}</TabsTrigger>
             <TabsTrigger value="members">{t("dashboard.members")}</TabsTrigger>
             <TabsTrigger value="info">{t("dashboard.info")}</TabsTrigger>
           </TabsList>
@@ -277,7 +277,7 @@ export default function DashboardPage() {
             <ChoreCalendar chores={optimisticChores} />
           </TabsContent>
 
-          <TabsContent value="expenses" className="space-y-6">
+          <TabsContent value="tasks" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif text-charcoal">{t("tasks.title")}</h2>
               {commune && <CreateTaskDialog
