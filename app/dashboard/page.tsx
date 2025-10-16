@@ -30,10 +30,15 @@ export default function DashboardPage() {
   const [pendingCreateIds, setPendingCreateIds] = useState<Set<string>>(new Set())
   const [confirmedCreateIds, setConfirmedCreateIds] = useState<Set<string>>(new Set())
 
-  // Sync fetched expenses with local state
+  // Sync fetched expenses with local state and enrich with member usernames
   useEffect(() => {
-    setExpenses(fetchedExpenses)
-  }, [fetchedExpenses])
+    // Enrich expenses with member usernames
+    const enrichedExpenses = fetchedExpenses.map(expense => ({
+      ...expense,
+      assignedToUsername: members.find(m => m.address.toLowerCase() === expense.assignedTo.toLowerCase())?.username || expense.assignedTo,
+    }))
+    setExpenses(enrichedExpenses)
+  }, [fetchedExpenses, members])
 
   // Optimistic expense creation
   const handleCreateExpenseOptimistic = (expenseData: {
