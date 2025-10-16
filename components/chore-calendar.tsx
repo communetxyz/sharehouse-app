@@ -153,35 +153,28 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
       <CardContent>
         {view === "daily" && (
           <div className="space-y-4">
-            <div className="text-center mb-4">
-              <h3 className="text-lg font-medium text-charcoal">
-                {language === "ja"
-                  ? `${year}年${month + 1}月${today.getDate()}日`
-                  : `${dayNames[today.getDay()]}, ${monthNames[month]} ${today.getDate()}, ${year}`}
+            <div className="bg-sage/10 border border-sage/40 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-charcoal mb-3">
+                {today.toLocaleDateString(
+                  language === "ja" ? "ja-JP" : "en-US",
+                  { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+                )}
               </h3>
-            </div>
-            <div>
-              <h4 className="font-medium text-charcoal mb-2">{t("calendar.chores")}</h4>
-              <div className="space-y-1">
-                {fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, month, today.getDate())).length === 0 ? (
-                  <p className="text-sm text-charcoal/60">{t("calendar.noChores")}</p>
-                ) : (
-                  fetchedChores
-                    .filter((chore) => isSameUTCDay(chore.periodStart, year, month, today.getDate()))
-                    .map((chore) => <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
-                )}
-              </div>
-            </div>
-            <div>
-              <h4 className="font-medium text-charcoal mb-2">{t("calendar.tasks")}</h4>
-              <div className="space-y-1">
-                {tasks.filter((task) => isSameUTCDay(task.dueDate, year, month, today.getDate())).length === 0 ? (
-                  <p className="text-sm text-charcoal/60">{t("calendar.noTasks")}</p>
-                ) : (
-                  tasks
-                    .filter((task) => isSameUTCDay(task.dueDate, year, month, today.getDate()))
-                    .map((task) => <TaskItem key={task.id} task={task} />)
-                )}
+              <div className="space-y-2">
+                {fetchedChores
+                  .filter((chore) => isSameUTCDay(chore.periodStart, year, month, today.getDate()))
+                  .map((chore) => (
+                    <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
+                  ))}
+                {tasks
+                  .filter((task) => isSameUTCDay(task.dueDate, year, month, today.getDate()))
+                  .map((task) => (
+                    <TaskItem key={task.id} task={task} />
+                  ))}
+                {fetchedChores.filter((c) => isSameUTCDay(c.periodStart, year, month, today.getDate())).length === 0 &&
+                  tasks.filter((t) => isSameUTCDay(t.dueDate, year, month, today.getDate())).length === 0 && (
+                    <p className="text-sm text-charcoal/60 text-center py-4">{t("calendar.noItemsToday")}</p>
+                  )}
               </div>
             </div>
           </div>
