@@ -53,8 +53,8 @@ export default function AddChoresPage() {
   useEffect(() => {
     if (commune && !isCreator) {
       toast({
-        title: "Access Denied",
-        description: "Only the sharehouse creator can add chores.",
+        title: t("addChores.accessDenied"),
+        description: t("addChores.accessDeniedDesc"),
         variant: "destructive",
       })
       router.push("/dashboard")
@@ -66,8 +66,8 @@ export default function AddChoresPage() {
 
     if (!title.trim()) {
       toast({
-        title: "Title Required",
-        description: "Please enter a chore title.",
+        title: t("addChores.titleRequired"),
+        description: t("addChores.titleRequiredDesc"),
         variant: "destructive",
       })
       return
@@ -108,8 +108,8 @@ export default function AddChoresPage() {
             )
           )
           toast({
-            title: "Chore Added!",
-            description: `"${optimisticChore.title}" has been added successfully.`,
+            title: t("addChores.choreAdded"),
+            description: t("addChores.choreAddedDesc").replace("{{title}}", optimisticChore.title),
           })
           // Refresh chore data so it appears in kanban/calendar
           refreshData()
@@ -124,8 +124,8 @@ export default function AddChoresPage() {
             )
           )
           toast({
-            title: "Failed to Add Chore",
-            description: error.message || "Please try again.",
+            title: t("addChores.failedToAddChore"),
+            description: error.message || t("common.tryAgain"),
             variant: "destructive",
           })
         }
@@ -154,8 +154,8 @@ export default function AddChoresPage() {
             prev.map((c) => (c.id === chore.id ? { ...c, status: "confirmed" } : c))
           )
           toast({
-            title: "Chore Added!",
-            description: `"${chore.title}" has been added successfully.`,
+            title: t("addChores.choreAdded"),
+            description: t("addChores.choreAddedDesc").replace("{{title}}", chore.title),
           })
           // Refresh chore data so it appears in kanban/calendar
           refreshData()
@@ -167,8 +167,8 @@ export default function AddChoresPage() {
             )
           )
           toast({
-            title: "Failed to Add Chore",
-            description: error.message || "Please try again.",
+            title: t("addChores.failedToAddChore"),
+            description: error.message || t("common.tryAgain"),
             variant: "destructive",
           })
         }
@@ -185,13 +185,13 @@ export default function AddChoresPage() {
   const getFrequencyLabel = (freq: ChoreFrequency) => {
     switch (freq) {
       case ChoreFrequency.DAILY:
-        return "Daily"
+        return t("addChores.daily")
       case ChoreFrequency.WEEKLY:
-        return "Weekly"
+        return t("addChores.weekly")
       case ChoreFrequency.MONTHLY:
-        return "Monthly"
+        return t("addChores.monthly")
       default:
-        return `Every ${freq} days`
+        return t("calendar.everyXDays").replace("{{days}}", freq.toString())
     }
   }
 
@@ -217,7 +217,7 @@ export default function AddChoresPage() {
       <div className="min-h-screen bg-gradient-to-br from-cream via-sage/20 to-cream flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 animate-spin text-sage mx-auto" />
-          <p className="text-charcoal/70">Loading...</p>
+          <p className="text-charcoal/70">{t("addChores.loading")}</p>
         </div>
       </div>
     )
@@ -249,14 +249,14 @@ export default function AddChoresPage() {
           <Link href="/dashboard">
             <Button variant="ghost" size="sm" className="mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {t("addChores.backToDashboard")}
             </Button>
           </Link>
           <h1 className="text-3xl md:text-4xl font-serif text-charcoal mb-2">
-            Add Chore Schedules
+            {t("addChores.title")}
           </h1>
           <p className="text-charcoal/70">
-            Define recurring tasks for your sharehouse. Each chore will be automatically assigned to members.
+            {t("addChores.subtitle")}
           </p>
         </div>
 
@@ -264,20 +264,20 @@ export default function AddChoresPage() {
           {/* Chore Form */}
           <Card className="border-sage/30 bg-white/50">
             <CardHeader>
-              <CardTitle className="font-serif text-charcoal">New Chore</CardTitle>
+              <CardTitle className="font-serif text-charcoal">{t("addChores.newChore")}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Title */}
                 <div className="space-y-2">
                   <Label htmlFor="title">
-                    Chore Title <span className="text-red-500">*</span>
+                    {t("addChores.choreTitle")} <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., Take out trash"
+                    placeholder={t("addChores.choreTitlePlaceholder")}
                     maxLength={100}
                     className="bg-white"
                   />
@@ -286,12 +286,12 @@ export default function AddChoresPage() {
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description (optional)</Label>
+                  <Label htmlFor="description">{t("addChores.description")}</Label>
                   <Textarea
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="e.g., Take trash and recycling to curb every Monday"
+                    placeholder={t("addChores.descriptionPlaceholder")}
                     maxLength={500}
                     className="bg-white min-h-[80px]"
                   />
@@ -301,7 +301,7 @@ export default function AddChoresPage() {
                 {/* Frequency */}
                 <div className="space-y-2">
                   <Label htmlFor="frequency">
-                    Frequency <span className="text-red-500">*</span>
+                    {t("addChores.frequency")} <span className="text-red-500">*</span>
                   </Label>
                   <Select
                     value={frequency.toString()}
@@ -311,12 +311,12 @@ export default function AddChoresPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={ChoreFrequency.DAILY.toString()}>Daily</SelectItem>
-                      <SelectItem value={ChoreFrequency.WEEKLY.toString()}>Weekly</SelectItem>
-                      <SelectItem value={ChoreFrequency.MONTHLY.toString()}>Monthly</SelectItem>
+                      <SelectItem value={ChoreFrequency.DAILY.toString()}>{t("addChores.daily")}</SelectItem>
+                      <SelectItem value={ChoreFrequency.WEEKLY.toString()}>{t("addChores.weekly")}</SelectItem>
+                      <SelectItem value={ChoreFrequency.MONTHLY.toString()}>{t("addChores.monthly")}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-charcoal/60">How often should this chore repeat?</p>
+                  <p className="text-xs text-charcoal/60">{t("addChores.frequencyHelper")}</p>
                 </div>
 
                 {/* Submit Button */}
@@ -328,12 +328,12 @@ export default function AddChoresPage() {
                   {isCreating ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Adding...
+                      {t("addChores.adding")}
                     </>
                   ) : (
                     <>
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Chore
+                      {t("addChores.addChore")}
                     </>
                   )}
                 </Button>
@@ -346,7 +346,7 @@ export default function AddChoresPage() {
             <Card className="border-charcoal/10">
               <CardHeader>
                 <CardTitle className="font-serif text-charcoal flex items-center justify-between">
-                  <span>Chores Added This Session</span>
+                  <span>{t("addChores.choresAddedThisSession")}</span>
                   <Badge variant="outline">{createdChores.length}</Badge>
                 </CardTitle>
               </CardHeader>
@@ -362,19 +362,19 @@ export default function AddChoresPage() {
                               {chore.status === "pending" && (
                                 <Badge variant="outline" className="border-yellow-500 text-yellow-700">
                                   <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                  Pending
+                                  {t("addChores.pending")}
                                 </Badge>
                               )}
                               {chore.status === "confirmed" && (
                                 <Badge variant="outline" className="border-sage text-sage">
                                   <CheckCircle2 className="w-3 h-3 mr-1" />
-                                  Confirmed
+                                  {t("addChores.confirmed")}
                                 </Badge>
                               )}
                               {chore.status === "failed" && (
                                 <Badge variant="outline" className="border-red-500 text-red-700">
                                   <AlertCircle className="w-3 h-3 mr-1" />
-                                  Failed
+                                  {t("addChores.failed")}
                                 </Badge>
                               )}
                             </div>
@@ -396,7 +396,7 @@ export default function AddChoresPage() {
                                 variant="outline"
                                 className="border-sage text-sage hover:bg-sage/10"
                               >
-                                Retry
+                                {t("addChores.retry")}
                               </Button>
                             )}
                             {(chore.status === "failed" || chore.status === "pending") && (
@@ -406,7 +406,7 @@ export default function AddChoresPage() {
                                 variant="ghost"
                                 className="text-charcoal/60 hover:text-charcoal"
                               >
-                                Remove
+                                {t("addChores.remove")}
                               </Button>
                             )}
                           </div>
@@ -423,12 +423,11 @@ export default function AddChoresPage() {
           <div className="flex items-center justify-between pt-4">
             <Link href="/dashboard">
               <Button variant="outline" className="border-charcoal/20">
-                Back to Dashboard
+                {t("addChores.backToDashboard")}
               </Button>
             </Link>
             <p className="text-sm text-charcoal/60">
-              {createdChores.filter((c) => c.status === "confirmed").length} chore
-              {createdChores.filter((c) => c.status === "confirmed").length !== 1 ? "s" : ""} confirmed
+              {t("addChores.confirmed_count").replace("{{count}}", createdChores.filter((c) => c.status === "confirmed").length.toString())}
             </p>
           </div>
         </div>

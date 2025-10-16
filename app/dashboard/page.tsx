@@ -212,7 +212,7 @@ export default function DashboardPage() {
                 <Link href="/dashboard/add-chores">
                   <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
                     <CalendarPlus className="w-4 h-4 mr-2" />
-                    Add Chores
+                    {t("addChores.button")}
                   </Button>
                 </Link>
                 <Link href="/dashboard/invites">
