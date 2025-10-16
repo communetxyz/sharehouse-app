@@ -37,8 +37,8 @@ export default function InviteGenerationPage() {
   const handleGenerateInvite = async () => {
     if (!commune || !address) {
       toast({
-        title: "Error",
-        description: "Please connect your wallet and join a commune first",
+        title: t("invites.error"),
+        description: t("invites.errorConnectWallet"),
         variant: "destructive",
       })
       return
@@ -46,8 +46,8 @@ export default function InviteGenerationPage() {
 
     if (!isOwner) {
       toast({
-        title: "Error",
-        description: "You must be a commune owner to generate invites",
+        title: t("invites.error"),
+        description: t("invites.errorOwnerOnly"),
         variant: "destructive",
       })
       return
@@ -107,14 +107,14 @@ export default function InviteGenerationPage() {
       await new Promise(resolve => setTimeout(resolve, 500))
 
       toast({
-        title: "Success",
-        description: "Invite link generated successfully!",
+        title: t("invites.success"),
+        description: t("invites.successGenerated"),
       })
     } catch (error: any) {
       console.error("Failed to generate invite:", error)
       toast({
-        title: "Error",
-        description: error.message || "Failed to generate invite link",
+        title: t("invites.error"),
+        description: error.message || t("invites.errorFailedToGenerate"),
         variant: "destructive",
       })
     } finally {
@@ -129,14 +129,14 @@ export default function InviteGenerationPage() {
       await navigator.clipboard.writeText(invite.url)
       setCopied(true)
       toast({
-        title: "Copied!",
-        description: "Invite link copied to clipboard",
+        title: t("invites.successCopied"),
+        description: t("invites.successCopiedDesc"),
       })
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to copy to clipboard",
+        title: t("invites.error"),
+        description: t("invites.errorCopyFailed"),
         variant: "destructive",
       })
     }
@@ -212,11 +212,11 @@ export default function InviteGenerationPage() {
         <div className="flex items-center justify-center min-h-[80vh]">
           <Card className="max-w-md">
             <CardHeader>
-              <CardTitle className="font-serif text-charcoal">Not a Member</CardTitle>
+              <CardTitle className="font-serif text-charcoal">{t("invites.notMember")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-charcoal/70">
-                You must be a member of a commune to access this page.
+                {t("invites.notMemberDesc")}
               </p>
               <Link href="/join">
                 <Button className="bg-sage hover:bg-sage/90 text-cream">
@@ -254,15 +254,15 @@ export default function InviteGenerationPage() {
         <div className="flex items-center justify-center min-h-[80vh]">
           <Card className="max-w-md">
             <CardHeader>
-              <CardTitle className="font-serif text-charcoal">Owner Only</CardTitle>
+              <CardTitle className="font-serif text-charcoal">{t("invites.ownerOnly")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-charcoal/70">
-                You must be a commune owner to generate invites.
+                {t("invites.ownerOnlyDesc")}
               </p>
               <Link href="/dashboard">
                 <Button className="bg-sage hover:bg-sage/90 text-cream">
-                  Back to Dashboard
+                  {t("invites.backToDashboard")}
                 </Button>
               </Link>
             </CardContent>
@@ -298,18 +298,18 @@ export default function InviteGenerationPage() {
       <main className="container mx-auto px-6 py-12 max-w-2xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-serif text-charcoal mb-4">
-            Generate Invite Link
+            {t("invites.title")}
           </h1>
           <p className="text-lg text-charcoal/70">
-            Create a secure invite link for new members to join {commune.name}
+            {t("invites.subtitle", { name: commune.name })}
           </p>
         </div>
 
         <Card className="border-charcoal/10 mb-6">
           <CardHeader>
-            <CardTitle className="font-serif">Invite Generation</CardTitle>
+            <CardTitle className="font-serif">{t("invites.generation")}</CardTitle>
             <CardDescription>
-              Generate an invite link to share with prospective members
+              {t("invites.generationDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -318,10 +318,10 @@ export default function InviteGenerationPage() {
                 <Mail className="w-16 h-16 mx-auto text-sage/50" />
                 <div>
                   <h3 className="text-lg font-medium text-charcoal mb-2">
-                    No Invite Generated Yet
+                    {t("invites.notGenerated")}
                   </h3>
                   <p className="text-sm text-charcoal/60">
-                    Click the button below to generate a new invite link
+                    {t("invites.clickToGenerate")}
                   </p>
                 </div>
                 <Button
@@ -330,28 +330,28 @@ export default function InviteGenerationPage() {
                   className="bg-sage hover:bg-sage/90 text-cream"
                 >
                   {isGenerating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {isGenerating ? "Generating..." : "Generate Invite Link"}
+                  {isGenerating ? t("invites.generating") : t("invites.generateLink")}
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="p-6 rounded-lg bg-sage/10 border border-sage/20 space-y-4">
-                  <h3 className="font-serif text-xl text-charcoal">Invite Details</h3>
+                  <h3 className="font-serif text-xl text-charcoal">{t("invites.details")}</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-charcoal/70">Commune:</span>
+                      <span className="text-charcoal/70">{t("invites.commune")}:</span>
                       <span className="font-medium text-charcoal">{commune.name}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-charcoal/70">Commune ID:</span>
+                      <span className="text-charcoal/70">{t("invites.communeId")}:</span>
                       <span className="font-medium text-charcoal">{invite.communeId}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-charcoal/70">Nonce:</span>
+                      <span className="text-charcoal/70">{t("invites.nonce")}:</span>
                       <span className="font-medium text-charcoal">{invite.nonce}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-charcoal/70">Generated:</span>
+                      <span className="text-charcoal/70">{t("invites.generated")}:</span>
                       <span className="font-medium text-charcoal">
                         {invite.generatedAt.toLocaleString()}
                       </span>
@@ -360,7 +360,7 @@ export default function InviteGenerationPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-charcoal">Invite Link:</label>
+                  <label className="text-sm font-medium text-charcoal">{t("invites.inviteLink")}:</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -376,12 +376,12 @@ export default function InviteGenerationPage() {
                       {copied ? (
                         <>
                           <Check className="w-4 h-4 mr-2" />
-                          Copied
+                          {t("invites.copied")}
                         </>
                       ) : (
                         <>
                           <Copy className="w-4 h-4 mr-2" />
-                          Copy
+                          {t("invites.copy")}
                         </>
                       )}
                     </Button>
@@ -396,7 +396,7 @@ export default function InviteGenerationPage() {
                     className="w-full border-charcoal/20"
                   >
                     {isGenerating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Generate New Invite
+                    {t("invites.generateNew")}
                   </Button>
                 </div>
               </div>
@@ -406,12 +406,10 @@ export default function InviteGenerationPage() {
 
         <div className="text-center text-sm text-charcoal/60 space-y-2">
           <p>
-            Each invite requires a new wallet signature for security. Share the generated link via
-            messaging or email.
+            {t("invites.securityNote")}
           </p>
           <p className="text-xs">
-            Note: Invite links do not expire. Keep them secure and only share with trusted
-            individuals.
+            {t("invites.expiryNote")}
           </p>
         </div>
       </main>
