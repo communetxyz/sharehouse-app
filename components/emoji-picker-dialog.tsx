@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Smile } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
 
 interface EmojiPickerDialogProps {
   choreId: string
@@ -26,6 +27,7 @@ const EMOJIS = [
 ]
 
 export function EmojiPickerDialog({ choreId, currentEmoji, onSelect }: EmojiPickerDialogProps) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [selectedEmoji, setSelectedEmoji] = useState(currentEmoji || "")
 
@@ -60,15 +62,21 @@ export function EmojiPickerDialog({ choreId, currentEmoji, onSelect }: EmojiPick
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0"
+          aria-label={t("chores.chooseEmoji")}
+          title={t("chores.chooseEmoji")}
+        >
           {selectedEmoji || <Smile className="w-4 h-4 text-charcoal/40" />}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose an Emoji</DialogTitle>
+          <DialogTitle>{t("chores.emojiPickerTitle")}</DialogTitle>
           <DialogDescription>
-            Pick an emoji to personalize this chore (stored in your browser)
+            {t("chores.emojiPickerDescription")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-10 gap-2 py-4">
@@ -86,7 +94,7 @@ export function EmojiPickerDialog({ choreId, currentEmoji, onSelect }: EmojiPick
         </div>
         {selectedEmoji && (
           <Button onClick={handleClear} variant="outline" size="sm" className="mt-2">
-            Clear Emoji
+            {t("chores.clearEmoji")}
           </Button>
         )}
       </DialogContent>

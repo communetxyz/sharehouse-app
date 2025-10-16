@@ -97,13 +97,9 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
     days.push(i)
   }
 
-  const monthNames = language === "ja"
-    ? ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
-    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
-  const dayNames = language === "ja"
-    ? ["日", "月", "火", "水", "木", "金", "土"]
-    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  // Get month and day names from translations to avoid duplication
+  const monthNames = t("calendar.monthNames") as unknown as string[]
+  const dayNames = t("calendar.dayNames") as unknown as string[]
 
   const isToday = (day: number | null) => {
     if (!day) return false
@@ -154,7 +150,10 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
           <div className="space-y-4">
             <div className="bg-sage/10 border border-sage/40 rounded-lg p-4">
               <h3 className="text-lg font-semibold text-charcoal mb-3">
-                {today.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                {today.toLocaleDateString(
+                  language === "ja" ? "ja-JP" : "en-US",
+                  { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+                )}
               </h3>
               <div className="space-y-2">
                 {fetchedChores
@@ -169,7 +168,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                   ))}
                 {fetchedChores.filter((c) => isSameUTCDay(c.periodStart, year, month, today.getDate())).length === 0 &&
                   expenses.filter((e) => isSameUTCDay(e.dueDate, year, month, today.getDate())).length === 0 && (
-                    <p className="text-sm text-charcoal/60 text-center py-4">No chores or expenses today</p>
+                    <p className="text-sm text-charcoal/60 text-center py-4">{t("calendar.noItemsToday")}</p>
                   )}
               </div>
             </div>

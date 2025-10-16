@@ -20,13 +20,14 @@ interface ChoreKanbanProps {
   filterMyChores?: boolean
 }
 
-// Helper functions extracted and memoized
-const getFrequencyLabel = (frequency: number) => {
+// Helper function to get frequency label
+const getFrequencyLabel = (frequency: number, t: (key: string) => string) => {
   const days = frequency / (24 * 60 * 60)
-  if (days === 1) return "Daily"
-  if (days === 7) return "Weekly"
-  if (days === 30) return "Monthly"
-  return `Every ${days} days`
+  if (days === 1) return t("calendar.frequencyDaily")
+  if (days === 7) return t("calendar.frequencyWeekly")
+  if (days === 30) return t("calendar.frequencyMonthly")
+  // Simple template replacement for "Every X days"
+  return t("calendar.everyXDays").replace("{{days}}", days.toString())
 }
 
 const formatPeriodDate = (periodStart: number, locale: string = "en-US") => {
@@ -112,7 +113,7 @@ const ChoreCard = memo(function ChoreCard({
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-charcoal/60">
               <Badge variant="outline" className={chore.completed ? "border-sage/30 text-sage" : "border-charcoal/20"}>
-                {getFrequencyLabel(chore.frequency)}
+                {getFrequencyLabel(chore.frequency, t)}
               </Badge>
               <span>{formatPeriodDate(chore.periodStart, locale)}</span>
             </div>
