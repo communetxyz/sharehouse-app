@@ -27,13 +27,13 @@ function ChoreItem({ chore }: { chore: ChoreInstance }) {
   )
 }
 
-function TaskItem({ task }: { expense: Expense }) {
+function TaskItem({ task }: { task: Task }) {
   return (
     <div
       className={`text-xs p-1.5 rounded mb-1 border-l-2 ${
         task.disputed
           ? "bg-red-50 border-red-400"
-          : task.paid
+          : task.done
             ? "bg-green-50 border-green-400"
             : task.isAssignedToUser
               ? "bg-blue-50 border-blue-400"
