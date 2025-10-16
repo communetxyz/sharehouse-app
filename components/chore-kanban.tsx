@@ -224,23 +224,25 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {t("chores.assignedToMe")}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <AnimatePresence mode="popLayout">
-              {assignedToMe.length === 0 ? (
-                <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noAssignedChores")}</p>
-              ) : (
-                assignedToMe.map((chore) => (
-                  <ChoreCard
-                    key={`${chore.scheduleId}-${chore.periodNumber}`}
-                    chore={chore}
-                    onComplete={() => handleComplete(chore)}
-                    isCompleting={completingId === chore.scheduleId.toString()}
-                    isSuccess={successId === chore.scheduleId.toString()}
-                    showCompleteButton
-                  />
-                ))
-              )}
-            </AnimatePresence>
+          <CardContent className="max-h-[600px] overflow-y-auto">
+            <div className="space-y-3">
+              <AnimatePresence mode="popLayout">
+                {assignedToMe.length === 0 ? (
+                  <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noAssignedChores")}</p>
+                ) : (
+                  assignedToMe.map((chore) => (
+                    <ChoreCard
+                      key={`${chore.scheduleId}-${chore.periodNumber}`}
+                      chore={chore}
+                      onComplete={() => handleComplete(chore)}
+                      isCompleting={completingId === chore.scheduleId.toString()}
+                      isSuccess={successId === chore.scheduleId.toString()}
+                      showCompleteButton
+                    />
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
           </CardContent>
         </Card>
 
@@ -252,14 +254,16 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {t("chores.completed")}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <AnimatePresence mode="popLayout">
-              {completed.length === 0 ? (
-                <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
-              ) : (
-                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
-              )}
-            </AnimatePresence>
+          <CardContent className="max-h-[600px] overflow-y-auto">
+            <div className="space-y-3">
+              <AnimatePresence mode="popLayout">
+                {completed.length === 0 ? (
+                  <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
+                ) : (
+                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
+                )}
+              </AnimatePresence>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -277,14 +281,16 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
             {t("chores.notStarted")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <AnimatePresence mode="popLayout">
-            {notStarted.length === 0 ? (
-              <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noPendingChores")}</p>
-            ) : (
-              notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
-            )}
-          </AnimatePresence>
+        <CardContent className="max-h-[600px] overflow-y-auto">
+          <div className="space-y-3">
+            <AnimatePresence mode="popLayout">
+              {notStarted.length === 0 ? (
+                <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noPendingChores")}</p>
+              ) : (
+                notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
+              )}
+            </AnimatePresence>
+          </div>
         </CardContent>
       </Card>
 
@@ -296,14 +302,16 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
             {t("chores.completed")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <AnimatePresence mode="popLayout">
-            {completed.length === 0 ? (
-              <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
-            ) : (
-              completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
-            )}
-          </AnimatePresence>
+        <CardContent className="max-h-[600px] overflow-y-auto">
+          <div className="space-y-3">
+            <AnimatePresence mode="popLayout">
+              {completed.length === 0 ? (
+                <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
+              ) : (
+                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />)
+              )}
+            </AnimatePresence>
+          </div>
         </CardContent>
       </Card>
     </div>
