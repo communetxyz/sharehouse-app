@@ -26,14 +26,6 @@ export function useWallet() {
   const address = privyAddress || wagmiAddress
   const isConnected = !!privyAddress || wagmiAddress
 
-  console.log("[v0] Wallet info:", {
-    privyAddress,
-    wagmiAddress,
-    activeAddress: address,
-    isPrivyWallet: !!privyAddress,
-    walletsCount: wallets.length,
-  })
-
   const { data: allowance } = useReadContract({
     address: BREAD_TOKEN_ADDRESS as `0x${string}`,
     abi: ERC20_ABI,
@@ -47,16 +39,11 @@ export function useWallet() {
     }
 
     try {
-      console.log("[v0] Executing transaction:", { functionName, args, address, isPrivyWallet: !!privyAddress })
-
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName,
         args,
       })
-
-      console.log("[v0] Encoded data:", data)
-      console.log("[v0] Calling sendTransaction with sponsor: true")
 
       setIsConfirming(true)
       setIsConfirmed(false)
@@ -72,7 +59,6 @@ export function useWallet() {
         },
       )
 
-      console.log("[v0] Transaction submitted with hash:", hash)
       setTxHash(hash as `0x${string}`)
       setIsConfirming(false)
       setIsConfirmed(true)
@@ -95,23 +81,11 @@ export function useWallet() {
     }
 
     try {
-      console.log("[v0] ===== APPROVE TOKEN START =====")
-      console.log("[v0] Approving token:", {
-        amount: amount.toString(),
-        spender,
-        address,
-        isPrivyWallet: !!privyAddress,
-        tokenAddress: BREAD_TOKEN_ADDRESS,
-      })
-
       const data = encodeFunctionData({
         abi: ERC20_ABI,
         functionName: "approve",
         args: [spender, amount],
       })
-
-      console.log("[v0] Encoded approval data:", data)
-      console.log("[v0] Calling sendTransaction with sponsor: true for approval")
 
       setIsConfirming(true)
       setIsConfirmed(false)
@@ -126,10 +100,6 @@ export function useWallet() {
           sponsor: true, // Enable gas sponsorship
         },
       )
-
-      console.log("[v0] Approval sendTransaction result:", result)
-      console.log("[v0] Approval transaction hash:", result.hash)
-      console.log("[v0] ===== APPROVE TOKEN SUCCESS =====")
 
       setTxHash(result.hash as `0x${string}`)
       setIsConfirming(false)
