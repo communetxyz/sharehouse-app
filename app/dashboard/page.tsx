@@ -15,7 +15,7 @@ import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import { useExpenseData } from "@/hooks/use-expense-data"
 import { useWallet } from "@/hooks/use-wallet"
-import { Loader2, Plus } from "lucide-react"
+import { Loader2, Plus, Mail } from "lucide-react"
 import { useState, useEffect } from "react"
 import type { Expense } from "@/types/commune"
 
@@ -207,6 +207,14 @@ export default function DashboardPage() {
           </Link>
           <div className="flex items-center gap-3">
             <LanguageToggle />
+            {commune && address && commune.creator.toLowerCase() === address.toLowerCase() && (
+              <Link href="/dashboard/invites">
+                <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Invites
+                </Button>
+              </Link>
+            )}
             <Link href="/create-sharehouse">
               <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
                 <Plus className="w-4 h-4 mr-2" />
