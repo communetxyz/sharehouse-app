@@ -15,28 +15,32 @@ const ensCache = new Map<string, string>()
 export function useEnsNameOrAddress(address: string | undefined) {
   const [cachedName, setCachedName] = useState<string | null>(null)
 
+  // Check cache first
+  useEffect(() => {
+    if (address && ensCache.has(address)) {
+      setCachedName(ensCache.get(address) || null)
+    }
+  }, [address])
+
   const { data: ensName, isError, error } = useEnsName({
     address: address as `0x${string}` | undefined,
     chainId: mainnet.id, // Always check mainnet for ENS
+    enabled: !!address && isValidAddress(address) && !ensCache.has(address), // Only query if not cached
   })
 
   useEffect(() => {
     if (address && ensName) {
       // Cache successful ENS lookups
       ensCache.set(address, ensName)
-    } else if (address && ensCache.has(address)) {
-      // Use cached value if available
-      setCachedName(ensCache.get(address) || null)
+      setCachedName(ensName)
     }
   }, [address, ensName])
 
   if (!address || !isValidAddress(address)) return ""
 
-  // Log errors for debugging but don't break the UI
-  if (isError && error) {
-    console.warn(`ENS lookup failed for ${address}:`, error)
-  }
+  // Don't log errors for now to reduce console noise
+  // The ENS gateway issue is known and doesn't affect functionality
 
-  // Return ENS name if available, otherwise cached name, otherwise truncated address
-  return ensName || cachedName || truncateAddress(address)
+  // Return cached name first, then ENS name, otherwise truncated address
+  return cachedName || ensName || truncateAddress(address)
 }

@@ -7,12 +7,14 @@ import { User, LogOut, Copy, Check } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 import { useCommuneData } from "@/hooks/use-commune-data"
+import { useI18n } from "@/lib/i18n/context"
 
 export function AccountButton() {
   const { ready, authenticated, login, logout, user } = usePrivy()
   const { wallets } = useWallets()
   const [copied, setCopied] = useState(false)
   const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const { t } = useI18n()
 
   const address = wallets[0]?.address as `0x${string}` | undefined
   const ensNameOrAddress = useEnsNameOrAddress(address)
@@ -50,7 +52,7 @@ export function AccountButton() {
     return (
       <Button disabled className="bg-sage/50 text-cream gap-2">
         <User className="w-4 h-4" />
-        Loading...
+        {t("common.loading")}
       </Button>
     )
   }
@@ -60,10 +62,10 @@ export function AccountButton() {
       <Button
         onClick={login}
         className="bg-sage hover:bg-sage/90 text-cream gap-2"
-        aria-label="Sign in to your account"
+        aria-label={t("dashboard.signIn")}
       >
         <User className="w-4 h-4" />
-        Sign In
+        {t("dashboard.signIn")}
       </Button>
     )
   }
@@ -83,11 +85,11 @@ export function AccountButton() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuItem onClick={copyAddress} className="cursor-pointer">
           {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-          {copied ? "Copied!" : "Copy Address"}
+          {copied ? t("dashboard.copied") : t("dashboard.copyAddress")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
           <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
+          {t("dashboard.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -56,7 +56,6 @@ export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, on
     handleClose,
     () => {
       // Call onSuccess with the pending temp ID when transaction succeeds
-      console.log('[v0] Success callback triggered, pendingTempIdRef.current:', pendingTempIdRef.current)
       if (pendingTempIdRef.current) {
         onSuccess(pendingTempIdRef.current)
         pendingTempIdRef.current = null

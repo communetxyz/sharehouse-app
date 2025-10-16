@@ -53,9 +53,12 @@ export const translations = {
       expenses: "経費",
       info: "情報",
       signIn: "サインイン",
+      signOut: "サインアウト",
+      copyAddress: "アドレスをコピー",
+      copied: "コピーしました！",
       signInDesc: "シェアハウスダッシュボードを表示するには、サインインしてください。",
       signingIn: "サインイン中...",
-      loadingSharehouse: "シェアハウスを読み込み中...",
+      loadingSharehouse: "シェアハウスを読み込み中..."
     },
     chores: {
       pending: "保留中",
@@ -216,9 +219,12 @@ export const translations = {
       expenses: "Expenses",
       info: "Info",
       signIn: "Sign In",
+      signOut: "Sign Out",
+      copyAddress: "Copy Address",
+      copied: "Copied!",
       signInDesc: "Please sign in to view your ShareHouse dashboard.",
       signingIn: "Signing in...",
-      loadingSharehouse: "Loading your ShareHouse...",
+      loadingSharehouse: "Loading your ShareHouse..."
     },
     chores: {
       pending: "Pending",
