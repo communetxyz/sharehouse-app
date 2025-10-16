@@ -213,14 +213,15 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
   }, [chores, sevenDaysAgo])
 
   const handleComplete = useCallback(async (chore: ChoreInstance) => {
-    const choreIdStr = chore.scheduleId.toString()
-    setCompletingId(choreIdStr)
+    // Use compound key: scheduleId-periodNumber to uniquely identify this chore instance
+    const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+    setCompletingId(choreKey)
 
     // Optimistically update UI immediately
     if (onOptimisticComplete) {
-      onOptimisticComplete(choreIdStr)
+      onOptimisticComplete(choreKey)
     }
-    setSuccessId(choreIdStr)
+    setSuccessId(choreKey)
 
     try {
       await markComplete(chore.scheduleId, {
@@ -256,18 +257,21 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                 {assignedToMe.length === 0 ? (
                   <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noAssignedChores")}</p>
                 ) : (
-                  assignedToMe.map((chore) => (
-                    <ChoreCard
-                      key={`${chore.scheduleId}-${chore.periodNumber}`}
-                      chore={chore}
-                      onComplete={() => handleComplete(chore)}
-                      isCompleting={completingId === chore.scheduleId.toString()}
-                      isSuccess={successId === chore.scheduleId.toString()}
-                      showCompleteButton
-                      locale={language}
-                      t={t}
-                    />
-                  ))
+                  assignedToMe.map((chore) => {
+                    const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+                    return (
+                      <ChoreCard
+                        key={choreKey}
+                        chore={chore}
+                        onComplete={() => handleComplete(chore)}
+                        isCompleting={completingId === choreKey}
+                        isSuccess={successId === choreKey}
+                        showCompleteButton
+                        locale={language}
+                        t={t}
+                      />
+                    )
+                  })
                 )}
               </AnimatePresence>
             </div>

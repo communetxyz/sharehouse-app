@@ -33,15 +33,18 @@ export default function DashboardPage() {
   }, [chores])
 
   // Optimistic chore completion
-  const handleChoreCompleteOptimistic = (choreId: string) => {
-    console.log("[dashboard] Optimistically completing chore:", choreId)
+  const handleChoreCompleteOptimistic = (choreKey: string) => {
+    // choreKey format is "scheduleId-periodNumber"
+    console.log("[dashboard] Optimistically completing chore:", choreKey)
     setOptimisticChores(prev => {
       const updated = prev.map(chore => {
-        const matches = chore.scheduleId.toString() === choreId
-        console.log(`[dashboard] Chore ${chore.scheduleId} (${chore.title}): matches=${matches}`)
+        const key = `${chore.scheduleId}-${chore.periodNumber}`
+        const matches = key === choreKey
+        if (matches) {
+          console.log(`[dashboard] Matched chore ${chore.scheduleId}-${chore.periodNumber} (${chore.title})`)
+        }
         return matches ? { ...chore, completed: true } : chore
       })
-      console.log("[dashboard] Updated chores:", updated.map(c => ({ id: c.scheduleId, title: c.title, completed: c.completed })))
       return updated
     })
   }
