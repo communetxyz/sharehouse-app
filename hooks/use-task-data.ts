@@ -21,22 +21,25 @@ export function useTaskData() {
 
     try {
       setIsLoading(true)
+      console.log("[use-task-data] Fetching tasks for commune:", commune.id)
       const taskData = await communeOSContract.getCommuneTasks(BigInt(commune.id))
+      console.log("[use-task-data] Raw task data from contract:", taskData)
 
-      setTasks(
-        taskData.map((task: any) => ({
-          id: task.id.toString(),
-          communeId: task.communeId.toString(),
-          budget: (Number(task.budget) / 1e18).toString(),
-          description: task.description,
-          assignedTo: task.assignedTo,
-          assignedToUsername: task.assignedToUsername || task.assignedTo,
-          dueDate: Number(task.dueDate),
-          done: Boolean(task.done),
-          disputed: Boolean(task.disputed),
-          isAssignedToUser: task.assignedTo.toLowerCase() === address.toLowerCase(),
-        })),
-      )
+      const mappedTasks = taskData.map((task: any) => ({
+        id: task.id.toString(),
+        communeId: task.communeId.toString(),
+        budget: (Number(task.budget) / 1e18).toString(),
+        description: task.description,
+        assignedTo: task.assignedTo,
+        assignedToUsername: task.assignedToUsername || task.assignedTo,
+        dueDate: Number(task.dueDate),
+        done: Boolean(task.done),
+        disputed: Boolean(task.disputed),
+        isAssignedToUser: task.assignedTo.toLowerCase() === address.toLowerCase(),
+      }))
+
+      console.log("[use-task-data] Mapped tasks:", mappedTasks)
+      setTasks(mappedTasks)
 
       setError(null)
     } catch (err: any) {
