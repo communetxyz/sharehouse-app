@@ -189,41 +189,43 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
 
         {view === "weekly" && (
           <div className="space-y-4">
-            {[0, 1, 2, 3, 4, 5, 6].map((dayOffset) => {
-              const date = new Date(today)
-              date.setDate(today.getDate() - today.getDay() + dayOffset)
-              const dayOfMonth = date.getDate()
-              const dayChores = fetchedChores.filter((chore) =>
-                isSameUTCDay(chore.periodStart, date.getFullYear(), date.getMonth(), dayOfMonth)
-              )
-              const dayTasks = tasks.filter((task) =>
-                isSameUTCDay(task.dueDate, date.getFullYear(), date.getMonth(), dayOfMonth)
-              )
+            <div className="grid grid-cols-7 gap-2">
+              {Array.from({ length: 7 }, (_, i) => {
+                const date = new Date(today)
+                date.setDate(today.getDate() - today.getDay() + i)
+                const day = date.getDate()
+                const isCurrentMonth = date.getMonth() === month
+                const dayChores = isCurrentMonth
+                  ? fetchedChores.filter((chore) => isSameUTCDay(chore.periodStart, year, date.getMonth(), day))
+                  : []
+                const dayTasks = isCurrentMonth
+                  ? tasks.filter((task) => isSameUTCDay(task.dueDate, year, date.getMonth(), day))
+                  : []
+                const isCurrentDay = date.toDateString() === today.toDateString()
 
-              return (
-                <div key={dayOffset} className="border-b border-charcoal/10 pb-3 last:border-0">
-                  <h4 className="font-medium text-charcoal mb-2">
-                    {language === "ja"
-                      ? `${date.getFullYear()}年${date.getMonth() + 1}月${dayOfMonth}日 (${dayNames[dayOffset]})`
-                      : `${dayNames[dayOffset]}, ${date.toLocaleDateString(language === "ja" ? "ja-JP" : "en-US", { month: "short", day: "numeric" })}`}
-                  </h4>
-                  <div className="space-y-2">
-                    {dayChores.length === 0 && dayTasks.length === 0 ? (
-                      <p className="text-sm text-charcoal/60">{t("calendar.noItems")}</p>
-                    ) : (
-                      <>
-                        {dayChores.map((chore) => (
-                          <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
-                        ))}
-                        {dayTasks.map((task) => (
-                          <TaskItem key={task.id} task={task} />
-                        ))}
-                      </>
-                    )}
+                return (
+                  <div
+                    key={i}
+                    className={`min-h-[500px] p-3 rounded-lg border ${
+                      isCurrentDay ? "bg-sage/10 border-sage/40" : "bg-white/50 border-charcoal/10"
+                    }`}
+                  >
+                    <div className={`text-center mb-2 ${isCurrentDay ? "text-sage font-bold" : "text-charcoal/70"}`}>
+                      <div className="text-xs font-medium">{dayNames[i]}</div>
+                      <div className="text-lg">{day}</div>
+                    </div>
+                    <div className="space-y-1 overflow-y-auto max-h-[450px]">
+                      {dayChores.map((chore) => (
+                        <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
+                      ))}
+                      {dayTasks.map((task) => (
+                        <TaskItem key={task.id} task={task} />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         )}
 
