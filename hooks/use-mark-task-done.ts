@@ -7,18 +7,18 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
+export function useMarkTaskDone(communeId: string, onSuccess?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isMarking, setIsMarking] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
   const { toast } = useToast()
 
-  const markPaid = async (expenseId: string) => {
+  const markDone = async (taskId: string) => {
     if (!isConnected || !address) {
       toast({
         title: "Wallet not connected",
-        description: "Please connect your wallet to mark expense as paid",
+        description: "Please connect your wallet to mark task as done",
         variant: "destructive",
       })
       return
@@ -30,8 +30,8 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
     try {
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
-        functionName: "markExpensePaid",
-        args: [BigInt(communeId), BigInt(expenseId)],
+        functionName: "markTaskDone",
+        args: [BigInt(communeId), BigInt(taskId)],
       })
 
       await sendTransaction(
@@ -47,17 +47,17 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
       setIsConfirmed(true)
 
       toast({
-        title: "Expense marked as paid",
-        description: "The expense has been marked as paid successfully",
+        title: "Task marked as done",
+        description: "The task has been marked as done successfully",
       })
 
       if (onSuccess) {
         onSuccess()
       }
     } catch (error: any) {
-      console.error("Error marking expense as paid:", error)
+      console.error("Error marking task as done:", error)
       toast({
-        title: "Failed to mark expense as paid",
+        title: "Failed to mark task as done",
         description: error.message || "An error occurred",
         variant: "destructive",
       })
@@ -67,7 +67,7 @@ export function useMarkExpensePaid(communeId: string, onSuccess?: () => void) {
   }
 
   return {
-    markPaid,
+    markDone,
     isMarking,
     isConfirmed,
   }

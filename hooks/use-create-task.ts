@@ -7,39 +7,47 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
+export function useCreateTask(communeId: string, onSuccess?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
-  const [isDisputing, setIsDisputing] = useState(false)
-  const [isConfirmed, setIsConfirmed] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
   const { toast } = useToast()
 
-  const disputeExpense = async (expenseId: string, newAssignee: string) => {
+  const createTask = async (budget: string, description: string, dueDate: Date, assignedTo: string) => {
     if (!isConnected || !address) {
       toast({
         title: "Wallet not connected",
-        description: "Please connect your wallet to dispute an expense",
+        description: "Please connect your wallet to create a task",
         variant: "destructive",
       })
       return
     }
 
-    setIsDisputing(true)
-    setIsConfirmed(false)
+    setIsCreating(true)
 
     try {
-      console.log("[v0] ===== DISPUTE EXPENSE START =====")
-      console.log("[v0] Disputing expense:", {
-        expenseId,
-        newAssignee,
+      console.log("[v0] ===== CREATE TASK START =====")
+      console.log("[v0] Creating task:", {
+        budget,
+        description,
+        dueDate,
+        assignedTo,
         communeId,
         contractAddress: COMMUNE_OS_ADDRESS,
       })
 
+      const budgetInWei = BigInt(Math.floor(Number.parseFloat(budget) * 1e18))
+      const dueDateTimestamp = BigInt(Math.floor(dueDate.getTime() / 1000))
+
+      console.log("[v0] Converted values:", {
+        budgetInWei: budgetInWei.toString(),
+        dueDateTimestamp: dueDateTimestamp.toString(),
+      })
+
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
-        functionName: "disputeExpense",
-        args: [BigInt(communeId), BigInt(expenseId), newAssignee as `0x${string}`],
+        functionName: "createTask",
+        args: [BigInt(communeId), budgetInWei, description, dueDateTimestamp, assignedTo as `0x${string}`],
       })
 
       console.log("[v0] Encoded data:", data)
@@ -51,45 +59,42 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
           data,
         },
         {
-          sponsor: true, // Enable gas sponsorship
+          sponsor: true,
         },
       )
 
       console.log("[v0] Transaction result:", result)
       console.log("[v0] Transaction hash:", result.hash)
-      console.log("[v0] ===== DISPUTE EXPENSE SUCCESS =====")
-
-      setIsConfirmed(true)
+      console.log("[v0] ===== CREATE TASK SUCCESS =====")
 
       toast({
-        title: "Dispute initiated",
-        description: "Your dispute has been submitted for voting",
+        title: "Task created",
+        description: "Your task has been created successfully",
       })
 
       if (onSuccess) {
         onSuccess()
       }
     } catch (error: any) {
-      console.error("[v0] ===== DISPUTE EXPENSE FAILED =====")
-      console.error("[v0] Error disputing expense:", error)
+      console.error("[v0] ===== CREATE TASK FAILED =====")
+      console.error("[v0] Error creating task:", error)
       console.error("[v0] Error details:", {
         message: error.message,
         code: error.code,
         data: error.data,
       })
       toast({
-        title: "Failed to dispute expense",
+        title: "Failed to create task",
         description: error.message || "An error occurred",
         variant: "destructive",
       })
     } finally {
-      setIsDisputing(false)
+      setIsCreating(false)
     }
   }
 
   return {
-    disputeExpense,
-    isDisputing,
-    isConfirmed,
+    createTask,
+    isCreating,
   }
 }

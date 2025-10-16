@@ -7,13 +7,13 @@ import { ChoreKanban } from "@/components/chore-kanban"
 import { ChoreCalendar } from "@/components/chore-calendar"
 import { MemberList } from "@/components/member-list"
 import { CommuneInfo } from "@/components/commune-info"
-import { ExpenseList } from "@/components/expense-list"
-import { CreateExpenseDialog } from "@/components/create-expense-dialog"
+import { TaskList } from "@/components/task-list"
+import { CreateTaskDialog } from "@/components/create-task-dialog"
 import { AccountButton } from "@/components/account-button"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
-import { useExpenseData } from "@/hooks/use-expense-data"
+import { useTaskData } from "@/hooks/use-task-data"
 import { useWallet } from "@/hooks/use-wallet"
 import { Loader2, Plus } from "lucide-react"
 
@@ -21,7 +21,7 @@ export default function DashboardPage() {
   const { t } = useI18n()
   const { address, isConnected, status } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
-  const { expenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
+  const { tasks, isLoading: isLoadingTasks, refreshTasks } = useTaskData()
 
   if (status === "reconnecting" || status === "connecting") {
     return (
@@ -120,7 +120,7 @@ export default function DashboardPage() {
             <Button
               onClick={() => {
                 refreshData()
-                refreshExpenses()
+                refreshTasks()
               }}
               variant="ghost"
               size="sm"
@@ -147,7 +147,7 @@ export default function DashboardPage() {
             <TabsTrigger value="my-chores">{t("dashboard.myChores")}</TabsTrigger>
             <TabsTrigger value="all-chores">{t("dashboard.allChores")}</TabsTrigger>
             <TabsTrigger value="calendar">{t("dashboard.calendar")}</TabsTrigger>
-            <TabsTrigger value="expenses">{t("dashboard.expenses")}</TabsTrigger>
+            <TabsTrigger value="tasks">{t("dashboard.tasks")}</TabsTrigger>
             <TabsTrigger value="members">{t("dashboard.members")}</TabsTrigger>
             <TabsTrigger value="info">{t("dashboard.info")}</TabsTrigger>
           </TabsList>
@@ -164,17 +164,17 @@ export default function DashboardPage() {
             <ChoreCalendar chores={chores} />
           </TabsContent>
 
-          <TabsContent value="expenses" className="space-y-6">
+          <TabsContent value="tasks" className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-serif text-charcoal">{t("expenses.title")}</h2>
-              {commune && <CreateExpenseDialog communeId={commune.id} members={members} onSuccess={refreshExpenses} />}
+              <h2 className="text-2xl font-serif text-charcoal">{t("tasks.title")}</h2>
+              {commune && <CreateTaskDialog communeId={commune.id} members={members} onSuccess={refreshTasks} />}
             </div>
-            {isLoadingExpenses ? (
+            {isLoadingTasks ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-sage" />
               </div>
             ) : (
-              commune && <ExpenseList expenses={expenses} communeId={commune.id} onRefresh={refreshExpenses} />
+              commune && <TaskList tasks={tasks} communeId={commune.id} onRefresh={refreshTasks} />
             )}
           </TabsContent>
 

@@ -131,7 +131,7 @@ export function useJoinCommune() {
       const communeInfo = stats[0]
       const totalMembers = stats[1]
       const totalChores = stats[2]
-      const activeChores = stats[3]
+      const totalTasks = stats[3]
 
       if (!communeInfo || typeof communeInfo !== "object") {
         throw new Error("Commune info is not an object")
@@ -145,7 +145,7 @@ export function useJoinCommune() {
         collateralAmount: communeInfo.collateralAmount ? (Number(communeInfo.collateralAmount) / 1e18).toString() : "0",
         memberCount: totalMembers?.toString() || "0",
         choreCount: totalChores?.toString() || "0",
-        expenseCount: activeChores?.toString() || "0",
+        taskCount: totalTasks?.toString() || "0",
       })
     } catch (err: any) {
       console.error("[v0] Validation error:", err)
