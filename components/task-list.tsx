@@ -67,7 +67,7 @@ export function TaskList({ tasks, communeId, filterAssignedToMe = false, onOptim
         return newSet
       })
 
-      // Clear confirmed status and refresh data after 2 seconds
+      // Clear confirmed status and refresh data after 3 seconds
       setTimeout(() => {
         setConfirmedTaskIds(prev => {
           const newSet = new Set(prev)
@@ -75,10 +75,11 @@ export function TaskList({ tasks, communeId, filterAssignedToMe = false, onOptim
           return newSet
         })
         // Refresh data to get updated state from blockchain
+        console.log("[task-list] Calling onRefresh after marking task", taskId, "as done")
         if (onRefresh) {
           onRefresh()
         }
-      }, 2000)
+      }, 3000)
     } catch (error) {
       // Remove from pending on error
       setPendingTaskIds(prev => {
