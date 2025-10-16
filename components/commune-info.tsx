@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Commune, Member } from "@/types/commune"
+import { useI18n } from "@/lib/i18n/context"
 
 interface CommuneInfoProps {
   commune: Commune | null
@@ -7,10 +8,12 @@ interface CommuneInfoProps {
 }
 
 export function CommuneInfo({ commune, members }: CommuneInfoProps) {
+  const { t } = useI18n()
+
   if (!commune) {
     return (
       <Card className="border-charcoal/10">
-        <CardContent className="p-8 text-center text-charcoal/60">No commune data available</CardContent>
+        <CardContent className="p-8 text-center text-charcoal/60">{t("commune.noCommuneData")}</CardContent>
       </Card>
     )
   }
@@ -19,34 +22,34 @@ export function CommuneInfo({ commune, members }: CommuneInfoProps) {
     <div className="space-y-6">
       <Card className="border-charcoal/10">
         <CardHeader>
-          <CardTitle className="font-serif text-charcoal">Commune Details</CardTitle>
+          <CardTitle className="font-serif text-charcoal">{t("commune.details")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-charcoal/60 mb-1">Name</p>
+              <p className="text-sm text-charcoal/60 mb-1">{t("commune.name")}</p>
               <p className="font-medium text-charcoal">{commune.name}</p>
             </div>
             <div>
-              <p className="text-sm text-charcoal/60 mb-1">Commune ID</p>
+              <p className="text-sm text-charcoal/60 mb-1">{t("commune.communeId")}</p>
               <p className="font-medium text-charcoal">{commune.id}</p>
             </div>
             <div>
-              <p className="text-sm text-charcoal/60 mb-1">Creator</p>
+              <p className="text-sm text-charcoal/60 mb-1">{t("commune.creator")}</p>
               <p className="font-mono text-sm text-charcoal">{commune.creatorUsername || commune.creator}</p>
             </div>
             <div>
-              <p className="text-sm text-charcoal/60 mb-1">Members</p>
+              <p className="text-sm text-charcoal/60 mb-1">{t("commune.members")}</p>
               <p className="font-medium text-charcoal">{members.length}</p>
             </div>
             <div>
-              <p className="text-sm text-charcoal/60 mb-1">Collateral Required</p>
-              <p className="font-medium text-charcoal">{commune.collateralRequired ? "Yes" : "No"}</p>
+              <p className="text-sm text-charcoal/60 mb-1">{t("commune.collateralRequired")}</p>
+              <p className="font-medium text-charcoal">{commune.collateralRequired ? t("commune.yes") : t("commune.no")}</p>
             </div>
             {commune.collateralRequired && (
               <div>
-                <p className="text-sm text-charcoal/60 mb-1">Collateral Amount</p>
-                <p className="font-medium text-charcoal">{commune.collateralAmount} Collateral Currency</p>
+                <p className="text-sm text-charcoal/60 mb-1">{t("commune.collateralAmount")}</p>
+                <p className="font-medium text-charcoal">¥{commune.collateralAmount}</p>
               </div>
             )}
           </div>
@@ -55,14 +58,11 @@ export function CommuneInfo({ commune, members }: CommuneInfoProps) {
 
       <Card className="border-sage/30 bg-sage/5">
         <CardHeader>
-          <CardTitle className="font-serif text-charcoal">About ShareHouse</CardTitle>
+          <CardTitle className="font-serif text-charcoal">{t("commune.aboutSharehouse")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-charcoal/70 leading-relaxed">
-          <p>
-            ShareHouse brings the spirit of Japanese communal living to the blockchain. All chores rotate automatically
-            based on the configured schedule, ensuring fair distribution of responsibilities.
-          </p>
-          <p>Built on Gnosis Chain with WalletConnect integration for seamless wallet interactions.</p>
+          <p>{t("commune.aboutDescription1")}</p>
+          <p>{t("commune.aboutDescription2")}</p>
         </CardContent>
       </Card>
     </div>

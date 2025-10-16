@@ -306,8 +306,7 @@ function ExpenseCard({
             </div>
             <CardDescription className="flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1">
-                <DollarSign className="h-3 w-3" />
-                {expense.amount} Collateral Currency
+                ¥{expense.amount}
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
