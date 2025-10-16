@@ -97,9 +97,14 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
     days.push(i)
   }
 
-  // Get month and day names from translations to avoid duplication
-  const monthNames = t("calendar.monthNames") as unknown as string[]
-  const dayNames = t("calendar.dayNames") as unknown as string[]
+  // Get month and day names based on language
+  const monthNames = language === "ja"
+    ? ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+    : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+  const dayNames = language === "ja"
+    ? ["日", "月", "火", "水", "木", "金", "土"]
+    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
   const isToday = (day: number | null) => {
     if (!day) return false
