@@ -29,7 +29,7 @@ export default function AddChoresPage() {
   const router = useRouter()
   const { t } = useLanguage()
   const { address, isConnected } = useWallet()
-  const { commune, isLoading: isLoadingCommune } = useCommuneData()
+  const { commune, isLoading: isLoadingCommune, refreshData } = useCommuneData()
   const { toast } = useToast()
 
   const [title, setTitle] = useState("")
@@ -111,6 +111,8 @@ export default function AddChoresPage() {
             title: "Chore Added!",
             description: `"${optimisticChore.title}" has been added successfully.`,
           })
+          // Refresh chore data so it appears in kanban/calendar
+          refreshData()
         },
         (error) => {
           // On error - update status to failed
@@ -155,6 +157,8 @@ export default function AddChoresPage() {
             title: "Chore Added!",
             description: `"${chore.title}" has been added successfully.`,
           })
+          // Refresh chore data so it appears in kanban/calendar
+          refreshData()
         },
         (error) => {
           setCreatedChores((prev) =>
