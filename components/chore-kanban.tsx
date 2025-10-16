@@ -42,6 +42,7 @@ const ChoreCard = memo(function ChoreCard({
   showCompleteButton,
   isSuccess,
   locale,
+  t,
 }: {
   chore: ChoreInstance
   onComplete?: () => void
@@ -49,6 +50,7 @@ const ChoreCard = memo(function ChoreCard({
   showCompleteButton?: boolean
   isSuccess?: boolean
   locale?: string
+  t: (key: string) => string
 }) {
   const [choreEmoji, setChoreEmoji] = useState("")
 
@@ -117,7 +119,7 @@ const ChoreCard = memo(function ChoreCard({
           </div>
           {!showCompleteButton && (
             <p className="text-xs text-charcoal/60">
-              {chore.completed ? "Completed by: " : "Assigned to: "}
+              {chore.completed ? `${t("chores.completedBy")}: ` : `${t("chores.assignedTo")}: `}
               {chore.assignedToUsername}
             </p>
           )}
@@ -151,7 +153,8 @@ const ChoreCard = memo(function ChoreCard({
     prevProps.chore.scheduleId === nextProps.chore.scheduleId &&
     prevProps.chore.completed === nextProps.chore.completed &&
     prevProps.isCompleting === nextProps.isCompleting &&
-    prevProps.isSuccess === nextProps.isSuccess
+    prevProps.isSuccess === nextProps.isSuccess &&
+    prevProps.locale === nextProps.locale
   )
 })
 
@@ -261,6 +264,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                       isSuccess={successId === chore.scheduleId.toString()}
                       showCompleteButton
                       locale={language}
+                      t={t}
                     />
                   ))
                 )}
@@ -283,7 +287,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                 {completed.length === 0 ? (
                   <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
                 ) : (
-                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} />)
+                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
                 )}
               </AnimatePresence>
             </div>
@@ -310,7 +314,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {notStarted.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noPendingChores")}</p>
               ) : (
-                notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} />)
+                notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
               )}
             </AnimatePresence>
           </div>
@@ -331,7 +335,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {completed.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
               ) : (
-                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} />)
+                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
               )}
             </AnimatePresence>
           </div>

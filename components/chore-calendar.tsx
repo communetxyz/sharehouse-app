@@ -6,7 +6,7 @@ import type { ChoreInstance, Expense } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useCalendarChores } from "@/hooks/use-calendar-chores"
 import { useCalendarExpenses } from "@/hooks/use-calendar-expenses"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Calendar, CalendarDays, CalendarRange } from "lucide-react"
 
 type CalendarView = "daily" | "weekly" | "monthly"
@@ -16,6 +16,18 @@ interface ChoreCalendarProps {
 }
 
 function ChoreItem({ chore }: { chore: ChoreInstance }) {
+  const [choreEmoji, setChoreEmoji] = useState("")
+
+  useEffect(() => {
+    // Load emoji from localStorage
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(`chore-emoji-${chore.scheduleId}`)
+      if (stored) {
+        setChoreEmoji(stored)
+      }
+    }
+  }, [chore.scheduleId])
+
   return (
     <div
       className={`text-xs p-1.5 rounded mb-1 ${
@@ -26,7 +38,10 @@ function ChoreItem({ chore }: { chore: ChoreInstance }) {
             : "bg-charcoal/5 border border-charcoal/10"
       }`}
     >
-      <div className="font-medium truncate">{chore.title}</div>
+      <div className="font-medium truncate">
+        {choreEmoji && <span className="mr-1">{choreEmoji}</span>}
+        {chore.title}
+      </div>
       <div className="text-charcoal/60 truncate">{chore.assignedToUsername}</div>
     </div>
   )
@@ -189,7 +204,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                 return (
                   <div
                     key={i}
-                    className={`min-h-[200px] p-3 rounded-lg border ${
+                    className={`min-h-[500px] p-3 rounded-lg border ${
                       isCurrentDay ? "bg-sage/10 border-sage/40" : "bg-white/50 border-charcoal/10"
                     }`}
                   >
@@ -197,7 +212,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                       <div className="text-xs font-medium">{dayNames[i]}</div>
                       <div className="text-lg">{day}</div>
                     </div>
-                    <div className="space-y-1 overflow-y-auto max-h-[150px]">
+                    <div className="space-y-1 overflow-y-auto max-h-[450px]">
                       {dayChores.map((chore) => (
                         <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
                       ))}
