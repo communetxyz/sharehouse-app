@@ -59,18 +59,21 @@ export default function InviteGenerationPage() {
       // Generate unique nonce
       const nonce = Math.floor(Math.random() * 1000000)
 
-      // Create message to sign (matching smart contract validation)
-      // The message format should match what the smart contract expects
-      const message = `Join Commune ${commune.id} with nonce ${nonce}`
+      // Create the message hash exactly as the smart contract does
+      // messageHash = keccak256(abi.encodePacked(communeId, nonce))
+      const messageHash = ethers.solidityPackedKeccak256(
+        ["uint256", "uint256"],
+        [commune.id, nonce]
+      )
 
-      console.log("[Invite] Signing message:", message)
-      console.log("[Invite] Message type:", typeof message)
-      console.log("[Invite] Commune ID:", commune.id, typeof commune.id)
+      console.log("[Invite] Message hash:", messageHash)
+      console.log("[Invite] Commune ID:", commune.id)
+      console.log("[Invite] Nonce:", nonce)
 
-      // Request signature from wallet using Privy's useSignMessage hook
-      // signMessage expects an object with a message property
+      // Sign the message hash using Privy's useSignMessage hook
+      // Privy will automatically convert to EIP-191 format (Ethereum Signed Message)
       const { signature } = await signMessage(
-        { message },
+        { message: messageHash },
         {
           uiOptions: {
             title: "Sign Invite",
