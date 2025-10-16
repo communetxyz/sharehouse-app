@@ -17,109 +17,12 @@ import { useTaskData } from "@/hooks/use-task-data"
 import { useWallet } from "@/hooks/use-wallet"
 import { Loader2, Plus, Mail } from "lucide-react"
 import { useState, useEffect } from "react"
-import type { Task } from "@/types/commune"
 
 export default function DashboardPage() {
   const { t } = useI18n()
   const { address, isConnected, status } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
-  const { tasks: fetchedTasks, isLoading: isLoadingTasks, refreshTasks } = useTaskData()
-
-  // Local optimistic state for tasks
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [pendingCreateIds, setPendingCreateIds] = useState<Set<string>>(new Set())
-  const [confirmedCreateIds, setConfirmedCreateIds] = useState<Set<string>>(new Set())
-
-  // Sync fetched tasks with local state and enrich with member usernames
-  useEffect(() => {
-    // Enrich tasks with member usernames
-    const enrichedTasks = fetchedTasks.map(task => ({
-      ...task,
-      assignedToUsername: members.find(m => m.address.toLowerCase() === task.assignedTo.toLowerCase())?.username || task.assignedTo,
-    }))
-
-    // Preserve optimistic updates by merging with existing state
-    setTasks(prevTasks => {
-      // Keep temporary tasks that haven't been confirmed yet
-      const tempTasks = prevTasks.filter(t => t.id.startsWith('temp-'))
-
-      // For each fetched task, check if we have an optimistic update for it
-      const mergedTasks = enrichedTasks.map(fetchedTask => {
-        const optimisticTask = prevTasks.find(t => t.id === fetchedTask.id)
-        if (optimisticTask && optimisticTask.done && !fetchedTask.done) {
-          // Preserve the optimistic "done" state if blockchain hasn't caught up yet
-          console.log("[dashboard] Preserving optimistic done state for task", fetchedTask.id)
-          return { ...fetchedTask, done: true }
-        }
-        return fetchedTask
-      })
-
-      // Return temp tasks plus merged tasks
-      return [...tempTasks, ...mergedTasks]
-    })
-  }, [fetchedTasks, members])
-
-  // Optimistic task creation
-  const handleCreateTaskOptimistic = (taskData: {
-    budget: string
-    description: string
-    dueDate: Date
-    assignedTo: string
-  }) => {
-    const tempId = `temp-${Date.now()}`
-    const newTask: Task = {
-      id: tempId, // Temporary ID
-      communeId: commune?.id || "",
-      budget: taskData.budget,
-      description: taskData.description,
-      dueDate: Math.floor(taskData.dueDate.getTime() / 1000),
-      assignedTo: taskData.assignedTo,
-      assignedToUsername: members.find(m => m.address === taskData.assignedTo)?.username || taskData.assignedTo,
-      done: false,
-      disputed: false,
-      isAssignedToUser: taskData.assignedTo.toLowerCase() === address?.toLowerCase(),
-    }
-
-    // Add to local state immediately
-    setTasks(prev => [...prev, newTask])
-
-    // Track as pending
-    setPendingCreateIds(prev => new Set(prev).add(tempId))
-
-    // Return the temp ID so we can track it
-    return tempId
-  }
-
-  // Handle task creation confirmation
-  const handleTaskCreateConfirmed = (tempId: string) => {
-    // Move from pending to confirmed
-    setPendingCreateIds(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(tempId)
-      return newSet
-    })
-    setConfirmedCreateIds(prev => new Set(prev).add(tempId))
-
-    // Clear confirmed status and refresh tasks after 2 seconds
-    setTimeout(() => {
-      setConfirmedCreateIds(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(tempId)
-        return newSet
-      })
-      // Refresh tasks to get the real ID from blockchain
-      refreshTasks()
-    }, 2000)
-  }
-
-  // Optimistic mark done
-  const handleMarkDoneOptimistic = (taskId: string) => {
-    setTasks(prev => prev.map(task =>
-      task.id === taskId
-        ? { ...task, done: true }
-        : task
-    ))
-  }
+  const { tasks, isLoading: isLoadingTasks, refreshTasks } = useTaskData()
 
   // Local optimistic state for chores
   const [optimisticChores, setOptimisticChores] = useState(chores)
@@ -302,11 +205,7 @@ export default function DashboardPage() {
               {commune && <CreateTaskDialog
                 communeId={commune.id}
                 members={members}
-                onOptimisticCreate={handleCreateTaskOptimistic}
-                onSuccess={(tempId) => {
-                  // Mark as confirmed when transaction succeeds
-                  handleTaskCreateConfirmed(tempId)
-                }}
+                onSuccess={refreshTasks}
               />}
             </div>
             {isLoadingTasks ? (
@@ -317,10 +216,7 @@ export default function DashboardPage() {
               commune && <TaskList
                 tasks={tasks}
                 communeId={commune.id}
-                onOptimisticMarkDone={handleMarkDoneOptimistic}
                 onRefresh={refreshTasks}
-                pendingCreateIds={pendingCreateIds}
-                confirmedCreateIds={confirmedCreateIds}
               />
             )}
           </TabsContent>

@@ -8,7 +8,7 @@ import type { Task } from "@/types/commune"
 
 export function useTaskData() {
   const { address } = useWallet()
-  const { commune } = useCommuneData()
+  const { commune, members } = useCommuneData()
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -31,7 +31,7 @@ export function useTaskData() {
         budget: (Number(task.budget) / 1e18).toString(),
         description: task.description,
         assignedTo: task.assignedTo,
-        assignedToUsername: task.assignedToUsername || task.assignedTo,
+        assignedToUsername: members.find(m => m.address.toLowerCase() === task.assignedTo.toLowerCase())?.username || task.assignedTo,
         dueDate: Number(task.dueDate),
         done: Boolean(task.done),
         disputed: Boolean(task.disputed),
@@ -48,7 +48,7 @@ export function useTaskData() {
     } finally {
       setIsLoading(false)
     }
-  }, [address, commune?.id])
+  }, [address, commune?.id, members])
 
   useEffect(() => {
     refreshTasks()

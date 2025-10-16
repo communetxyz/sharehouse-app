@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -24,44 +24,25 @@ import { Plus } from "lucide-react"
 interface CreateTaskDialogProps {
   communeId: string
   members: Member[]
-  onOptimisticCreate: (taskData: {
-    budget: string
-    description: string
-    dueDate: Date
-    assignedTo: string
-  }) => string // Returns temp ID
-  onSuccess: (tempId: string) => void
+  onSuccess: () => void
 }
 
-export function CreateTaskDialog({ communeId, members, onOptimisticCreate, onSuccess }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ communeId, members, onSuccess }: CreateTaskDialogProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [budget, setBudget] = useState("")
   const [description, setDescription] = useState("")
   const [assignedTo, setAssignedTo] = useState("")
   const [dueDate, setDueDate] = useState("")
-  const pendingTempIdRef = useRef<string | null>(null)
 
-  const handleClose = () => {
+  const { createTask, isCreating } = useCreateTask(communeId, () => {
     setOpen(false)
     setBudget("")
     setDescription("")
     setAssignedTo("")
     setDueDate("")
-    // Don't clear the ref here - it needs to persist until the transaction completes
-  }
-
-  const { createTask, isCreating } = useCreateTask(
-    communeId,
-    handleClose,
-    () => {
-      // Call onSuccess with the pending temp ID when transaction succeeds
-      if (pendingTempIdRef.current) {
-        onSuccess(pendingTempIdRef.current)
-        pendingTempIdRef.current = null
-      }
-    }
-  )
+    onSuccess()
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,18 +51,6 @@ export function CreateTaskDialog({ communeId, members, onOptimisticCreate, onSuc
     const dueDateObj = new Date(dueDate)
     const budgetValue = budget || "0"
 
-    // Optimistically add task to UI immediately and get temp ID
-    const tempId = onOptimisticCreate({
-      budget: budgetValue,
-      description,
-      dueDate: dueDateObj,
-      assignedTo,
-    })
-
-    // Store the temp ID for the success callback
-    pendingTempIdRef.current = tempId
-
-    // Then send the transaction
     await createTask(budgetValue, description, dueDateObj, assignedTo)
   }
 
