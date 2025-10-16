@@ -37,7 +37,26 @@ export default function DashboardPage() {
       ...task,
       assignedToUsername: members.find(m => m.address.toLowerCase() === task.assignedTo.toLowerCase())?.username || task.assignedTo,
     }))
-    setTasks(enrichedTasks)
+
+    // Preserve optimistic updates by merging with existing state
+    setTasks(prevTasks => {
+      // Keep temporary tasks that haven't been confirmed yet
+      const tempTasks = prevTasks.filter(t => t.id.startsWith('temp-'))
+
+      // For each fetched task, check if we have an optimistic update for it
+      const mergedTasks = enrichedTasks.map(fetchedTask => {
+        const optimisticTask = prevTasks.find(t => t.id === fetchedTask.id)
+        if (optimisticTask && optimisticTask.done && !fetchedTask.done) {
+          // Preserve the optimistic "done" state if blockchain hasn't caught up yet
+          console.log("[dashboard] Preserving optimistic done state for task", fetchedTask.id)
+          return { ...fetchedTask, done: true }
+        }
+        return fetchedTask
+      })
+
+      // Return temp tasks plus merged tasks
+      return [...tempTasks, ...mergedTasks]
+    })
   }, [fetchedTasks, members])
 
   // Optimistic task creation
