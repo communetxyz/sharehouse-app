@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSendTransaction } from "@privy-io/react-auth"
+import { useWaitForTransactionReceipt } from "wagmi"
 import { encodeFunctionData } from "viem"
 import { useCommuneData } from "./use-commune-data"
 import { COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI } from "@/lib/contracts"
@@ -10,11 +11,16 @@ import { useToast } from "./use-toast"
 export function useMarkChoreComplete() {
   const { commune } = useCommuneData()
   const [isMarking, setIsMarking] = useState(false)
-  const [isConfirmed, setIsConfirmed] = useState(false)
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const { toast } = useToast()
 
   const { sendTransaction } = useSendTransaction()
+
+  // Wait for transaction confirmation
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash || undefined,
+  })
 
   const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void) => {
     if (!commune) {
@@ -31,11 +37,8 @@ export function useMarkChoreComplete() {
     }
 
     setIsMarking(true)
-    setIsConfirmed(false)
+    setTxHash(null)
     setError(null)
-
-    // Optimistically mark as confirmed
-    setIsConfirmed(true)
 
     try {
       console.log("[v0] ===== MARK CHORE COMPLETE START =====")
@@ -64,7 +67,7 @@ export function useMarkChoreComplete() {
       })
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      await sendTransaction(
+      const result = await sendTransaction(
         {
           to: COMMUNE_OS_ADDRESS as `0x${string}`,
           data,
@@ -74,9 +77,10 @@ export function useMarkChoreComplete() {
         },
       )
 
-      console.log("[v0] ===== MARK CHORE COMPLETE SUCCESS =====")
+      console.log("[v0] Transaction sent:", result.hash)
+      setTxHash(result.hash as `0x${string}`)
 
-      // Don't refresh - UI already updated optimistically
+      // Transaction will be confirmed via useWaitForTransactionReceipt
     } catch (err: any) {
       console.error("[v0] ===== MARK CHORE COMPLETE FAILED =====")
       console.error("[v0] Error:", err)
@@ -87,7 +91,7 @@ export function useMarkChoreComplete() {
         cause: err.cause,
       })
       setError(err)
-      setIsConfirmed(false)
+      setTxHash(null)
       toast({
         title: "Failed to mark chore complete",
         description: err.message || "An error occurred. Please try again.",
@@ -103,7 +107,7 @@ export function useMarkChoreComplete() {
     markComplete,
     isMarking,
     isConfirmed,
-    isConfirming: isMarking,
+    isConfirming,
     error,
   }
 }
