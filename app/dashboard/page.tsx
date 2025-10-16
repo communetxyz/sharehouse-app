@@ -7,62 +7,62 @@ import { ChoreKanban } from "@/components/chore-kanban"
 import { ChoreCalendar } from "@/components/chore-calendar"
 import { MemberList } from "@/components/member-list"
 import { CommuneInfo } from "@/components/commune-info"
-import { ExpenseList } from "@/components/expense-list"
-import { CreateExpenseDialog } from "@/components/create-expense-dialog"
+import { TaskList } from "@/components/task-list"
+import { CreateTaskDialog } from "@/components/create-task-dialog"
 import { AccountButton } from "@/components/account-button"
 import { LanguageToggle } from "@/components/language-toggle"
 import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
-import { useExpenseData } from "@/hooks/use-expense-data"
+import { useTaskData } from "@/hooks/use-task-data"
 import { useWallet } from "@/hooks/use-wallet"
-import { Loader2, Plus, Mail } from "lucide-react"
+import { Loader2, Plus, Mail, CalendarPlus } from "lucide-react"
 import { useState, useEffect } from "react"
-import type { Expense } from "@/types/commune"
+import type { Task } from "@/types/commune"
 
 export default function DashboardPage() {
   const { t } = useI18n()
   const { address, isConnected, status } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
-  const { expenses: fetchedExpenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
+  const { tasks: fetchedTasks, isLoading: isLoadingTasks, refreshTasks } = useTaskData()
 
-  // Local optimistic state for expenses
-  const [expenses, setExpenses] = useState<Expense[]>([])
+  // Local optimistic state for tasks
+  const [tasks, setTasks] = useState<Task[]>([])
   const [pendingCreateIds, setPendingCreateIds] = useState<Set<string>>(new Set())
   const [confirmedCreateIds, setConfirmedCreateIds] = useState<Set<string>>(new Set())
 
-  // Sync fetched expenses with local state and enrich with member usernames
+  // Sync fetched tasks with local state and enrich with member usernames
   useEffect(() => {
-    // Enrich expenses with member usernames
-    const enrichedExpenses = fetchedExpenses.map(expense => ({
-      ...expense,
-      assignedToUsername: members.find(m => m.address.toLowerCase() === expense.assignedTo.toLowerCase())?.username || expense.assignedTo,
+    // Enrich tasks with member usernames
+    const enrichedTasks = fetchedTasks.map(task => ({
+      ...task,
+      assignedToUsername: members.find(m => m.address.toLowerCase() === task.assignedTo.toLowerCase())?.username || task.assignedTo,
     }))
-    setExpenses(enrichedExpenses)
-  }, [fetchedExpenses, members])
+    setTasks(enrichedTasks)
+  }, [fetchedTasks, members])
 
-  // Optimistic expense creation
-  const handleCreateExpenseOptimistic = (expenseData: {
-    amount: string
+  // Optimistic task creation
+  const handleCreateTaskOptimistic = (taskData: {
+    budget: string
     description: string
     dueDate: Date
     assignedTo: string
   }) => {
     const tempId = `temp-${Date.now()}`
-    const newExpense: Expense = {
+    const newTask: Task = {
       id: tempId, // Temporary ID
       communeId: commune?.id || "",
-      amount: expenseData.amount,
-      description: expenseData.description,
-      dueDate: Math.floor(expenseData.dueDate.getTime() / 1000),
-      assignedTo: expenseData.assignedTo,
-      assignedToUsername: members.find(m => m.address === expenseData.assignedTo)?.username || expenseData.assignedTo,
-      paid: false,
+      budget: taskData.budget,
+      description: taskData.description,
+      dueDate: Math.floor(taskData.dueDate.getTime() / 1000),
+      assignedTo: taskData.assignedTo,
+      assignedToUsername: members.find(m => m.address === taskData.assignedTo)?.username || taskData.assignedTo,
+      done: false,
       disputed: false,
-      isAssignedToUser: expenseData.assignedTo.toLowerCase() === address?.toLowerCase(),
+      isAssignedToUser: taskData.assignedTo.toLowerCase() === address?.toLowerCase(),
     }
 
     // Add to local state immediately
-    setExpenses(prev => [...prev, newExpense])
+    setTasks(prev => [...prev, newTask])
 
     // Track as pending
     setPendingCreateIds(prev => new Set(prev).add(tempId))
@@ -71,8 +71,8 @@ export default function DashboardPage() {
     return tempId
   }
 
-  // Handle expense creation confirmation
-  const handleExpenseCreateConfirmed = (tempId: string) => {
+  // Handle task creation confirmation
+  const handleTaskCreateConfirmed = (tempId: string) => {
     // Move from pending to confirmed
     setPendingCreateIds(prev => {
       const newSet = new Set(prev)
@@ -81,24 +81,24 @@ export default function DashboardPage() {
     })
     setConfirmedCreateIds(prev => new Set(prev).add(tempId))
 
-    // Clear confirmed status and refresh expenses after 2 seconds
+    // Clear confirmed status and refresh tasks after 2 seconds
     setTimeout(() => {
       setConfirmedCreateIds(prev => {
         const newSet = new Set(prev)
         newSet.delete(tempId)
         return newSet
       })
-      // Refresh expenses to get the real ID from blockchain
-      refreshExpenses()
+      // Refresh tasks to get the real ID from blockchain
+      refreshTasks()
     }, 2000)
   }
 
-  // Optimistic mark paid
-  const handleMarkPaidOptimistic = (expenseId: string) => {
-    setExpenses(prev => prev.map(expense =>
-      expense.id === expenseId
-        ? { ...expense, paid: true }
-        : expense
+  // Optimistic mark done
+  const handleMarkDoneOptimistic = (taskId: string) => {
+    setTasks(prev => prev.map(task =>
+      task.id === taskId
+        ? { ...task, done: true }
+        : task
     ))
   }
 
@@ -208,12 +208,20 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <LanguageToggle />
             {commune && address && commune.creator.toLowerCase() === address.toLowerCase() && (
-              <Link href="/dashboard/invites">
-                <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Invites
-                </Button>
-              </Link>
+              <>
+                <Link href="/dashboard/add-chores">
+                  <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                    <CalendarPlus className="w-4 h-4 mr-2" />
+                    {t("addChores.button")}
+                  </Button>
+                </Link>
+                <Link href="/dashboard/invites">
+                  <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Invites
+                  </Button>
+                </Link>
+              </>
             )}
             <Link href="/create-sharehouse">
               <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
@@ -224,7 +232,7 @@ export default function DashboardPage() {
             <Button
               onClick={() => {
                 refreshData()
-                refreshExpenses()
+                refreshTasks()
               }}
               variant="ghost"
               size="sm"
@@ -251,7 +259,7 @@ export default function DashboardPage() {
             <TabsTrigger value="my-chores">{t("dashboard.myChores")}</TabsTrigger>
             <TabsTrigger value="all-chores">{t("dashboard.allChores")}</TabsTrigger>
             <TabsTrigger value="calendar">{t("dashboard.calendar")}</TabsTrigger>
-            <TabsTrigger value="expenses">{t("dashboard.expenses")}</TabsTrigger>
+            <TabsTrigger value="tasks">{t("dashboard.tasks")}</TabsTrigger>
             <TabsTrigger value="members">{t("dashboard.members")}</TabsTrigger>
             <TabsTrigger value="info">{t("dashboard.info")}</TabsTrigger>
           </TabsList>
@@ -277,29 +285,29 @@ export default function DashboardPage() {
             <ChoreCalendar chores={optimisticChores} />
           </TabsContent>
 
-          <TabsContent value="expenses" className="space-y-6">
+          <TabsContent value="tasks" className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-serif text-charcoal">{t("expenses.title")}</h2>
-              {commune && <CreateExpenseDialog
+              <h2 className="text-2xl font-serif text-charcoal">{t("tasks.title")}</h2>
+              {commune && <CreateTaskDialog
                 communeId={commune.id}
                 members={members}
-                onOptimisticCreate={handleCreateExpenseOptimistic}
+                onOptimisticCreate={handleCreateTaskOptimistic}
                 onSuccess={(tempId) => {
                   // Mark as confirmed when transaction succeeds
-                  handleExpenseCreateConfirmed(tempId)
+                  handleTaskCreateConfirmed(tempId)
                 }}
               />}
             </div>
-            {isLoadingExpenses ? (
+            {isLoadingTasks ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-sage" />
               </div>
             ) : (
-              commune && <ExpenseList
-                expenses={expenses}
+              commune && <TaskList
+                tasks={tasks}
                 communeId={commune.id}
-                onOptimisticMarkPaid={handleMarkPaidOptimistic}
-                onRefresh={refreshExpenses}
+                onOptimisticMarkDone={handleMarkDoneOptimistic}
+                onRefresh={refreshTasks}
                 pendingCreateIds={pendingCreateIds}
                 confirmedCreateIds={confirmedCreateIds}
               />

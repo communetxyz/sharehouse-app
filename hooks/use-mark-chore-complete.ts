@@ -21,6 +21,10 @@ export function useMarkChoreComplete() {
       throw new Error("No commune data available")
     }
 
+    if (!choreData?.periodNumber) {
+      throw new Error("Period number is required to mark chore complete")
+    }
+
     // Call onSuccess IMMEDIATELY before any async operations (for animations)
     if (onSuccess) {
       onSuccess()
@@ -39,6 +43,8 @@ export function useMarkChoreComplete() {
       console.log("[v0] Marking chore complete:", {
         choreId,
         choreIdType: typeof choreId,
+        period: choreData.periodNumber,
+        periodType: typeof choreData.periodNumber,
         communeId: commune.id,
         communeIdType: typeof commune.id,
         contractAddress: COMMUNE_OS_ADDRESS,
@@ -47,13 +53,14 @@ export function useMarkChoreComplete() {
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "markChoreComplete",
-        args: [BigInt(commune.id), BigInt(choreId)],
+        args: [BigInt(commune.id), BigInt(choreId), BigInt(choreData.periodNumber)],
       })
 
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Function args:", {
         communeId: BigInt(commune.id).toString(),
         choreId: BigInt(choreId).toString(),
+        period: BigInt(choreData.periodNumber).toString(),
       })
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
