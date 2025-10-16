@@ -284,7 +284,7 @@ export default function InviteGenerationPage() {
           <CardHeader>
             <CardTitle className="font-serif">Invite Generation</CardTitle>
             <CardDescription>
-              Generate a cryptographically signed invite link to share with prospective members
+              Generate an invite link to share with prospective members
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
