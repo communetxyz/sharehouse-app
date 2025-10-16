@@ -165,7 +165,7 @@ function ExpenseColumn({
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-lg text-charcoal">{title}</h3>
-      <div className="space-y-3">
+      <div className="max-h-[600px] overflow-y-auto space-y-3">
         {expenses.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex items-center justify-center py-8">
@@ -306,8 +306,7 @@ function ExpenseCard({
             </div>
             <CardDescription className="flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1">
-                <DollarSign className="h-3 w-3" />
-                {expense.amount} Collateral Currency
+                ¥{expense.amount}
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />

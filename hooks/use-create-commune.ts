@@ -30,9 +30,6 @@ export function useCreateCommune() {
     setIsLoading(true)
     setError(null)
 
-    // Optimistically redirect to dashboard
-    router.push("/dashboard")
-
     try {
       console.log("[v0] Creating commune with data:", input)
 
@@ -57,6 +54,7 @@ export function useCreateCommune() {
       console.log("[v0] Encoded transaction data:", data)
 
       // Send transaction with gas sponsorship
+      // Note: sendTransaction resolves when transaction is submitted and confirmed on-chain
       await sendTransaction(
         {
           to: COMMUNE_OS_ADDRESS as `0x${string}`,
@@ -74,6 +72,9 @@ export function useCreateCommune() {
         title: "Success",
         description: "Commune created successfully!",
       })
+
+      // Redirect to dashboard after transaction succeeds
+      router.push("/dashboard")
     } catch (err) {
       console.error("[v0] Create commune error:", err)
       const error = err as Error
