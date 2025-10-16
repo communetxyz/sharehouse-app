@@ -7,7 +7,7 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
+export function useDisputeExpense(communeId: string, onClose?: () => void, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isDisputing, setIsDisputing] = useState(false)
@@ -24,8 +24,16 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
       return
     }
 
+    // Close dialog IMMEDIATELY before any async operations
+    if (onClose) {
+      onClose()
+    }
+
     setIsDisputing(true)
     setIsConfirmed(false)
+
+    // Optimistically mark as confirmed
+    setIsConfirmed(true)
 
     try {
       console.log("[v0] ===== DISPUTE EXPENSE START =====")
@@ -45,7 +53,7 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      const result = await sendTransaction(
+      await sendTransaction(
         {
           to: COMMUNE_OS_ADDRESS as `0x${string}`,
           data,
@@ -55,20 +63,14 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
         },
       )
 
-      console.log("[v0] Transaction result:", result)
-      console.log("[v0] Transaction hash:", result.hash)
       console.log("[v0] ===== DISPUTE EXPENSE SUCCESS =====")
-
-      setIsConfirmed(true)
 
       toast({
         title: "Dispute initiated",
         description: "Your dispute has been submitted for voting",
       })
 
-      if (onSuccess) {
-        onSuccess()
-      }
+      // Don't refresh - UI already updated optimistically
     } catch (error: any) {
       console.error("[v0] ===== DISPUTE EXPENSE FAILED =====")
       console.error("[v0] Error disputing expense:", error)
@@ -77,9 +79,10 @@ export function useDisputeExpense(communeId: string, onSuccess?: () => void) {
         code: error.code,
         data: error.data,
       })
+      setIsConfirmed(false)
       toast({
         title: "Failed to dispute expense",
-        description: error.message || "An error occurred",
+        description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
     } finally {

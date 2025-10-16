@@ -4,7 +4,7 @@ import { PrivyProvider } from "@privy-io/react-auth"
 import { WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type { ReactNode } from "react"
-import { gnosis, gnosisChiado } from "wagmi/chains"
+import { gnosis, gnosisChiado, mainnet } from "wagmi/chains"
 import { config } from "./wagmi-config"
 
 const queryClient = new QueryClient()
@@ -31,11 +31,16 @@ export function Web3Provider({ children }: { children: ReactNode }) {
           theme: "light",
           accentColor: "#8B7355",
           logo: "https://avatars.githubusercontent.com/u/37784886",
+          showWalletLoginFirst: false,
         },
         embeddedWallets: {
           createOnLogin: "users-without-wallets",
+          showWalletUIs: false,
         },
-        supportedChains: [gnosis, gnosisChiado],
+        externalWallets: {
+          showWalletUIs: false,
+        },
+        supportedChains: [gnosis, gnosisChiado, mainnet],
       }}
     >
       <QueryClientProvider client={queryClient}>

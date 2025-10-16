@@ -7,7 +7,7 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useCreateExpense(communeId: string, onSuccess?: () => void) {
+export function useCreateExpense(communeId: string, onClose?: () => void, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isCreating, setIsCreating] = useState(false)
@@ -21,6 +21,11 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
         variant: "destructive",
       })
       return
+    }
+
+    // Close dialog IMMEDIATELY before any async operations
+    if (onClose) {
+      onClose()
     }
 
     setIsCreating(true)
@@ -53,7 +58,7 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      const result = await sendTransaction(
+      await sendTransaction(
         {
           to: COMMUNE_OS_ADDRESS as `0x${string}`,
           data,
@@ -63,8 +68,6 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
         },
       )
 
-      console.log("[v0] Transaction result:", result)
-      console.log("[v0] Transaction hash:", result.hash)
       console.log("[v0] ===== CREATE EXPENSE SUCCESS =====")
 
       toast({
@@ -72,8 +75,9 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
         description: "Your expense has been created successfully",
       })
 
-      if (onSuccess) {
-        onSuccess()
+      // Notify parent that transaction succeeded
+      if (onRefresh) {
+        onRefresh()
       }
     } catch (error: any) {
       console.error("[v0] ===== CREATE EXPENSE FAILED =====")
@@ -85,7 +89,7 @@ export function useCreateExpense(communeId: string, onSuccess?: () => void) {
       })
       toast({
         title: "Failed to create expense",
-        description: error.message || "An error occurred",
+        description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
     } finally {

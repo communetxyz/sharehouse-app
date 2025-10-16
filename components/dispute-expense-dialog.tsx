@@ -29,14 +29,18 @@ export function DisputeExpenseDialog({
 }: DisputeExpenseDialogProps) {
   const { t } = useI18n()
   const [selectedMember, setSelectedMember] = useState<string>("")
-  const { disputeExpense, isDisputing } = useDisputeExpense(communeId, onRefresh)
+
+  const handleClose = () => {
+    onOpenChange(false)
+    setSelectedMember("")
+  }
+
+  const { disputeExpense, isDisputing } = useDisputeExpense(communeId, handleClose, onRefresh)
 
   const handleDispute = async () => {
     if (!selectedMember) return
 
     await disputeExpense(expenseId, selectedMember)
-    onOpenChange(false)
-    setSelectedMember("")
   }
 
   // Filter out the current assignee from the member list

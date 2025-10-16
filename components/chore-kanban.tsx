@@ -10,9 +10,11 @@ import type { ChoreInstance } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useToast } from "@/hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
+import { Confetti } from "@/components/ui/confetti"
 
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
+  onOptimisticComplete?: (choreId: string) => void
   onRefresh: () => void
   filterMyChores?: boolean
 }
@@ -55,25 +57,28 @@ const ChoreCard = memo(function ChoreCard({
       transition={{ duration: 0.3 }}
     >
       <Card
-        className={`border-charcoal/10 ${chore.completed ? "border-sage/20 bg-sage/5" : "bg-white/50"} ${isSuccess ? "ring-2 ring-sage/50" : ""}`}
+        className={`border-charcoal/10 ${chore.completed ? "border-sage/20 bg-sage/5" : "bg-white/50"} ${isSuccess ? "ring-2 ring-sage/50" : ""} relative overflow-hidden`}
       >
         <CardContent className="p-4 space-y-3">
           <AnimatePresence>
             {isSuccess && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center bg-sage/10 rounded-lg z-10"
-              >
+              <>
+                <Confetti active={isSuccess} />
                 <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", duration: 0.6 }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex items-center justify-center bg-sage/10 rounded-lg z-10"
                 >
-                  <Sparkles className="w-12 h-12 text-sage" />
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", duration: 0.6 }}
+                  >
+                    <Sparkles className="w-12 h-12 text-sage" />
+                  </motion.div>
                 </motion.div>
-              </motion.div>
+              </>
             )}
           </AnimatePresence>
 
@@ -128,7 +133,7 @@ const ChoreCard = memo(function ChoreCard({
   )
 })
 
-export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
+export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { markComplete, isMarking, isConfirmed, error } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
@@ -182,7 +187,15 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
   }, [chores, sevenDaysAgo])
 
   const handleComplete = useCallback(async (chore: ChoreInstance) => {
-    setCompletingId(chore.scheduleId.toString())
+    const choreIdStr = chore.scheduleId.toString()
+    setCompletingId(choreIdStr)
+
+    // Optimistically update UI immediately
+    if (onOptimisticComplete) {
+      onOptimisticComplete(choreIdStr)
+    }
+    setSuccessId(choreIdStr)
+
     try {
       await markComplete(chore.scheduleId, {
         scheduleId: chore.scheduleId,
@@ -190,11 +203,14 @@ export function ChoreKanban({ chores, onRefresh, filterMyChores = false }: Chore
         title: chore.title,
         assignedTo: chore.assignedTo,
         completed: chore.completed,
-      })
+      }, () => {
+        // Keep success animation
+      }, onRefresh)
     } catch (err) {
       setCompletingId(null)
+      setSuccessId(null)
     }
-  }, [markComplete])
+  }, [markComplete, onOptimisticComplete, onRefresh])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"

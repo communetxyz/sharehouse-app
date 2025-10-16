@@ -16,12 +16,108 @@ import { useCommuneData } from "@/hooks/use-commune-data"
 import { useExpenseData } from "@/hooks/use-expense-data"
 import { useWallet } from "@/hooks/use-wallet"
 import { Loader2, Plus } from "lucide-react"
+import { useState, useEffect } from "react"
+import type { Expense } from "@/types/commune"
 
 export default function DashboardPage() {
   const { t } = useI18n()
   const { address, isConnected, status } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()
-  const { expenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
+  const { expenses: fetchedExpenses, isLoading: isLoadingExpenses, refreshExpenses } = useExpenseData()
+
+  // Local optimistic state for expenses
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [pendingCreateIds, setPendingCreateIds] = useState<Set<string>>(new Set())
+  const [confirmedCreateIds, setConfirmedCreateIds] = useState<Set<string>>(new Set())
+
+  // Sync fetched expenses with local state and enrich with member usernames
+  useEffect(() => {
+    // Enrich expenses with member usernames
+    const enrichedExpenses = fetchedExpenses.map(expense => ({
+      ...expense,
+      assignedToUsername: members.find(m => m.address.toLowerCase() === expense.assignedTo.toLowerCase())?.username || expense.assignedTo,
+    }))
+    setExpenses(enrichedExpenses)
+  }, [fetchedExpenses, members])
+
+  // Optimistic expense creation
+  const handleCreateExpenseOptimistic = (expenseData: {
+    amount: string
+    description: string
+    dueDate: Date
+    assignedTo: string
+  }) => {
+    const tempId = `temp-${Date.now()}`
+    const newExpense: Expense = {
+      id: tempId, // Temporary ID
+      communeId: commune?.id || "",
+      amount: expenseData.amount,
+      description: expenseData.description,
+      dueDate: Math.floor(expenseData.dueDate.getTime() / 1000),
+      assignedTo: expenseData.assignedTo,
+      assignedToUsername: members.find(m => m.address === expenseData.assignedTo)?.username || expenseData.assignedTo,
+      paid: false,
+      disputed: false,
+      isAssignedToUser: expenseData.assignedTo.toLowerCase() === address?.toLowerCase(),
+    }
+
+    // Add to local state immediately
+    setExpenses(prev => [...prev, newExpense])
+
+    // Track as pending
+    setPendingCreateIds(prev => new Set(prev).add(tempId))
+
+    // Return the temp ID so we can track it
+    return tempId
+  }
+
+  // Handle expense creation confirmation
+  const handleExpenseCreateConfirmed = (tempId: string) => {
+    // Move from pending to confirmed
+    setPendingCreateIds(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(tempId)
+      return newSet
+    })
+    setConfirmedCreateIds(prev => new Set(prev).add(tempId))
+
+    // Clear confirmed status and refresh expenses after 2 seconds
+    setTimeout(() => {
+      setConfirmedCreateIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(tempId)
+        return newSet
+      })
+      // Refresh expenses to get the real ID from blockchain
+      refreshExpenses()
+    }, 2000)
+  }
+
+  // Optimistic mark paid
+  const handleMarkPaidOptimistic = (expenseId: string) => {
+    setExpenses(prev => prev.map(expense =>
+      expense.id === expenseId
+        ? { ...expense, paid: true }
+        : expense
+    ))
+  }
+
+  // Local optimistic state for chores
+  const [optimisticChores, setOptimisticChores] = useState(chores)
+
+  // Sync fetched chores with local state
+  useEffect(() => {
+    setOptimisticChores(chores)
+  }, [chores])
+
+  // Optimistic chore completion
+  const handleChoreCompleteOptimistic = (choreId: string) => {
+    setOptimisticChores(prev => prev.map(chore =>
+      chore.scheduleId.toString() === choreId
+        ? { ...chore, completed: true }
+        : chore
+    ))
+  }
 
   if (status === "reconnecting" || status === "connecting") {
     return (
@@ -153,28 +249,52 @@ export default function DashboardPage() {
           </TabsList>
 
           <TabsContent value="my-chores" className="space-y-6">
-            <ChoreKanban chores={chores} onRefresh={refreshData} filterMyChores />
+            <ChoreKanban
+              chores={optimisticChores}
+              onOptimisticComplete={handleChoreCompleteOptimistic}
+              onRefresh={refreshData}
+              filterMyChores
+            />
           </TabsContent>
 
           <TabsContent value="all-chores" className="space-y-6">
-            <ChoreKanban chores={chores} onRefresh={refreshData} />
+            <ChoreKanban
+              chores={optimisticChores}
+              onOptimisticComplete={handleChoreCompleteOptimistic}
+              onRefresh={refreshData}
+            />
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">
-            <ChoreCalendar chores={chores} />
+            <ChoreCalendar chores={optimisticChores} />
           </TabsContent>
 
           <TabsContent value="expenses" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-serif text-charcoal">{t("expenses.title")}</h2>
-              {commune && <CreateExpenseDialog communeId={commune.id} members={members} onSuccess={refreshExpenses} />}
+              {commune && <CreateExpenseDialog
+                communeId={commune.id}
+                members={members}
+                onOptimisticCreate={handleCreateExpenseOptimistic}
+                onSuccess={(tempId) => {
+                  // Mark as confirmed when transaction succeeds
+                  handleExpenseCreateConfirmed(tempId)
+                }}
+              />}
             </div>
             {isLoadingExpenses ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-sage" />
               </div>
             ) : (
-              commune && <ExpenseList expenses={expenses} communeId={commune.id} onRefresh={refreshExpenses} />
+              commune && <ExpenseList
+                expenses={expenses}
+                communeId={commune.id}
+                onOptimisticMarkPaid={handleMarkPaidOptimistic}
+                onRefresh={refreshExpenses}
+                pendingCreateIds={pendingCreateIds}
+                confirmedCreateIds={confirmedCreateIds}
+              />
             )}
           </TabsContent>
 

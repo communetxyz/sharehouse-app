@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import {
   Dialog,
   DialogContent,
@@ -24,31 +24,63 @@ import { Plus } from "lucide-react"
 interface CreateExpenseDialogProps {
   communeId: string
   members: Member[]
-  onSuccess: () => void
+  onOptimisticCreate: (expenseData: {
+    amount: string
+    description: string
+    dueDate: Date
+    assignedTo: string
+  }) => string // Returns temp ID
+  onSuccess: (tempId: string) => void
 }
 
-export function CreateExpenseDialog({ communeId, members, onSuccess }: CreateExpenseDialogProps) {
+export function CreateExpenseDialog({ communeId, members, onOptimisticCreate, onSuccess }: CreateExpenseDialogProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState("")
   const [description, setDescription] = useState("")
   const [assignedTo, setAssignedTo] = useState("")
   const [dueDate, setDueDate] = useState("")
+  const pendingTempIdRef = useRef<string | null>(null)
 
-  const { createExpense, isCreating } = useCreateExpense(communeId, () => {
+  const handleClose = () => {
     setOpen(false)
     setAmount("")
     setDescription("")
     setAssignedTo("")
     setDueDate("")
-    onSuccess()
-  })
+    // Don't clear the ref here - it needs to persist until the transaction completes
+  }
+
+  const { createExpense, isCreating } = useCreateExpense(
+    communeId,
+    handleClose,
+    () => {
+      // Call onSuccess with the pending temp ID when transaction succeeds
+      if (pendingTempIdRef.current) {
+        onSuccess(pendingTempIdRef.current)
+        pendingTempIdRef.current = null
+      }
+    }
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!amount || !description || !assignedTo || !dueDate) return
 
     const dueDateObj = new Date(dueDate)
+
+    // Optimistically add expense to UI immediately and get temp ID
+    const tempId = onOptimisticCreate({
+      amount,
+      description,
+      dueDate: dueDateObj,
+      assignedTo,
+    })
+
+    // Store the temp ID for the success callback
+    pendingTempIdRef.current = tempId
+
+    // Then send the transaction
     await createExpense(amount, description, dueDateObj, assignedTo)
   }
 
