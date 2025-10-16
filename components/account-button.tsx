@@ -17,12 +17,17 @@ export function AccountButton() {
   const { t } = useI18n()
 
   const address = wallets[0]?.address as `0x${string}` | undefined
+  console.log('[AccountButton] Wallet address:', address)
+
   const ensNameOrAddress = useEnsNameOrAddress(address)
+  console.log('[AccountButton] ENS or address result:', ensNameOrAddress)
 
   const { members } = useCommuneData()
   const currentMember = members.find((m) => m.isCurrentUser)
+  console.log('[AccountButton] Current member:', currentMember)
 
   const displayName = currentMember?.username || ensNameOrAddress
+  console.log('[AccountButton] Display name:', displayName)
 
   // Cleanup timeout on unmount
   useEffect(() => {

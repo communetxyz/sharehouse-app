@@ -15,32 +15,52 @@ const ensCache = new Map<string, string>()
 export function useEnsNameOrAddress(address: string | undefined) {
   const [cachedName, setCachedName] = useState<string | null>(null)
 
+  console.log('[ENS] Hook called with address:', address)
+  console.log('[ENS] Address valid?', address ? isValidAddress(address) : 'no address')
+  console.log('[ENS] Cache has address?', address ? ensCache.has(address) : 'no address')
+
   // Check cache first
   useEffect(() => {
     if (address && ensCache.has(address)) {
-      setCachedName(ensCache.get(address) || null)
+      const cached = ensCache.get(address) || null
+      console.log('[ENS] Using cached value for', address, ':', cached)
+      setCachedName(cached)
     }
   }, [address])
 
-  const { data: ensName, isError, error } = useEnsName({
+  const enabled = !!address && isValidAddress(address) && !ensCache.has(address)
+  console.log('[ENS] Query enabled?', enabled)
+
+  const { data: ensName, isError, error, isFetching, isLoading } = useEnsName({
     address: address as `0x${string}` | undefined,
     chainId: mainnet.id, // Always check mainnet for ENS
-    enabled: !!address && isValidAddress(address) && !ensCache.has(address), // Only query if not cached
+    enabled, // Only query if not cached
   })
+
+  console.log('[ENS] Query state:', { ensName, isError, isFetching, isLoading })
 
   useEffect(() => {
     if (address && ensName) {
+      console.log('[ENS] Caching successful lookup for', address, ':', ensName)
       // Cache successful ENS lookups
       ensCache.set(address, ensName)
       setCachedName(ensName)
     }
   }, [address, ensName])
 
-  if (!address || !isValidAddress(address)) return ""
+  useEffect(() => {
+    if (isError && error) {
+      console.error('[ENS] Lookup error for', address, ':', error)
+    }
+  }, [isError, error, address])
 
-  // Don't log errors for now to reduce console noise
-  // The ENS gateway issue is known and doesn't affect functionality
+  if (!address || !isValidAddress(address)) {
+    console.log('[ENS] Returning empty - invalid address')
+    return ""
+  }
 
-  // Return cached name first, then ENS name, otherwise truncated address
-  return cachedName || ensName || truncateAddress(address)
+  const result = cachedName || ensName || truncateAddress(address)
+  console.log('[ENS] Returning:', result, 'for', address)
+
+  return result
 }
