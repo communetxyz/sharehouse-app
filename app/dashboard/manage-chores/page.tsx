@@ -7,15 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Loader2, ArrowLeft, Trash2 } from "lucide-react"
 import { useChoreSchedules } from "@/hooks/use-chore-schedules"
 import { useRemoveChoreSchedule } from "@/hooks/use-remove-chore-schedule"
@@ -247,25 +245,27 @@ export default function ManageChoresPage() {
       </main>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!scheduleToDelete} onOpenChange={(open) => !open && setScheduleToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("manageChores.confirmDelete")}</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Dialog open={!!scheduleToDelete} onOpenChange={(open) => !open && setScheduleToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("manageChores.confirmDelete")}</DialogTitle>
+            <DialogDescription>
               {t("manageChores.confirmDeleteDesc")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-            <AlertDialogAction
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setScheduleToDelete(null)}>
+              {t("common.cancel")}
+            </Button>
+            <Button
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               {t("manageChores.delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
