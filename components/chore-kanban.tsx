@@ -165,6 +165,7 @@ const ChoreCard = memo(function ChoreCard({
 
 export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { commune } = useCommuneData()
+  console.log("[chore-kanban] Commune ID:", commune?.id)
   const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete(commune?.id)
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
