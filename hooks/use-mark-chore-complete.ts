@@ -4,12 +4,10 @@ import { useState, useEffect } from "react"
 import { useSendTransaction } from "@privy-io/react-auth"
 import { useWaitForTransactionReceipt } from "wagmi"
 import { encodeFunctionData } from "viem"
-import { useCommuneData } from "./use-commune-data"
 import { COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useMarkChoreComplete() {
-  const { commune } = useCommuneData()
+export function useMarkChoreComplete(communeId?: string) {
   const [isMarking, setIsMarking] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | null>(null)
   const [error, setError] = useState<Error | null>(null)
@@ -39,7 +37,7 @@ export function useMarkChoreComplete() {
   }, [isConfirmed, txHash])
 
   const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void) => {
-    if (!commune) {
+    if (!communeId) {
       throw new Error("No commune data available")
     }
 
@@ -64,20 +62,20 @@ export function useMarkChoreComplete() {
         choreIdType: typeof choreId,
         period: choreData.periodNumber,
         periodType: typeof choreData.periodNumber,
-        communeId: commune.id,
-        communeIdType: typeof commune.id,
+        communeId: communeId,
+        communeIdType: typeof communeId,
         contractAddress: COMMUNE_OS_ADDRESS,
       })
 
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "markChoreComplete",
-        args: [BigInt(commune.id), BigInt(choreId), BigInt(choreData.periodNumber)],
+        args: [BigInt(communeId), BigInt(choreId), BigInt(choreData.periodNumber)],
       })
 
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Function args:", {
-        communeId: BigInt(commune.id).toString(),
+        communeId: BigInt(communeId).toString(),
         choreId: BigInt(choreId).toString(),
         period: BigInt(choreData.periodNumber).toString(),
       })

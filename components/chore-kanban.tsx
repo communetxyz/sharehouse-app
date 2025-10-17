@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Circle, Loader2, Sparkles } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback, memo } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
+import { useCommuneData } from "@/hooks/use-commune-data"
 import type { ChoreInstance } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useToast } from "@/hooks/use-toast"
@@ -163,7 +164,8 @@ const ChoreCard = memo(function ChoreCard({
 })
 
 export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
-  const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete()
+  const { commune } = useCommuneData()
+  const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete(commune?.id)
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
   const { t, language } = useLanguage()
