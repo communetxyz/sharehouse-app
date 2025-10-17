@@ -137,12 +137,12 @@ const ChoreCard = memo(function ChoreCard({
               {isCompleting || isConfirming ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {isConfirming ? "Confirming..." : "Marking..."}
+                  {isConfirming ? t("chores.confirming") : t("chores.marking")}
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Mark Complete
+                  {t("chores.markComplete")}
                 </>
               )}
             </Button>
@@ -251,7 +251,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
       setCompletingId(null)
       setSuccessId(null)
     }
-  }, [markComplete, onOptimisticComplete, onRefresh])
+  }, [markComplete, onOptimisticComplete, onRefresh, commune?.id])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"
