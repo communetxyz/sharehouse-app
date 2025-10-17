@@ -148,7 +148,7 @@ export default function DashboardPage() {
                 <Link href="/dashboard/invites">
                   <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
                     <Mail className="w-4 h-4 mr-2" />
-                    Invites
+                    {t("dashboard.invites")}
                   </Button>
                 </Link>
               </>

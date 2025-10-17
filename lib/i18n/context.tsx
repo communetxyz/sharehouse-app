@@ -6,7 +6,7 @@ import { translations, type Language } from "./translations"
 interface I18nContextType {
   language: Language
   setLanguage: (lang: Language) => void
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined)
@@ -39,7 +39,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const t = (key: string): string => {
+  const t = (key: string, params?: Record<string, string | number>): string => {
     const keys = key.split(".")
     let value: any = translations[language]
 
@@ -47,7 +47,18 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       value = value?.[k]
     }
 
-    return typeof value === "string" ? value : key
+    if (typeof value !== "string") {
+      return key
+    }
+
+    // Replace template variables like {{name}} with provided params
+    if (params) {
+      return value.replace(/\{\{(\w+)\}\}/g, (match, paramKey) => {
+        return params[paramKey]?.toString() ?? match
+      })
+    }
+
+    return value
   }
 
   return <I18nContext.Provider value={{ language, setLanguage, t }}>{children}</I18nContext.Provider>
