@@ -22,6 +22,22 @@ export function useMarkChoreComplete() {
     hash: txHash || undefined,
   })
 
+  // Log confirmation state changes
+  useEffect(() => {
+    if (txHash) {
+      console.log("[v0] Transaction hash set:", txHash)
+      console.log("[v0] isConfirming:", isConfirming, "isConfirmed:", isConfirmed)
+    }
+  }, [txHash, isConfirming, isConfirmed])
+
+  // Log when transaction is confirmed
+  useEffect(() => {
+    if (isConfirmed && txHash) {
+      console.log("[v0] ===== TRANSACTION CONFIRMED =====")
+      console.log("[v0] Transaction hash:", txHash)
+    }
+  }, [isConfirmed, txHash])
+
   const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void) => {
     if (!commune) {
       throw new Error("No commune data available")

@@ -218,6 +218,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
   const handleComplete = useCallback(async (chore: ChoreInstance) => {
     // Use compound key: scheduleId-periodNumber to uniquely identify this chore instance
     const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+    console.log("[chore-kanban] handleComplete called for chore:", choreKey)
     setCompletingId(choreKey)
 
     // Optimistically update UI immediately
@@ -227,6 +228,10 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
     setSuccessId(choreKey)
 
     try {
+      console.log("[chore-kanban] Calling markComplete with:", {
+        scheduleId: chore.scheduleId,
+        periodNumber: chore.periodNumber,
+      })
       await markComplete(chore.scheduleId, {
         scheduleId: chore.scheduleId,
         periodNumber: chore.periodNumber,
@@ -236,7 +241,9 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
       }, () => {
         // Keep success animation
       }, onRefresh)
+      console.log("[chore-kanban] markComplete completed successfully")
     } catch (err) {
+      console.error("[chore-kanban] markComplete failed:", err)
       setCompletingId(null)
       setSuccessId(null)
     }
