@@ -3,18 +3,35 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, Circle, Loader2, Sparkles } from "lucide-react"
+import { CheckCircle2, Circle, Loader2, Sparkles, UserCog } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback, memo } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
-import type { ChoreInstance } from "@/types/commune"
+import { useReassignChore } from "@/hooks/use-reassign-chore"
+import type { ChoreInstance, Member } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useToast } from "@/hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
 import { Confetti } from "@/components/ui/confetti"
 import { EmojiPickerDialog } from "@/components/emoji-picker-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
+  members: Member[]
   onOptimisticComplete?: (choreId: string) => void
   onRefresh: () => void
   filterMyChores?: boolean
@@ -38,21 +55,29 @@ const formatPeriodDate = (periodStart: number, locale: string = "en-US") => {
 // Memoize ChoreCard to prevent unnecessary re-renders
 const ChoreCard = memo(function ChoreCard({
   chore,
+  members,
   onComplete,
+  onReassign,
   isCompleting,
   showCompleteButton,
+  showReassignButton,
   isSuccess,
   locale,
   t,
 }: {
   chore: ChoreInstance
+  members?: Member[]
   onComplete?: () => void
+  onReassign?: (newAssignee: string) => void
   isCompleting?: boolean
   showCompleteButton?: boolean
+  showReassignButton?: boolean
   isSuccess?: boolean
   locale?: string
   t: (key: string) => string
 }) {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedAssignee, setSelectedAssignee] = useState<string>("")
   const [choreEmoji, setChoreEmoji] = useState("")
 
   useEffect(() => {
@@ -64,6 +89,14 @@ const ChoreCard = memo(function ChoreCard({
       }
     }
   }, [chore.scheduleId])
+
+  const handleReassignConfirm = () => {
+    if (selectedAssignee && onReassign) {
+      onReassign(selectedAssignee)
+      setDialogOpen(false)
+      setSelectedAssignee("")
+    }
+  }
 
   return (
     <motion.div
