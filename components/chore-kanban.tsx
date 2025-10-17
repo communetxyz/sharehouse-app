@@ -177,6 +177,48 @@ const ChoreCard = memo(function ChoreCard({
               )}
             </Button>
           )}
+          {showReassignButton && onReassign && members && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-charcoal/20 text-charcoal hover:bg-charcoal/5"
+                >
+                  <UserCog className="w-4 h-4 mr-2" />
+                  {t("chores.reassign")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("chores.reassignChore")}</DialogTitle>
+                  <DialogDescription>{t("chores.selectNewAssignee")}</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("chores.newAssignee")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {members.map((member) => (
+                        <SelectItem key={member.address} value={member.address}>
+                          {member.username || member.address}
+                          {member.isCurrentUser && ` (${t("members.you")})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={handleReassignConfirm}
+                    disabled={!selectedAssignee}
+                    className="w-full bg-sage hover:bg-sage/90 text-cream"
+                  >
+                    {t("chores.confirmReassign")}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </CardContent>
       </Card>
     </motion.div>
@@ -192,8 +234,9 @@ const ChoreCard = memo(function ChoreCard({
   )
 })
 
-export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
+export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { markComplete, isMarking, isConfirmed, error } = useMarkChoreComplete()
+  const { reassignChore, isReassigning } = useReassignChore()
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
   const { t, language } = useLanguage()
@@ -272,6 +315,20 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
     }
   }, [markComplete, onOptimisticComplete, onRefresh])
 
+  const handleReassign = useCallback(async (chore: ChoreInstance, newAssignee: string) => {
+    try {
+      await reassignChore(
+        chore.scheduleId,
+        chore.periodNumber,
+        newAssignee,
+        undefined,
+        onRefresh
+      )
+    } catch (err) {
+      // Error already handled in hook
+    }
+  }, [reassignChore, onRefresh])
+
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"
     return (
@@ -296,10 +353,13 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                       <ChoreCard
                         key={choreKey}
                         chore={chore}
+                        members={members}
                         onComplete={() => handleComplete(chore)}
+                        onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
                         isCompleting={completingId === choreKey}
                         isSuccess={successId === choreKey}
                         showCompleteButton
+                        showReassignButton
                         locale={language}
                         t={t}
                       />
@@ -325,7 +385,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                 {completed.length === 0 ? (
                   <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
                 ) : (
-                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
+                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} members={members} locale={language} t={t} />)
                 )}
               </AnimatePresence>
             </div>
@@ -352,7 +412,17 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {notStarted.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noPendingChores")}</p>
               ) : (
-                notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
+                notStarted.map((chore) => (
+                  <ChoreCard
+                    key={`${chore.scheduleId}-${chore.periodNumber}`}
+                    chore={chore}
+                    members={members}
+                    onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
+                    showReassignButton
+                    locale={language}
+                    t={t}
+                  />
+                ))
               )}
             </AnimatePresence>
           </div>
@@ -373,7 +443,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {completed.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
               ) : (
-                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
+                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} members={members} locale={language} t={t} />)
               )}
             </AnimatePresence>
           </div>
