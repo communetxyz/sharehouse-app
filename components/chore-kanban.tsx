@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Circle, Loader2, Sparkles } from "lucide-react"
-import { useState, useEffect, useMemo, useCallback, memo } from "react"
+import { useState, useEffect, useMemo, useCallback, memo, useRef } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import type { ChoreInstance } from "@/types/commune"
@@ -165,6 +165,14 @@ const ChoreCard = memo(function ChoreCard({
 
 export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { commune } = useCommuneData()
+  const communeRef = useRef<typeof commune>(commune)
+
+  // Keep ref updated with current commune value
+  useEffect(() => {
+    communeRef.current = commune
+    console.log("[chore-kanban-v2] Commune ref updated:", commune?.id)
+  }, [commune])
+
   console.log("[chore-kanban] Commune ID:", commune?.id)
   const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
@@ -221,7 +229,8 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
   const handleComplete = useCallback(async (chore: ChoreInstance) => {
     // Use compound key: scheduleId-periodNumber to uniquely identify this chore instance
     const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
-    console.log("[chore-kanban] handleComplete called for chore:", choreKey)
+    const currentCommuneId = communeRef.current?.id
+    console.log("[chore-kanban-v2] handleComplete called for chore:", choreKey, "communeId:", currentCommuneId)
     setCompletingId(choreKey)
 
     // Optimistically update UI immediately
@@ -231,10 +240,10 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
     setSuccessId(choreKey)
 
     try {
-      console.log("[chore-kanban] Calling markComplete with:", {
+      console.log("[chore-kanban-v2] Calling markComplete with:", {
         scheduleId: chore.scheduleId,
         periodNumber: chore.periodNumber,
-        communeId: commune?.id,
+        communeId: currentCommuneId,
       })
       await markComplete(chore.scheduleId, {
         scheduleId: chore.scheduleId,
@@ -244,14 +253,14 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
         completed: chore.completed,
       }, () => {
         // Keep success animation
-      }, onRefresh, commune?.id)
-      console.log("[chore-kanban] markComplete completed successfully")
+      }, onRefresh, currentCommuneId)
+      console.log("[chore-kanban-v2] markComplete completed successfully")
     } catch (err) {
-      console.error("[chore-kanban] markComplete failed:", err)
+      console.error("[chore-kanban-v2] markComplete failed:", err)
       setCompletingId(null)
       setSuccessId(null)
     }
-  }, [markComplete, onOptimisticComplete, onRefresh, commune?.id])
+  }, [markComplete, onOptimisticComplete, onRefresh])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"
