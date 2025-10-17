@@ -7,7 +7,7 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useMarkChoreComplete(communeId?: string) {
+export function useMarkChoreComplete() {
   const [isMarking, setIsMarking] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | null>(null)
   const [error, setError] = useState<Error | null>(null)
@@ -36,8 +36,9 @@ export function useMarkChoreComplete(communeId?: string) {
     }
   }, [isConfirmed, txHash])
 
-  const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void) => {
+  const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void, communeId?: string) => {
     if (!communeId) {
+      console.error("[v0] No commune ID provided. communeId:", communeId)
       throw new Error("No commune data available")
     }
 

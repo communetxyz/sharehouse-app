@@ -166,7 +166,7 @@ const ChoreCard = memo(function ChoreCard({
 export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { commune } = useCommuneData()
   console.log("[chore-kanban] Commune ID:", commune?.id)
-  const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete(commune?.id)
+  const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete()
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
   const { t, language } = useLanguage()
@@ -234,6 +234,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
       console.log("[chore-kanban] Calling markComplete with:", {
         scheduleId: chore.scheduleId,
         periodNumber: chore.periodNumber,
+        communeId: commune?.id,
       })
       await markComplete(chore.scheduleId, {
         scheduleId: chore.scheduleId,
@@ -243,7 +244,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
         completed: chore.completed,
       }, () => {
         // Keep success animation
-      }, onRefresh)
+      }, onRefresh, commune?.id)
       console.log("[chore-kanban] markComplete completed successfully")
     } catch (err) {
       console.error("[chore-kanban] markComplete failed:", err)
