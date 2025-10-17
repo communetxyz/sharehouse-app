@@ -51,6 +51,7 @@ export function useMarkChoreComplete() {
       onSuccess()
     }
 
+    console.log("[v0] Setting isMarking to true")
     setIsMarking(true)
     setTxHash(null)
     setError(null)

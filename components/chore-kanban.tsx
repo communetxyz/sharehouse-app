@@ -175,6 +175,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
 
   console.log("[chore-kanban] Commune ID:", commune?.id)
   const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete()
+  console.log("[chore-kanban-v2] Hook states:", { isMarking, isConfirming, isConfirmed })
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
   const { t, language } = useLanguage()
