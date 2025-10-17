@@ -15,7 +15,7 @@ export function useCommuneData() {
 
   const refreshData = useCallback(async () => {
     if (!address) {
-      setError("Please connect your wallet")
+      setError("Please connect your account")
       setIsLoading(false)
       return
     }
