@@ -114,20 +114,20 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
   return (
     <Card className="border-charcoal/10">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <CardTitle className="font-serif text-charcoal">
             {language === "ja" ? `${year}年 ${monthNames[month]}` : `${monthNames[month]} ${year}`}
             {isLoading && <span className="text-sm font-normal text-charcoal/60 ml-2">{t("calendar.loading")}</span>}
           </CardTitle>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             <Button
               variant={view === "daily" ? "default" : "outline"}
               size="sm"
               onClick={() => setView("daily")}
               className={view === "daily" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
             >
-              <Calendar className="w-4 h-4 mr-2" />
-              {t("calendar.daily")}
+              <Calendar className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t("calendar.daily")}</span>
             </Button>
             <Button
               variant={view === "weekly" ? "default" : "outline"}
@@ -135,8 +135,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
               onClick={() => setView("weekly")}
               className={view === "weekly" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
             >
-              <CalendarDays className="w-4 h-4 mr-2" />
-              {t("calendar.weekly")}
+              <CalendarDays className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t("calendar.weekly")}</span>
             </Button>
             <Button
               variant={view === "monthly" ? "default" : "outline"}
@@ -144,8 +144,8 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
               onClick={() => setView("monthly")}
               className={view === "monthly" ? "bg-sage hover:bg-sage/90 text-cream" : ""}
             >
-              <CalendarRange className="w-4 h-4 mr-2" />
-              {t("calendar.monthly")}
+              <CalendarRange className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t("calendar.monthly")}</span>
             </Button>
           </div>
         </div>
@@ -182,7 +182,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
 
         {view === "weekly" && (
           <div className="space-y-4">
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
               {Array.from({ length: 7 }, (_, i) => {
                 const date = new Date(today)
                 date.setDate(today.getDate() - today.getDay() + i)
@@ -199,7 +199,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                 return (
                   <div
                     key={i}
-                    className={`min-h-[500px] p-3 rounded-lg border ${
+                    className={`min-h-[200px] sm:min-h-[350px] md:min-h-[500px] p-2 sm:p-3 rounded-lg border ${
                       isCurrentDay ? "bg-sage/10 border-sage/40" : "bg-white/50 border-charcoal/10"
                     }`}
                   >
@@ -207,7 +207,7 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                       <div className="text-xs font-medium">{dayNames[i]}</div>
                       <div className="text-lg">{day}</div>
                     </div>
-                    <div className="space-y-1 overflow-y-auto max-h-[450px]">
+                    <div className="space-y-1 overflow-y-auto max-h-[150px] sm:max-h-[300px] md:max-h-[450px]">
                       {dayChores.map((chore) => (
                         <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
                       ))}
@@ -224,14 +224,14 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
 
         {view === "monthly" && (
           <>
-            <div className="grid grid-cols-7 gap-2 mb-2">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
               {dayNames.map((day) => (
-                <div key={day} className="text-center text-xs font-medium text-charcoal/60 py-2">
+                <div key={day} className="text-center text-[10px] sm:text-xs font-medium text-charcoal/60 py-1 sm:py-2">
                   {day}
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
               {days.map((day, index) => {
                 if (!day) {
                   return <div key={`empty-${index}`} className="aspect-square" />
@@ -243,14 +243,14 @@ export function ChoreCalendar({ chores }: ChoreCalendarProps) {
                 return (
                   <div
                     key={day}
-                    className={`aspect-square border rounded-lg p-1 overflow-hidden ${
+                    className={`aspect-square border rounded-lg p-0.5 sm:p-1 overflow-hidden ${
                       isToday(day)
                         ? "bg-sage/10 border-sage/40"
                         : "border-charcoal/10 hover:bg-charcoal/5"
                     }`}
                   >
-                    <div className="text-xs font-medium text-charcoal mb-1">{day}</div>
-                    <div className="space-y-1 max-h-[80px] overflow-y-auto">
+                    <div className="text-[10px] sm:text-xs font-medium text-charcoal mb-0.5 sm:mb-1">{day}</div>
+                    <div className="space-y-0.5 sm:space-y-1 max-h-[40px] sm:max-h-[60px] md:max-h-[80px] overflow-y-auto">
                       {dayChores.map((chore) => (
                         <ChoreItem key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} />
                       ))}
