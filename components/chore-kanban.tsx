@@ -234,11 +234,8 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
     console.log("[chore-kanban-v2] handleComplete called for chore:", choreKey, "communeId:", currentCommuneId)
     setCompletingId(choreKey)
 
-    // Optimistically update UI immediately
-    if (onOptimisticComplete) {
-      onOptimisticComplete(choreKey)
-    }
-    setSuccessId(choreKey)
+    // Don't optimistically complete - keep it in the same section so spinner is visible
+    // setSuccessId will be set when transaction is confirmed
 
     try {
       console.log("[chore-kanban-v2] Calling markComplete with:", {
