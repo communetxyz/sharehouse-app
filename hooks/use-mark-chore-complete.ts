@@ -1,23 +1,44 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSendTransaction } from "@privy-io/react-auth"
+import { useWaitForTransactionReceipt } from "wagmi"
 import { encodeFunctionData } from "viem"
-import { useCommuneData } from "./use-commune-data"
 import { COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
 export function useMarkChoreComplete() {
-  const { commune } = useCommuneData()
   const [isMarking, setIsMarking] = useState(false)
-  const [isConfirmed, setIsConfirmed] = useState(false)
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const { toast } = useToast()
 
   const { sendTransaction } = useSendTransaction()
 
-  const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void) => {
-    if (!commune) {
+  // Wait for transaction confirmation
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash || undefined,
+  })
+
+  // Log confirmation state changes
+  useEffect(() => {
+    if (txHash) {
+      console.log("[v0] Transaction hash set:", txHash)
+      console.log("[v0] isConfirming:", isConfirming, "isConfirmed:", isConfirmed)
+    }
+  }, [txHash, isConfirming, isConfirmed])
+
+  // Log when transaction is confirmed
+  useEffect(() => {
+    if (isConfirmed && txHash) {
+      console.log("[v0] ===== TRANSACTION CONFIRMED =====")
+      console.log("[v0] Transaction hash:", txHash)
+    }
+  }, [isConfirmed, txHash])
+
+  const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void, communeId?: string) => {
+    if (!communeId) {
+      console.error("[v0] No commune ID provided. communeId:", communeId)
       throw new Error("No commune data available")
     }
 
@@ -30,12 +51,10 @@ export function useMarkChoreComplete() {
       onSuccess()
     }
 
+    console.log("[v0] Setting isMarking to true")
     setIsMarking(true)
-    setIsConfirmed(false)
+    setTxHash(null)
     setError(null)
-
-    // Optimistically mark as confirmed
-    setIsConfirmed(true)
 
     try {
       console.log("[v0] ===== MARK CHORE COMPLETE START =====")
@@ -45,38 +64,54 @@ export function useMarkChoreComplete() {
         choreIdType: typeof choreId,
         period: choreData.periodNumber,
         periodType: typeof choreData.periodNumber,
-        communeId: commune.id,
-        communeIdType: typeof commune.id,
+        communeId: communeId,
+        communeIdType: typeof communeId,
         contractAddress: COMMUNE_OS_ADDRESS,
       })
 
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "markChoreComplete",
-        args: [BigInt(commune.id), BigInt(choreId), BigInt(choreData.periodNumber)],
+        args: [BigInt(communeId), BigInt(choreId), BigInt(choreData.periodNumber)],
       })
 
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Function args:", {
-        communeId: BigInt(commune.id).toString(),
+        communeId: BigInt(communeId).toString(),
         choreId: BigInt(choreId).toString(),
         period: BigInt(choreData.periodNumber).toString(),
       })
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      await sendTransaction(
-        {
-          to: COMMUNE_OS_ADDRESS as `0x${string}`,
-          data,
-        },
-        {
-          sponsor: true, // Enable gas sponsorship
-        },
-      )
+      let transactionHash: string | null = null
 
-      console.log("[v0] ===== MARK CHORE COMPLETE SUCCESS =====")
+      try {
+        const result = await sendTransaction(
+          {
+            to: COMMUNE_OS_ADDRESS as `0x${string}`,
+            data,
+          },
+          {
+            sponsor: true, // Enable gas sponsorship
+          },
+        )
 
-      // Don't refresh - UI already updated optimistically
+        transactionHash = result.hash
+        console.log("[v0] Transaction sent:", transactionHash)
+        setTxHash(transactionHash as `0x${string}`)
+      } catch (sendErr: any) {
+        // Check if this is an AbortError - transaction might still have been submitted
+        if (sendErr.name === "AbortError" || sendErr.message?.includes("aborted")) {
+          console.warn("[v0] AbortError caught, but transaction may have been submitted. Waiting for confirmation...")
+          // Don't throw - let the transaction confirmation handle it
+          // The transaction might still succeed
+        } else {
+          // This is a real error, re-throw it
+          throw sendErr
+        }
+      }
+
+      // Transaction will be confirmed via useWaitForTransactionReceipt
     } catch (err: any) {
       console.error("[v0] ===== MARK CHORE COMPLETE FAILED =====")
       console.error("[v0] Error:", err)
@@ -87,7 +122,7 @@ export function useMarkChoreComplete() {
         cause: err.cause,
       })
       setError(err)
-      setIsConfirmed(false)
+      setTxHash(null)
       toast({
         title: "Failed to mark chore complete",
         description: err.message || "An error occurred. Please try again.",
@@ -103,7 +138,7 @@ export function useMarkChoreComplete() {
     markComplete,
     isMarking,
     isConfirmed,
-    isConfirming: isMarking,
+    isConfirming,
     error,
   }
 }
