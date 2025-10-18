@@ -23,12 +23,12 @@ export function useCreateTask(communeId: string, onClose?: () => void, onRefresh
       return
     }
 
-    // Close dialog IMMEDIATELY before any async operations
+    setIsCreating(true)
+
+    // Close dialog IMMEDIATELY after setting loading state
     if (onClose) {
       onClose()
     }
-
-    setIsCreating(true)
 
     try {
       console.log("[v0] ===== CREATE TASK START =====")
