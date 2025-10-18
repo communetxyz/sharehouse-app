@@ -15,6 +15,8 @@ export function useMarkTaskDone(communeId: string, onRefresh?: () => void) {
   const { toast } = useToast()
 
   const markDone = async (taskId: string) => {
+    console.log("[mark-task-done] ✅ NEW VERSION RUNNING - v2024-01-19")
+
     if (!isConnected || !address) {
       toast({
         title: "Wallet not connected",

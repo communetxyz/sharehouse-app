@@ -42,6 +42,8 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
     e.preventDefault()
     if (!description || !assignedTo || !dueDate) return
 
+    console.log("[create-task-dialog] ✅ NEW VERSION RUNNING - v2024-01-19")
+
     const dueDateObj = new Date(dueDate)
     const budgetValue = budget || "0"
 
@@ -49,6 +51,8 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
     if (onOptimisticCreate) {
       console.log("[create-task-dialog] Calling optimistic create with:", { budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
       onOptimisticCreate({ budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
+    } else {
+      console.warn("[create-task-dialog] ⚠️ onOptimisticCreate callback is missing!")
     }
 
     // Close dialog and reset form immediately for better UX
