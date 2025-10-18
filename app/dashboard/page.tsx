@@ -196,7 +196,8 @@ export default function DashboardPage() {
 
           <TabsContent value="my-chores" className="space-y-6">
             <ChoreKanban
-              chores={chores}
+              chores={optimisticChores}
+              onOptimisticComplete={handleChoreCompleteOptimistic}
               onRefresh={refreshData}
               filterMyChores
             />
@@ -204,7 +205,8 @@ export default function DashboardPage() {
 
           <TabsContent value="all-chores" className="space-y-6">
             <ChoreKanban
-              chores={chores}
+              chores={optimisticChores}
+              onOptimisticComplete={handleChoreCompleteOptimistic}
               onRefresh={refreshData}
             />
           </TabsContent>

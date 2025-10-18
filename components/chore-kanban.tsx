@@ -108,6 +108,12 @@ const ChoreCard = memo(function ChoreCard({
                 {choreEmoji && <span className="mr-2">{choreEmoji}</span>}
                 {chore.title}
               </h4>
+              {(isCompleting || isConfirming) && (
+                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  {isConfirming ? t("chores.confirming") : t("chores.marking")}
+                </Badge>
+              )}
               <EmojiPickerDialog
                 choreId={chore.scheduleId.toString()}
                 currentEmoji={choreEmoji}
@@ -234,8 +240,11 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
     console.log("[chore-kanban-v2] handleComplete called for chore:", choreKey, "communeId:", currentCommuneId)
     setCompletingId(choreKey)
 
-    // Don't optimistically complete - keep it in the same section so spinner is visible
-    // setSuccessId will be set when transaction is confirmed
+    // Optimistically update UI immediately
+    if (onOptimisticComplete) {
+      onOptimisticComplete(choreKey)
+    }
+    setSuccessId(choreKey)
 
     try {
       console.log("[chore-kanban-v2] Calling markComplete with:", {
@@ -314,7 +323,19 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                 {completed.length === 0 ? (
                   <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
                 ) : (
-                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
+                  completed.map((chore) => {
+                    const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+                    return (
+                      <ChoreCard
+                        key={choreKey}
+                        chore={chore}
+                        locale={language}
+                        t={t}
+                        isCompleting={completingId === choreKey && isMarking}
+                        isConfirming={completingId === choreKey && isConfirming}
+                      />
+                    )
+                  })
                 )}
               </AnimatePresence>
             </div>
