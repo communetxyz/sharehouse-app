@@ -143,6 +143,10 @@ export const translations = {
       joinedDate: "参加日",
       you: "あなた",
       collateral: "担保",
+      remove: "削除",
+      removing: "削除中...",
+      removeConfirmTitle: "メンバーを削除しますか？",
+      removeConfirmDesc: "{{username}}をシェアハウスから削除してもよろしいですか？この操作は元に戻せません。",
     },
     commune: {
       info: "コミューン情報",
@@ -420,6 +424,10 @@ export const translations = {
       joinedDate: "Joined",
       you: "You",
       collateral: "Collateral",
+      remove: "Remove",
+      removing: "Removing...",
+      removeConfirmTitle: "Remove Member?",
+      removeConfirmDesc: "Are you sure you want to remove {{username}} from the sharehouse? This action cannot be undone.",
     },
     commune: {
       info: "Commune Info",
