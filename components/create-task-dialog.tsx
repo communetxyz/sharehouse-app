@@ -25,9 +25,10 @@ interface CreateTaskDialogProps {
   communeId: string
   members: Member[]
   onSuccess: () => void
+  onOptimisticCreate?: (taskData: { budget: string, description: string, dueDate: Date, assignedTo: string }) => void
 }
 
-export function CreateTaskDialog({ communeId, members, onSuccess }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCreate }: CreateTaskDialogProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [budget, setBudget] = useState("")
@@ -50,6 +51,11 @@ export function CreateTaskDialog({ communeId, members, onSuccess }: CreateTaskDi
 
     const dueDateObj = new Date(dueDate)
     const budgetValue = budget || "0"
+
+    // Optimistically add the task
+    if (onOptimisticCreate) {
+      onOptimisticCreate({ budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
+    }
 
     await createTask(budgetValue, description, dueDateObj, assignedTo)
   }

@@ -27,10 +27,18 @@ export default function DashboardPage() {
   // Local optimistic state for chores
   const [optimisticChores, setOptimisticChores] = useState(chores)
 
+  // Local optimistic state for tasks
+  const [optimisticTasks, setOptimisticTasks] = useState(tasks)
+
   // Sync fetched chores with local state
   useEffect(() => {
     setOptimisticChores(chores)
   }, [chores])
+
+  // Sync fetched tasks with local state
+  useEffect(() => {
+    setOptimisticTasks(tasks)
+  }, [tasks])
 
   // Optimistic chore completion
   const handleChoreCompleteOptimistic = (choreKey: string) => {
@@ -47,6 +55,24 @@ export default function DashboardPage() {
       })
       return updated
     })
+  }
+
+  // Optimistic task creation
+  const handleTaskCreateOptimistic = (taskData: { budget: string, description: string, dueDate: Date, assignedTo: string }) => {
+    console.log("[dashboard] Optimistically creating task:", taskData)
+    const optimisticTask = {
+      id: `temp-${Date.now()}`, // Temporary ID
+      communeId: commune?.id || "",
+      budget: taskData.budget || "0",
+      description: taskData.description,
+      assignedTo: taskData.assignedTo,
+      assignedToUsername: members.find(m => m.address.toLowerCase() === taskData.assignedTo.toLowerCase())?.username || taskData.assignedTo,
+      dueDate: Math.floor(taskData.dueDate.getTime() / 1000),
+      done: false,
+      disputed: false,
+      isAssignedToUser: taskData.assignedTo.toLowerCase() === address?.toLowerCase(),
+    }
+    setOptimisticTasks(prev => [...prev, optimisticTask])
   }
 
   if (status === "reconnecting" || status === "connecting") {
@@ -222,6 +248,7 @@ export default function DashboardPage() {
                 communeId={commune.id}
                 members={members}
                 onSuccess={refreshTasks}
+                onOptimisticCreate={handleTaskCreateOptimistic}
               />}
             </div>
             {isLoadingTasks ? (
@@ -230,7 +257,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               commune && <TaskList
-                tasks={tasks}
+                tasks={optimisticTasks}
                 communeId={commune.id}
                 onRefresh={refreshTasks}
               />
