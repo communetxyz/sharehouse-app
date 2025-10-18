@@ -19,15 +19,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useI18n } from "@/lib/i18n/context"
 import { useCreateTask } from "@/hooks/use-create-task"
 import type { Member } from "@/types/commune"
-import { Plus } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 
 interface CreateTaskDialogProps {
   communeId: string
   members: Member[]
   onSuccess: () => void
+  onOptimisticCreate?: (taskData: { budget: string, description: string, dueDate: Date, assignedTo: string }) => void
 }
 
-export function CreateTaskDialog({ communeId, members, onSuccess }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCreate }: CreateTaskDialogProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [budget, setBudget] = useState("")
@@ -35,23 +36,34 @@ export function CreateTaskDialog({ communeId, members, onSuccess }: CreateTaskDi
   const [assignedTo, setAssignedTo] = useState("")
   const [dueDate, setDueDate] = useState("")
 
-  const { createTask, isCreating } = useCreateTask(communeId, () => {
-    setOpen(false)
-    setBudget("")
-    setDescription("")
-    setAssignedTo("")
-    setDueDate("")
-    onSuccess()
-  })
+  const { createTask, isCreating } = useCreateTask(communeId, onSuccess)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!description || !assignedTo || !dueDate) return
 
+    console.log("[create-task-dialog] ✅ NEW VERSION RUNNING - v2024-01-19")
+
     const dueDateObj = new Date(dueDate)
     const budgetValue = budget || "0"
 
+    // Optimistically add the task before starting the transaction
+    if (onOptimisticCreate) {
+      console.log("[create-task-dialog] Calling optimistic create with:", { budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
+      onOptimisticCreate({ budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
+    } else {
+      console.warn("[create-task-dialog] ⚠️ onOptimisticCreate callback is missing!")
+    }
+
+    // Wait for transaction to complete before closing dialog (shows spinner)
     await createTask(budgetValue, description, dueDateObj, assignedTo)
+
+    // Close dialog and reset form after transaction completes
+    setOpen(false)
+    setBudget("")
+    setDescription("")
+    setAssignedTo("")
+    setDueDate("")
   }
 
   return (
@@ -113,8 +125,18 @@ export function CreateTaskDialog({ communeId, members, onSuccess }: CreateTaskDi
             <Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
           </div>
 
-          <Button type="submit" disabled={isCreating} className="w-full bg-sage hover:bg-sage/90">
-            {isCreating ? t("tasks.creating") : t("tasks.create")}
+          <Button type="submit" disabled={isCreating} className="w-full bg-sage hover:bg-sage/90 text-cream">
+            {isCreating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {t("tasks.creating")}
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                {t("tasks.create")}
+              </>
+            )}
           </Button>
         </form>
       </DialogContent>

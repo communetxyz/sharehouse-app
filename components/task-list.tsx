@@ -7,7 +7,7 @@ import { useI18n } from "@/lib/i18n/context"
 import { useMarkTaskDone } from "@/hooks/use-mark-task-done"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import type { Task } from "@/types/commune"
-import { DollarSign, Calendar, User, AlertCircle } from "lucide-react"
+import { DollarSign, Calendar, User, AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { useState } from "react"
 import { DisputeTaskDialog } from "@/components/dispute-task-dialog"
@@ -21,12 +21,12 @@ interface TaskListProps {
 
 export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefresh }: TaskListProps) {
   const { t } = useI18n()
-  const { markDone, isMarking } = useMarkTaskDone(communeId, onRefresh)
+  const { markDone, markingTaskId, confirmedTaskIds } = useMarkTaskDone(communeId, onRefresh)
 
   const filteredTasks = filterAssignedToMe ? tasks.filter((e) => e.isAssignedToUser) : tasks
 
-  const undoneTasks = filteredTasks.filter((e) => !e.done && !e.disputed)
-  const doneTasks = filteredTasks.filter((e) => e.done && !e.disputed)
+  const undoneTasks = filteredTasks.filter((e) => !e.done && !e.disputed && !confirmedTaskIds.has(e.id))
+  const doneTasks = filteredTasks.filter((e) => (e.done || confirmedTaskIds.has(e.id)) && !e.disputed)
   const disputedTasks = filteredTasks.filter((e) => e.disputed)
 
   return (
@@ -36,7 +36,7 @@ export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefre
         tasks={undoneTasks}
         communeId={communeId}
         onMarkDone={markDone}
-        isMarking={isMarking}
+        markingTaskId={markingTaskId}
         onRefresh={onRefresh}
         emptyMessage={t("tasks.noTasks")}
       />
@@ -66,7 +66,7 @@ interface TaskColumnProps {
   isDone?: boolean
   isDisputed?: boolean
   onMarkDone?: (taskId: string) => void
-  isMarking?: boolean
+  markingTaskId?: string | null
   onRefresh?: () => void
   emptyMessage: string
 }
@@ -78,7 +78,7 @@ function TaskColumn({
   isDone,
   isDisputed,
   onMarkDone,
-  isMarking,
+  markingTaskId,
   onRefresh,
   emptyMessage,
 }: TaskColumnProps) {
@@ -103,7 +103,7 @@ function TaskColumn({
               isDone={isDone}
               isDisputed={isDisputed}
               onMarkDone={onMarkDone}
-              isMarking={isMarking}
+              markingTaskId={markingTaskId}
               onRefresh={onRefresh}
             />
           ))
@@ -119,16 +119,17 @@ interface TaskCardProps {
   isDone?: boolean
   isDisputed?: boolean
   onMarkDone?: (taskId: string) => void
-  isMarking?: boolean
+  markingTaskId?: string | null
   onRefresh?: () => void
 }
 
-function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, isMarking, onRefresh }: TaskCardProps) {
+function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, markingTaskId, onRefresh }: TaskCardProps) {
   const { t } = useI18n()
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const { members } = useCommuneData()
 
   const isOverdue = !task.done && task.dueDate < Date.now() / 1000
+  const isThisTaskMarking = markingTaskId === task.id
 
   return (
     <>
@@ -174,11 +175,21 @@ function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, isMarking, 
             {!isDone && !isDisputed && task.isAssignedToUser && onMarkDone && (
               <Button
                 onClick={() => onMarkDone(task.id)}
-                disabled={isMarking}
+                disabled={isThisTaskMarking}
                 size="sm"
-                className="w-full bg-sage hover:bg-sage/90"
+                className="w-full bg-sage hover:bg-sage/90 text-cream"
               >
-                {isMarking ? t("tasks.markingDone") : t("tasks.markDone")}
+                {isThisTaskMarking ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("tasks.markingDone")}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    {t("tasks.markDone")}
+                  </>
+                )}
               </Button>
             )}
 
