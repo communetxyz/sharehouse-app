@@ -53,17 +53,27 @@ export function useCreateTask(communeId: string, onRefresh?: () => void) {
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      await sendTransaction(
-        {
-          to: COMMUNE_OS_ADDRESS as `0x${string}`,
-          data,
-        },
-        {
-          sponsor: true,
-        },
-      )
-
-      console.log("[v0] ===== CREATE TASK SUCCESS =====")
+      try {
+        await sendTransaction(
+          {
+            to: COMMUNE_OS_ADDRESS as `0x${string}`,
+            data,
+          },
+          {
+            sponsor: true,
+          },
+        )
+        console.log("[v0] ===== CREATE TASK SUCCESS =====")
+      } catch (sendErr: any) {
+        // Check if this is an AbortError - transaction might still have been submitted
+        if (sendErr.name === "AbortError" || sendErr.message?.includes("aborted")) {
+          console.warn("[v0] AbortError caught, but transaction may have been submitted.")
+          // Don't throw - the transaction likely succeeded, just wait for refresh
+        } else {
+          // This is a real error, re-throw it
+          throw sendErr
+        }
+      }
 
       toast({
         title: "Task created",

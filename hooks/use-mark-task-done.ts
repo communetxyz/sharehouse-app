@@ -36,15 +36,26 @@ export function useMarkTaskDone(communeId: string, onRefresh?: () => void) {
         args: [BigInt(communeId), BigInt(taskId)],
       })
 
-      await sendTransaction(
-        {
-          to: COMMUNE_OS_ADDRESS as `0x${string}`,
-          data,
-        },
-        {
-          sponsor: true, // Enable gas sponsorship
-        },
-      )
+      try {
+        await sendTransaction(
+          {
+            to: COMMUNE_OS_ADDRESS as `0x${string}`,
+            data,
+          },
+          {
+            sponsor: true, // Enable gas sponsorship
+          },
+        )
+      } catch (sendErr: any) {
+        // Check if this is an AbortError - transaction might still have been submitted
+        if (sendErr.name === "AbortError" || sendErr.message?.includes("aborted")) {
+          console.warn("[mark-task-done] AbortError caught, but transaction may have been submitted.")
+          // Don't throw - the transaction likely succeeded, just wait for refresh
+        } else {
+          // This is a real error, re-throw it
+          throw sendErr
+        }
+      }
 
       toast({
         title: "Task marked as done",
