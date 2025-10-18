@@ -3,19 +3,36 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, Circle, Loader2, Sparkles } from "lucide-react"
+import { CheckCircle2, Circle, Loader2, Sparkles, UserCog } from "lucide-react"
 import { useState, useEffect, useMemo, useCallback, memo, useRef } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
+import { useReassignChore } from "@/hooks/use-reassign-chore"
 import { useCommuneData } from "@/hooks/use-commune-data"
-import type { ChoreInstance } from "@/types/commune"
+import type { ChoreInstance, Member } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useToast } from "@/hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
 import { Confetti } from "@/components/ui/confetti"
 import { EmojiPickerDialog } from "@/components/emoji-picker-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface ChoreKanbanProps {
   chores: ChoreInstance[]
+  members: Member[]
   onOptimisticComplete?: (choreId: string) => void
   onRefresh: () => void
   filterMyChores?: boolean
@@ -39,23 +56,33 @@ const formatPeriodDate = (periodStart: number, locale: string = "en-US") => {
 // Memoize ChoreCard to prevent unnecessary re-renders
 const ChoreCard = memo(function ChoreCard({
   chore,
+  members,
   onComplete,
+  onReassign,
   isCompleting,
   isConfirming,
+  isReassigning,
   showCompleteButton,
+  showReassignButton,
   isSuccess,
   locale,
   t,
 }: {
   chore: ChoreInstance
+  members?: Member[]
   onComplete?: () => void
+  onReassign?: (newAssignee: string) => void
   isCompleting?: boolean
   isConfirming?: boolean
+  isReassigning?: boolean
   showCompleteButton?: boolean
+  showReassignButton?: boolean
   isSuccess?: boolean
   locale?: string
   t: (key: string) => string
 }) {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedAssignee, setSelectedAssignee] = useState<string>("")
   const [choreEmoji, setChoreEmoji] = useState("")
 
   useEffect(() => {
@@ -67,6 +94,14 @@ const ChoreCard = memo(function ChoreCard({
       }
     }
   }, [chore.scheduleId])
+
+  const handleReassignConfirm = () => {
+    if (selectedAssignee && onReassign) {
+      onReassign(selectedAssignee)
+      setDialogOpen(false)
+      setSelectedAssignee("")
+    }
+  }
 
   return (
     <motion.div
@@ -153,6 +188,59 @@ const ChoreCard = memo(function ChoreCard({
               )}
             </Button>
           )}
+          {showReassignButton && onReassign && members && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-charcoal/20 text-charcoal hover:bg-charcoal/5"
+                >
+                  <UserCog className="w-4 h-4 mr-2" />
+                  {t("chores.reassign")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("chores.reassignChore")}</DialogTitle>
+                  <DialogDescription>{t("chores.selectNewAssignee")}</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("chores.newAssignee")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {members.map((member) => (
+                        <SelectItem
+                          key={member.address}
+                          value={member.address}
+                          disabled={member.address.toLowerCase() === chore.assignedTo.toLowerCase()}
+                        >
+                          {member.username || member.address}
+                          {member.isCurrentUser && ` (${t("members.you")})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={handleReassignConfirm}
+                    disabled={!selectedAssignee || isReassigning || selectedAssignee.toLowerCase() === chore.assignedTo.toLowerCase()}
+                    className="w-full bg-sage hover:bg-sage/90 text-cream"
+                  >
+                    {isReassigning ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        {t("chores.reassigning")}
+                      </>
+                    ) : (
+                      t("chores.confirmReassign")
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </CardContent>
       </Card>
     </motion.div>
@@ -169,7 +257,7 @@ const ChoreCard = memo(function ChoreCard({
   )
 })
 
-export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
+export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { commune } = useCommuneData()
   const communeRef = useRef<typeof commune>(commune)
 
@@ -181,8 +269,10 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
 
   console.log("[chore-kanban] Commune ID:", commune?.id)
   const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete()
+  const { reassignChore, isReassigning } = useReassignChore()
   console.log("[chore-kanban-v2] Hook states:", { isMarking, isConfirming, isConfirmed })
   const [completingId, setCompletingId] = useState<string | null>(null)
+  const [reassigningId, setReassigningId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
   const { t, language } = useLanguage()
   const { toast } = useToast()
@@ -269,6 +359,30 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
     }
   }, [markComplete, onOptimisticComplete, onRefresh])
 
+  const handleReassign = useCallback(async (chore: ChoreInstance, newAssignee: string) => {
+    const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+    setReassigningId(choreKey)
+
+    try {
+      await reassignChore(
+        chore.scheduleId,
+        chore.periodNumber,
+        newAssignee,
+        undefined,
+        onRefresh
+      )
+    } catch (err) {
+      // Surface a toast so users get feedback when reassignment fails
+      toast({
+        title: t("chores.reassignFailed") || "Failed to reassign chore",
+        description: err instanceof Error ? err.message : String(err),
+        variant: "destructive",
+      })
+    } finally {
+      setReassigningId(null)
+    }
+  }, [reassignChore, onRefresh, t, toast])
+
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"
     return (
@@ -293,11 +407,15 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                       <ChoreCard
                         key={choreKey}
                         chore={chore}
+                        members={members}
                         onComplete={() => handleComplete(chore)}
+                        onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
                         isCompleting={completingId === choreKey && isMarking}
                         isConfirming={completingId === choreKey && isConfirming}
+                        isReassigning={reassigningId === choreKey && isReassigning}
                         isSuccess={successId === choreKey}
                         showCompleteButton
+                        showReassignButton
                         locale={language}
                         t={t}
                       />
@@ -329,6 +447,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
                       <ChoreCard
                         key={choreKey}
                         chore={chore}
+                        members={members}
                         locale={language}
                         t={t}
                         isCompleting={completingId === choreKey && isMarking}
@@ -362,7 +481,21 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {notStarted.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noPendingChores")}</p>
               ) : (
-                notStarted.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
+                notStarted.map((chore) => {
+                  const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+                  return (
+                    <ChoreCard
+                      key={choreKey}
+                      chore={chore}
+                      members={members}
+                      onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
+                      isReassigning={reassigningId === choreKey && isReassigning}
+                      showReassignButton
+                      locale={language}
+                      t={t}
+                    />
+                  )
+                })
               )}
             </AnimatePresence>
           </div>
@@ -383,7 +516,7 @@ export function ChoreKanban({ chores, onOptimisticComplete, onRefresh, filterMyC
               {completed.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
               ) : (
-                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} locale={language} t={t} />)
+                completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} members={members} locale={language} t={t} />)
               )}
             </AnimatePresence>
           </div>
