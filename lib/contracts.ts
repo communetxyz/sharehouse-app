@@ -4,15 +4,7 @@ export const COMMUNE_OS_ADDRESS = "0x3b019bcfd1F76906136694D5C52Dbddb82648891" a
 export const BREAD_TOKEN_ADDRESS = "0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3" as `0x${string}`
 export const COLLATERAL_MANAGER_ADDRESS = "0x61Ba220071184886710A8F2814B7c6eDecbcaA82" as `0x${string}`
 
-// Get RPC URL from environment - MUST be set in Vercel project settings
-export const RPC_URL = process.env.NEXT_PUBLIC_GNOSIS_RPC_URL || ""
-
-// Validate at runtime (client-side only)
-if (typeof window !== "undefined" && !RPC_URL) {
-  console.error(
-    "[contracts] NEXT_PUBLIC_GNOSIS_RPC_URL is not set. Please add it to Vercel environment variables."
-  )
-}
+export const RPC_URL = "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"
 
 export const ERC20_ABI = [
   {
