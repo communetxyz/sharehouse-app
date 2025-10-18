@@ -1,54 +1,73 @@
 "use client"
 
-import { useCallback } from "react"
-import { useContractTransaction } from "./use-contract-transaction"
-import { debug } from "@/lib/debug"
+import { useState } from "react"
+import { useSendTransaction } from "@privy-io/react-auth"
+import { encodeFunctionData } from "viem"
+import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
+import { useToast } from "./use-toast"
 
 interface RemoveMemberParams {
   communeId: string
   memberAddress: string
   onSuccess?: () => void
-  onError?: (error: Error) => void
 }
 
 /**
  * Hook for removing a member from a commune
- * Calls the removeMember function on the CommuneOS contract
+ * Uses Privy's gas sponsorship
  */
 export function useRemoveMember() {
-  const { executeTransaction, isExecuting, isConfirming, isConfirmed, hash } = useContractTransaction()
+  const { sendTransaction } = useSendTransaction()
+  const [isRemoving, setIsRemoving] = useState(false)
+  const { toast } = useToast()
 
-  const removeMember = useCallback(
-    async ({ communeId, memberAddress, onSuccess, onError }: RemoveMemberParams) => {
-      debug.log("Removing member:", { communeId, memberAddress })
+  const removeMember = async ({ communeId, memberAddress, onSuccess }: RemoveMemberParams) => {
+    setIsRemoving(true)
 
-      try {
-        const txHash = await executeTransaction({
-          functionName: "removeMember",
-          args: [BigInt(communeId), memberAddress],
-          onSuccess: () => {
-            debug.log("Member removed successfully")
-            onSuccess?.()
-          },
-          onError,
-          successMessage: "Member removed successfully!",
-          errorMessage: "Failed to remove member",
-        })
+    try {
+      console.log("[remove-member] Removing member:", { communeId, memberAddress })
 
-        return txHash
-      } catch (error) {
-        debug.error("Error removing member:", error)
-        throw error
-      }
-    },
-    [executeTransaction]
-  )
+      const data = encodeFunctionData({
+        abi: COMMUNE_OS_ABI,
+        functionName: "removeMember",
+        args: [BigInt(communeId), memberAddress as `0x${string}`],
+      })
+
+      console.log("[remove-member] Calling sendTransaction with sponsor: true")
+
+      await sendTransaction(
+        {
+          to: COMMUNE_OS_ADDRESS as `0x${string}`,
+          data,
+        },
+        {
+          sponsor: true,
+        },
+      )
+
+      console.log("[remove-member] Member removed successfully")
+
+      toast({
+        title: "Member removed",
+        description: "Member has been removed from the sharehouse",
+      })
+
+      onSuccess?.()
+    } catch (error: any) {
+      console.error("[remove-member] Error removing member:", error)
+      toast({
+        title: "Failed to remove member",
+        description: error.message || "An error occurred. Please try again.",
+        variant: "destructive",
+      })
+      throw error
+    } finally {
+      setIsRemoving(false)
+    }
+  }
 
   return {
     removeMember,
-    isRemoving: isExecuting,
-    isConfirming,
-    isConfirmed,
-    hash,
+    isRemoving,
   }
 }
