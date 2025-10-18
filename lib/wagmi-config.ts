@@ -4,28 +4,28 @@ import { createConfig } from "@privy-io/wagmi"
 import { http } from "wagmi"
 import { gnosis, gnosisChiado, mainnet } from "wagmi/chains"
 
-// Enforce environment variables - no fallbacks
-if (!process.env.NEXT_PUBLIC_GNOSIS_RPC_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_GNOSIS_RPC_URL environment variable is required but not set. Please add it to your .env.local file."
-  )
-}
-
-if (!process.env.NEXT_PUBLIC_MAINNET_RPC_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_MAINNET_RPC_URL environment variable is required but not set. Please add it to your .env.local file."
-  )
-}
-
-const mainnetRpc = process.env.NEXT_PUBLIC_MAINNET_RPC_URL
+// Get RPC URLs from environment - these MUST be set in Vercel project settings
 const gnosisRpc = process.env.NEXT_PUBLIC_GNOSIS_RPC_URL
+const mainnetRpc = process.env.NEXT_PUBLIC_MAINNET_RPC_URL
 
-// Debug logging to verify RPC URL configuration
+// Validate at runtime (client-side only)
 if (typeof window !== "undefined") {
-  console.log("[wagmi-config] Using RPC URLs from environment:", {
-    gnosisRpc,
-    mainnetRpc,
-  })
+  if (!gnosisRpc) {
+    console.error(
+      "[wagmi-config] NEXT_PUBLIC_GNOSIS_RPC_URL is not set. Please add it to Vercel environment variables."
+    )
+  }
+  if (!mainnetRpc) {
+    console.error(
+      "[wagmi-config] NEXT_PUBLIC_MAINNET_RPC_URL is not set. Please add it to Vercel environment variables."
+    )
+  }
+  if (gnosisRpc && mainnetRpc) {
+    console.log("[wagmi-config] Using RPC URLs from environment:", {
+      gnosisRpc: gnosisRpc.substring(0, 50) + "...",
+      mainnetRpc: mainnetRpc.substring(0, 50) + "...",
+    })
+  }
 }
 
 export const config = createConfig({
