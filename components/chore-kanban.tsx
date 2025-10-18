@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Circle, Loader2, Sparkles, UserCog } from "lucide-react"
-import { useState, useEffect, useMemo, useCallback, memo } from "react"
+import { useState, useEffect, useMemo, useCallback, memo, useRef } from "react"
 import { useMarkChoreComplete } from "@/hooks/use-mark-chore-complete"
 import { useReassignChore } from "@/hooks/use-reassign-chore"
+import { useCommuneData } from "@/hooks/use-commune-data"
 import type { ChoreInstance, Member } from "@/types/commune"
 import { useLanguage } from "@/lib/i18n/context"
 import { useToast } from "@/hooks/use-toast"
@@ -59,6 +60,7 @@ const ChoreCard = memo(function ChoreCard({
   onComplete,
   onReassign,
   isCompleting,
+  isConfirming,
   showCompleteButton,
   showReassignButton,
   isSuccess,
@@ -70,6 +72,7 @@ const ChoreCard = memo(function ChoreCard({
   onComplete?: () => void
   onReassign?: (newAssignee: string) => void
   isCompleting?: boolean
+  isConfirming?: boolean
   showCompleteButton?: boolean
   showReassignButton?: boolean
   isSuccess?: boolean
@@ -138,6 +141,12 @@ const ChoreCard = memo(function ChoreCard({
                 {choreEmoji && <span className="mr-2">{choreEmoji}</span>}
                 {chore.title}
               </h4>
+              {(isCompleting || isConfirming) && (
+                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  {isConfirming ? t("chores.confirming") : t("chores.marking")}
+                </Badge>
+              )}
               <EmojiPickerDialog
                 choreId={chore.scheduleId.toString()}
                 currentEmoji={choreEmoji}
@@ -160,19 +169,19 @@ const ChoreCard = memo(function ChoreCard({
           {showCompleteButton && onComplete && (
             <Button
               onClick={onComplete}
-              disabled={isCompleting}
+              disabled={isCompleting || isConfirming}
               size="sm"
               className="w-full bg-sage hover:bg-sage/90 text-cream"
             >
-              {isCompleting ? (
+              {isCompleting || isConfirming ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Marking...
+                  {isConfirming ? t("chores.confirming") : t("chores.marking")}
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Mark Complete
+                  {t("chores.markComplete")}
                 </>
               )}
             </Button>
@@ -229,14 +238,26 @@ const ChoreCard = memo(function ChoreCard({
     prevProps.chore.scheduleId === nextProps.chore.scheduleId &&
     prevProps.chore.completed === nextProps.chore.completed &&
     prevProps.isCompleting === nextProps.isCompleting &&
+    prevProps.isConfirming === nextProps.isConfirming &&
     prevProps.isSuccess === nextProps.isSuccess &&
     prevProps.locale === nextProps.locale
   )
 })
 
 export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
-  const { markComplete, isMarking, isConfirmed, error } = useMarkChoreComplete()
+  const { commune } = useCommuneData()
+  const communeRef = useRef<typeof commune>(commune)
+
+  // Keep ref updated with current commune value
+  useEffect(() => {
+    communeRef.current = commune
+    console.log("[chore-kanban-v2] Commune ref updated:", commune?.id)
+  }, [commune])
+
+  console.log("[chore-kanban] Commune ID:", commune?.id)
+  const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete()
   const { reassignChore, isReassigning } = useReassignChore()
+  console.log("[chore-kanban-v2] Hook states:", { isMarking, isConfirming, isConfirmed })
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
   const { t, language } = useLanguage()
@@ -291,6 +312,8 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
   const handleComplete = useCallback(async (chore: ChoreInstance) => {
     // Use compound key: scheduleId-periodNumber to uniquely identify this chore instance
     const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+    const currentCommuneId = communeRef.current?.id
+    console.log("[chore-kanban-v2] handleComplete called for chore:", choreKey, "communeId:", currentCommuneId)
     setCompletingId(choreKey)
 
     // Optimistically update UI immediately
@@ -300,6 +323,11 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
     setSuccessId(choreKey)
 
     try {
+      console.log("[chore-kanban-v2] Calling markComplete with:", {
+        scheduleId: chore.scheduleId,
+        periodNumber: chore.periodNumber,
+        communeId: currentCommuneId,
+      })
       await markComplete(chore.scheduleId, {
         scheduleId: chore.scheduleId,
         periodNumber: chore.periodNumber,
@@ -308,8 +336,10 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
         completed: chore.completed,
       }, () => {
         // Keep success animation
-      }, onRefresh)
+      }, onRefresh, currentCommuneId)
+      console.log("[chore-kanban-v2] markComplete completed successfully")
     } catch (err) {
+      console.error("[chore-kanban-v2] markComplete failed:", err)
       setCompletingId(null)
       setSuccessId(null)
     }
@@ -356,7 +386,8 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
                         members={members}
                         onComplete={() => handleComplete(chore)}
                         onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
-                        isCompleting={completingId === choreKey}
+                        isCompleting={completingId === choreKey && isMarking}
+                        isConfirming={completingId === choreKey && isConfirming}
                         isSuccess={successId === choreKey}
                         showCompleteButton
                         showReassignButton
@@ -385,7 +416,20 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
                 {completed.length === 0 ? (
                   <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noCompletedChores")}</p>
                 ) : (
-                  completed.map((chore) => <ChoreCard key={`${chore.scheduleId}-${chore.periodNumber}`} chore={chore} members={members} locale={language} t={t} />)
+                  completed.map((chore) => {
+                    const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+                    return (
+                      <ChoreCard
+                        key={choreKey}
+                        chore={chore}
+                        members={members}
+                        locale={language}
+                        t={t}
+                        isCompleting={completingId === choreKey && isMarking}
+                        isConfirming={completingId === choreKey && isConfirming}
+                      />
+                    )
+                  })
                 )}
               </AnimatePresence>
             </div>
