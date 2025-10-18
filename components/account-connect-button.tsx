@@ -7,7 +7,7 @@ import { Wallet, LogOut, Copy, Check } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 
-export function WalletConnectButton() {
+export function AccountConnectButton() {
   const { ready, authenticated, login, logout, user } = usePrivy()
   const { wallets } = useWallets()
   const [copied, setCopied] = useState(false)
@@ -54,10 +54,10 @@ export function WalletConnectButton() {
       <Button
         onClick={login}
         className="bg-sage hover:bg-sage/90 text-cream gap-2"
-        aria-label="Connect your crypto wallet"
+        aria-label="Connect your account"
       >
         <Wallet className="w-4 h-4" />
-        Connect Wallet
+        Connect Account
       </Button>
     )
   }
@@ -68,7 +68,7 @@ export function WalletConnectButton() {
         <Button
           variant="outline"
           className="border-charcoal/20 hover:bg-charcoal/5 bg-transparent gap-2"
-          aria-label={`Wallet menu for ${displayName}`}
+          aria-label={`Account menu for ${displayName}`}
         >
           <Wallet className="w-4 h-4" />
           {displayName}

@@ -36,7 +36,7 @@ export function useCreateChoreSchedule(communeId: string) {
     onError?: (error: Error) => void
   ) => {
     if (!address) {
-      const error = new Error("Wallet not connected")
+      const error = new Error("Account not connected")
       setError(error)
       if (onError) onError(error)
       throw error

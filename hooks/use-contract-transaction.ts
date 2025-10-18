@@ -53,10 +53,10 @@ export function useContractTransaction() {
       errorMessage = "Transaction failed",
     }: TransactionParams) => {
       if (!address) {
-        const error = new Error("Wallet not connected")
+        const error = new Error("Account not connected")
         toast({
-          title: "Wallet Not Connected",
-          description: "Please connect your wallet to continue",
+          title: "Account Not Connected",
+          description: "Please connect your account to continue",
           variant: "destructive",
         })
         onError?.(error)

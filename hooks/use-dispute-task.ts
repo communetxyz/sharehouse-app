@@ -17,8 +17,8 @@ export function useDisputeTask(communeId: string, onClose?: () => void, onRefres
   const disputeTask = async (taskId: string, newAssignee: string) => {
     if (!isConnected || !address) {
       toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to dispute an task",
+        title: "Account not connected",
+        description: "Please connect your account to dispute an task",
         variant: "destructive",
       })
       return

@@ -35,7 +35,7 @@ export function useWallet() {
 
   const executeTransaction = async (functionName: string, args: any[]) => {
     if (!address) {
-      throw new Error("Wallet not connected")
+      throw new Error("Account not connected")
     }
 
     try {
@@ -77,7 +77,7 @@ export function useWallet() {
 
   const approveToken = async (amount: bigint, spender: `0x${string}`) => {
     if (!address) {
-      throw new Error("Wallet not connected")
+      throw new Error("Account not connected")
     }
 
     try {

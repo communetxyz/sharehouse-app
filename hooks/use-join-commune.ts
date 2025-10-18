@@ -158,7 +158,7 @@ export function useJoinCommune() {
 
   const joinCommune = async (communeId: string, nonce: string, signature: string, username: string) => {
     if (!address) {
-      setError("Please connect your wallet first")
+      setError("Please connect your account first")
       return
     }
 
