@@ -7,7 +7,7 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useCreateTask(communeId: string, onClose?: () => void, onRefresh?: () => void) {
+export function useCreateTask(communeId: string, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isCreating, setIsCreating] = useState(false)
@@ -24,11 +24,6 @@ export function useCreateTask(communeId: string, onClose?: () => void, onRefresh
     }
 
     setIsCreating(true)
-
-    // Close dialog IMMEDIATELY after setting loading state
-    if (onClose) {
-      onClose()
-    }
 
     try {
       console.log("[v0] ===== CREATE TASK START =====")

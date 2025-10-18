@@ -36,14 +36,7 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
   const [assignedTo, setAssignedTo] = useState("")
   const [dueDate, setDueDate] = useState("")
 
-  const { createTask, isCreating } = useCreateTask(communeId, () => {
-    setOpen(false)
-    setBudget("")
-    setDescription("")
-    setAssignedTo("")
-    setDueDate("")
-    onSuccess()
-  })
+  const { createTask, isCreating } = useCreateTask(communeId, onSuccess)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,6 +50,13 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
       console.log("[create-task-dialog] Calling optimistic create with:", { budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
       onOptimisticCreate({ budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
     }
+
+    // Close dialog and reset form immediately for better UX
+    setOpen(false)
+    setBudget("")
+    setDescription("")
+    setAssignedTo("")
+    setDueDate("")
 
     await createTask(budgetValue, description, dueDateObj, assignedTo)
   }
