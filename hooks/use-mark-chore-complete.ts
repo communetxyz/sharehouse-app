@@ -83,18 +83,33 @@ export function useMarkChoreComplete() {
       })
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      const result = await sendTransaction(
-        {
-          to: COMMUNE_OS_ADDRESS as `0x${string}`,
-          data,
-        },
-        {
-          sponsor: true, // Enable gas sponsorship
-        },
-      )
+      let transactionHash: string | null = null
 
-      console.log("[v0] Transaction sent:", result.hash)
-      setTxHash(result.hash as `0x${string}`)
+      try {
+        const result = await sendTransaction(
+          {
+            to: COMMUNE_OS_ADDRESS as `0x${string}`,
+            data,
+          },
+          {
+            sponsor: true, // Enable gas sponsorship
+          },
+        )
+
+        transactionHash = result.hash
+        console.log("[v0] Transaction sent:", transactionHash)
+        setTxHash(transactionHash as `0x${string}`)
+      } catch (sendErr: any) {
+        // Check if this is an AbortError - transaction might still have been submitted
+        if (sendErr.name === "AbortError" || sendErr.message?.includes("aborted")) {
+          console.warn("[v0] AbortError caught, but transaction may have been submitted. Waiting for confirmation...")
+          // Don't throw - let the transaction confirmation handle it
+          // The transaction might still succeed
+        } else {
+          // This is a real error, re-throw it
+          throw sendErr
+        }
+      }
 
       // Transaction will be confirmed via useWaitForTransactionReceipt
     } catch (err: any) {
