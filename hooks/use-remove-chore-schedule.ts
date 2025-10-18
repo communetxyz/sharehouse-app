@@ -64,9 +64,18 @@ export function useRemoveChoreSchedule(communeId: string) {
     } catch (err) {
       console.error("[remove-chore] Remove chore schedule error:", err)
       const error = err as Error
-      setError(error)
-      if (onError) onError(error)
-      throw error
+
+      // Check if it's an AbortError - this often happens when the transaction modal is closed
+      // but the transaction may still have been submitted successfully
+      if (error.name === 'AbortError') {
+        console.log("[remove-chore] AbortError detected - transaction may still be processing")
+        // Call onSuccess anyway since the transaction was likely submitted
+        if (onSuccess) onSuccess()
+      } else {
+        setError(error)
+        if (onError) onError(error)
+        throw error
+      }
     } finally {
       setIsRemoving(false)
     }

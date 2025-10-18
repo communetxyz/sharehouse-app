@@ -81,19 +81,24 @@ export default function ManageChoresPage() {
   const handleDeleteConfirm = async () => {
     if (!scheduleToDelete) return
 
-    setRemovingScheduleId(scheduleToDelete)
+    const scheduleId = scheduleToDelete
+
+    // Close dialog immediately
+    setScheduleToDelete(null)
+
+    // Set removing state
+    setRemovingScheduleId(scheduleId)
 
     try {
       await removeChoreSchedule(
-        scheduleToDelete,
+        scheduleId,
         () => {
           toast({
             title: t("manageChores.choreRemoved"),
             description: t("manageChores.choreRemovedDesc"),
           })
-          refreshSchedules()
-          setScheduleToDelete(null)
           setRemovingScheduleId(null)
+          refreshSchedules()
         },
         (error) => {
           toast({
@@ -106,6 +111,11 @@ export default function ManageChoresPage() {
       )
     } catch (error) {
       console.error("Failed to remove chore:", error)
+      toast({
+        title: t("manageChores.failedToRemoveChore"),
+        description: t("common.tryAgain"),
+        variant: "destructive",
+      })
       setRemovingScheduleId(null)
     }
   }
