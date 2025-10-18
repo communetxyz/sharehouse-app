@@ -55,14 +55,15 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
       console.warn("[create-task-dialog] ⚠️ onOptimisticCreate callback is missing!")
     }
 
-    // Close dialog and reset form immediately for better UX
+    // Wait for transaction to complete before closing dialog (shows spinner)
+    await createTask(budgetValue, description, dueDateObj, assignedTo)
+
+    // Close dialog and reset form after transaction completes
     setOpen(false)
     setBudget("")
     setDescription("")
     setAssignedTo("")
     setDueDate("")
-
-    await createTask(budgetValue, description, dueDateObj, assignedTo)
   }
 
   return (
