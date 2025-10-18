@@ -61,6 +61,7 @@ const ChoreCard = memo(function ChoreCard({
   onReassign,
   isCompleting,
   isConfirming,
+  isReassigning,
   showCompleteButton,
   showReassignButton,
   isSuccess,
@@ -73,6 +74,7 @@ const ChoreCard = memo(function ChoreCard({
   onReassign?: (newAssignee: string) => void
   isCompleting?: boolean
   isConfirming?: boolean
+  isReassigning?: boolean
   showCompleteButton?: boolean
   showReassignButton?: boolean
   isSuccess?: boolean
@@ -210,7 +212,11 @@ const ChoreCard = memo(function ChoreCard({
                     </SelectTrigger>
                     <SelectContent>
                       {members.map((member) => (
-                        <SelectItem key={member.address} value={member.address}>
+                        <SelectItem
+                          key={member.address}
+                          value={member.address}
+                          disabled={member.address.toLowerCase() === chore.assignedTo.toLowerCase()}
+                        >
                           {member.username || member.address}
                           {member.isCurrentUser && ` (${t("members.you")})`}
                         </SelectItem>
@@ -219,10 +225,17 @@ const ChoreCard = memo(function ChoreCard({
                   </Select>
                   <Button
                     onClick={handleReassignConfirm}
-                    disabled={!selectedAssignee}
+                    disabled={!selectedAssignee || isReassigning || selectedAssignee.toLowerCase() === chore.assignedTo.toLowerCase()}
                     className="w-full bg-sage hover:bg-sage/90 text-cream"
                   >
-                    {t("chores.confirmReassign")}
+                    {isReassigning ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        {t("chores.reassigning")}
+                      </>
+                    ) : (
+                      t("chores.confirmReassign")
+                    )}
                   </Button>
                 </div>
               </DialogContent>
@@ -259,6 +272,7 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
   const { reassignChore, isReassigning } = useReassignChore()
   console.log("[chore-kanban-v2] Hook states:", { isMarking, isConfirming, isConfirmed })
   const [completingId, setCompletingId] = useState<string | null>(null)
+  const [reassigningId, setReassigningId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
   const { t, language } = useLanguage()
   const { toast } = useToast()
@@ -346,6 +360,9 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
   }, [markComplete, onOptimisticComplete, onRefresh])
 
   const handleReassign = useCallback(async (chore: ChoreInstance, newAssignee: string) => {
+    const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+    setReassigningId(choreKey)
+
     try {
       await reassignChore(
         chore.scheduleId,
@@ -355,9 +372,16 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
         onRefresh
       )
     } catch (err) {
-      // Error already handled in hook
+      // Surface a toast so users get feedback when reassignment fails
+      toast({
+        title: t("chores.reassignFailed") || "Failed to reassign chore",
+        description: err instanceof Error ? err.message : String(err),
+        variant: "destructive",
+      })
+    } finally {
+      setReassigningId(null)
     }
-  }, [reassignChore, onRefresh])
+  }, [reassignChore, onRefresh, t, toast])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"
@@ -388,6 +412,7 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
                         onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
                         isCompleting={completingId === choreKey && isMarking}
                         isConfirming={completingId === choreKey && isConfirming}
+                        isReassigning={reassigningId === choreKey && isReassigning}
                         isSuccess={successId === choreKey}
                         showCompleteButton
                         showReassignButton
@@ -456,17 +481,21 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
               {notStarted.length === 0 ? (
                 <p className="text-sm text-charcoal/60 text-center py-8">{t("chores.noPendingChores")}</p>
               ) : (
-                notStarted.map((chore) => (
-                  <ChoreCard
-                    key={`${chore.scheduleId}-${chore.periodNumber}`}
-                    chore={chore}
-                    members={members}
-                    onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
-                    showReassignButton
-                    locale={language}
-                    t={t}
-                  />
-                ))
+                notStarted.map((chore) => {
+                  const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+                  return (
+                    <ChoreCard
+                      key={choreKey}
+                      chore={chore}
+                      members={members}
+                      onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
+                      isReassigning={reassigningId === choreKey && isReassigning}
+                      showReassignButton
+                      locale={language}
+                      t={t}
+                    />
+                  )
+                })
               )}
             </AnimatePresence>
           </div>

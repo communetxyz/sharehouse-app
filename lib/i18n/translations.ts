@@ -100,6 +100,7 @@ export const translations = {
       newAssignee: "新しい担当者",
       confirmReassign: "再割り当てを確認",
       reassigning: "再割り当て中...",
+      reassignFailed: "再割り当てに失敗しました",
     },
     addChores: {
       button: "家事を追加",
@@ -376,6 +377,7 @@ export const translations = {
       newAssignee: "New Assignee",
       confirmReassign: "Confirm Reassign",
       reassigning: "Reassigning...",
+      reassignFailed: "Failed to reassign chore",
     },
     addChores: {
       button: "Add Chores",

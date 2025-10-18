@@ -23,19 +23,32 @@ export function useReassignChore() {
     onSuccess?: () => void,
     onRefresh?: () => void
   ) => {
-    if (!commune) {
-      throw new Error("No commune data available")
-    }
-
-    if (!newAssignee || newAssignee === "") {
-      throw new Error("New assignee address is required")
-    }
-
     setIsReassigning(true)
     setIsConfirmed(false)
     setError(null)
 
     try {
+      if (!commune) {
+        const error = new Error("No commune data available")
+        setError(error)
+        toast({
+          title: "Failed to reassign chore",
+          description: error.message,
+          variant: "destructive",
+        })
+        throw error
+      }
+
+      if (!newAssignee || newAssignee === "") {
+        const error = new Error("New assignee address is required")
+        setError(error)
+        toast({
+          title: "Failed to reassign chore",
+          description: error.message,
+          variant: "destructive",
+        })
+        throw error
+      }
       console.log("[v0] ===== REASSIGN CHORE START =====")
       console.log("[v0] Reassigning chore:", {
         choreId,
