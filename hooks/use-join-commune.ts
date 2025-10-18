@@ -9,6 +9,7 @@ import {
   BREAD_TOKEN_ADDRESS,
   ERC20_ABI,
   MEMBER_REGISTRY_ABI,
+  RPC_URL,
 } from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
 import { createPublicClient, http } from "viem"
@@ -95,9 +96,10 @@ export function useJoinCommune() {
     setError(null)
 
     try {
+      console.log("[use-join-commune] Using RPC URL:", RPC_URL)
       const provider = createPublicClient({
         chain: mainnet,
-        transport: http("https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"),
+        transport: http(RPC_URL),
       })
 
       const memberRegistryAddress = (await provider.readContract({

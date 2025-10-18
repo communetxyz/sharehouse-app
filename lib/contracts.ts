@@ -4,7 +4,14 @@ export const COMMUNE_OS_ADDRESS = "0x3b019bcfd1F76906136694D5C52Dbddb82648891" a
 export const BREAD_TOKEN_ADDRESS = "0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3" as `0x${string}`
 export const COLLATERAL_MANAGER_ADDRESS = "0x61Ba220071184886710A8F2814B7c6eDecbcaA82" as `0x${string}`
 
-export const RPC_URL = "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"
+// Get RPC URL from environment variable - no fallback
+if (!process.env.NEXT_PUBLIC_GNOSIS_RPC_URL) {
+  throw new Error(
+    "NEXT_PUBLIC_GNOSIS_RPC_URL environment variable is required but not set. Please add it to your .env.local file."
+  )
+}
+
+export const RPC_URL = process.env.NEXT_PUBLIC_GNOSIS_RPC_URL
 
 export const ERC20_ABI = [
   {
