@@ -244,7 +244,7 @@ export default function DashboardPage() {
           </TabsContent>
 
           <TabsContent value="members" className="space-y-6">
-            <MemberList members={members} />
+            <MemberList members={members} commune={commune} onMemberRemoved={refreshData} />
           </TabsContent>
 
           <TabsContent value="info" className="space-y-6">
