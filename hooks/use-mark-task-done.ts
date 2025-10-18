@@ -10,8 +10,8 @@ import { useToast } from "./use-toast"
 export function useMarkTaskDone(communeId: string, onRefresh?: () => void) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
-  const [isMarking, setIsMarking] = useState(false)
-  const [isConfirmed, setIsConfirmed] = useState(false)
+  const [markingTaskId, setMarkingTaskId] = useState<string | null>(null)
+  const [confirmedTaskIds, setConfirmedTaskIds] = useState<Set<string>>(new Set())
   const { toast } = useToast()
 
   const markDone = async (taskId: string) => {
@@ -24,11 +24,10 @@ export function useMarkTaskDone(communeId: string, onRefresh?: () => void) {
       return
     }
 
-    setIsMarking(true)
-    setIsConfirmed(false)
+    setMarkingTaskId(taskId)
 
     // Optimistically mark as confirmed
-    setIsConfirmed(true)
+    setConfirmedTaskIds(prev => new Set(prev).add(taskId))
 
     try {
       const data = encodeFunctionData({
@@ -52,23 +51,29 @@ export function useMarkTaskDone(communeId: string, onRefresh?: () => void) {
         description: "The task has been marked as done successfully",
       })
 
-      // Don't call onRefresh - TaskList handles confirmation internally
+      if (onRefresh) {
+        onRefresh()
+      }
     } catch (error: any) {
       console.error("Error marking task as done:", error)
-      setIsConfirmed(false)
+      setConfirmedTaskIds(prev => {
+        const next = new Set(prev)
+        next.delete(taskId)
+        return next
+      })
       toast({
         title: "Failed to mark task as done",
         description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       })
     } finally {
-      setIsMarking(false)
+      setMarkingTaskId(null)
     }
   }
 
   return {
     markDone,
-    isMarking,
-    isConfirmed,
+    markingTaskId,
+    confirmedTaskIds,
   }
 }
