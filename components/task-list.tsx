@@ -150,18 +150,26 @@ function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, markingTask
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <CardTitle className="text-base font-medium text-charcoal">{task.description}</CardTitle>
-              {isCreating && (
-                <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-700 border-amber-200">
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                  {t("tasks.creating")}
-                </Badge>
-              )}
-              {isDisputed && (
-                <Badge variant="destructive" className="ml-2">
-                  <AlertCircle className="mr-1 h-3 w-3" />
-                  {t("tasks.disputed")}
-                </Badge>
-              )}
+              <div className="flex gap-2">
+                {isCreating && (
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    {t("tasks.creating")}
+                  </Badge>
+                )}
+                {isThisTaskMarking && (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    {t("tasks.markingDone")}
+                  </Badge>
+                )}
+                {isDisputed && (
+                  <Badge variant="destructive">
+                    <AlertCircle className="mr-1 h-3 w-3" />
+                    {t("tasks.disputed")}
+                  </Badge>
+                )}
+              </div>
             </div>
             <CardDescription className="flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1">
