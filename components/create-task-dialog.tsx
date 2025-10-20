@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { useI18n } from "@/lib/i18n/context"
 import { useCreateTask } from "@/hooks/use-create-task"
 import type { Member } from "@/types/commune"
@@ -24,11 +25,10 @@ import { Plus, Loader2 } from "lucide-react"
 interface CreateTaskDialogProps {
   communeId: string
   members: Member[]
-  onSuccess: () => void
   onOptimisticCreate?: (taskData: { budget: string, description: string, dueDate: Date, assignedTo: string }) => void
 }
 
-export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCreate }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ communeId, members, onOptimisticCreate }: CreateTaskDialogProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [showBudget, setShowBudget] = useState(false)
@@ -37,7 +37,7 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
   const [assignedTo, setAssignedTo] = useState("")
   const [dueDate, setDueDate] = useState("")
 
-  const { createTask, isCreating } = useCreateTask(communeId, onSuccess)
+  const { createTask, isCreating } = useCreateTask(communeId)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -85,14 +85,11 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="budget-toggle">{t("tasks.budget")} (Collateral Currency)</Label>
-              <button
+              <Switch
                 id="budget-toggle"
-                type="button"
-                onClick={() => setShowBudget(!showBudget)}
-                className="text-xs text-sage hover:text-sage/80 underline"
-              >
-                {showBudget ? "Hide budget" : "Add budget"}
-              </button>
+                checked={showBudget}
+                onCheckedChange={setShowBudget}
+              />
             </div>
             {showBudget && (
               <Input

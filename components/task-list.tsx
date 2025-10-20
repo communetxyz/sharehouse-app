@@ -22,7 +22,7 @@ interface TaskListProps {
 
 export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefresh, creatingTaskIds }: TaskListProps) {
   const { t } = useI18n()
-  const { markDone, markingTaskId, confirmedTaskIds } = useMarkTaskDone(communeId, onRefresh)
+  const { markDone, markingTaskId, confirmedTaskIds } = useMarkTaskDone(communeId)
 
   const filteredTasks = filterAssignedToMe ? tasks.filter((e) => e.isAssignedToUser) : tasks
 

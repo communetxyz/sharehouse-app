@@ -269,7 +269,6 @@ export default function DashboardPage() {
               {commune && <CreateTaskDialog
                 communeId={commune.id}
                 members={members}
-                onSuccess={refreshTasks}
                 onOptimisticCreate={handleTaskCreateOptimistic}
               />}
             </div>

@@ -7,7 +7,7 @@ import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
-export function useCreateTask(communeId: string, onRefresh?: () => void) {
+export function useCreateTask(communeId: string) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [isCreating, setIsCreating] = useState(false)
@@ -68,7 +68,7 @@ export function useCreateTask(communeId: string, onRefresh?: () => void) {
         // Check if this is an AbortError - transaction might still have been submitted
         if (sendErr.name === "AbortError" || sendErr.message?.includes("aborted")) {
           console.warn("[v0] AbortError caught, but transaction may have been submitted.")
-          // Don't throw - the transaction likely succeeded, just wait for refresh
+          // Don't throw - the transaction likely succeeded, optimistic update stays
         } else {
           // This is a real error, re-throw it
           throw sendErr
@@ -79,11 +79,6 @@ export function useCreateTask(communeId: string, onRefresh?: () => void) {
         title: "Task created",
         description: "Your task has been created successfully",
       })
-
-      // Notify parent that transaction succeeded
-      if (onRefresh) {
-        onRefresh()
-      }
     } catch (error: any) {
       console.error("[v0] ===== CREATE TASK FAILED =====")
       console.error("[v0] Error creating task:", error)
