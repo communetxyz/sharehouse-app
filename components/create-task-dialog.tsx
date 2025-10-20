@@ -31,6 +31,7 @@ interface CreateTaskDialogProps {
 export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCreate }: CreateTaskDialogProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
+  const [showBudget, setShowBudget] = useState(false)
   const [budget, setBudget] = useState("")
   const [description, setDescription] = useState("")
   const [assignedTo, setAssignedTo] = useState("")
@@ -47,7 +48,15 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
     const dueDateObj = new Date(dueDate)
     const budgetValue = budget || "0"
 
-    // Optimistically add the task before starting the transaction
+    // Close dialog and reset form immediately
+    setOpen(false)
+    setShowBudget(false)
+    setBudget("")
+    setDescription("")
+    setAssignedTo("")
+    setDueDate("")
+
+    // Optimistically add the task (will show in list with spinner)
     if (onOptimisticCreate) {
       console.log("[create-task-dialog] Calling optimistic create with:", { budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
       onOptimisticCreate({ budget: budgetValue, description, dueDate: dueDateObj, assignedTo })
@@ -55,15 +64,8 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
       console.warn("[create-task-dialog] ⚠️ onOptimisticCreate callback is missing!")
     }
 
-    // Wait for transaction to complete before closing dialog (shows spinner)
+    // Create task in background
     await createTask(budgetValue, description, dueDateObj, assignedTo)
-
-    // Close dialog and reset form after transaction completes
-    setOpen(false)
-    setBudget("")
-    setDescription("")
-    setAssignedTo("")
-    setDueDate("")
   }
 
   return (
@@ -81,15 +83,27 @@ export function CreateTaskDialog({ communeId, members, onSuccess, onOptimisticCr
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="budget">{t("tasks.budget")} (Collateral Currency) - Optional</Label>
-            <Input
-              id="budget"
-              type="number"
-              step="0.01"
-              placeholder={t("tasks.enterBudget")}
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-            />
+            <div className="flex items-center justify-between">
+              <Label htmlFor="budget-toggle">{t("tasks.budget")} (Collateral Currency)</Label>
+              <button
+                id="budget-toggle"
+                type="button"
+                onClick={() => setShowBudget(!showBudget)}
+                className="text-xs text-sage hover:text-sage/80 underline"
+              >
+                {showBudget ? "Hide budget" : "Add budget"}
+              </button>
+            </div>
+            {showBudget && (
+              <Input
+                id="budget"
+                type="number"
+                step="0.01"
+                placeholder={t("tasks.enterBudget")}
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+              />
+            )}
           </div>
 
           <div className="space-y-2">

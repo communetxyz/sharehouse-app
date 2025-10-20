@@ -29,15 +29,29 @@ export default function DashboardPage() {
 
   // Local optimistic state for tasks
   const [optimisticTasks, setOptimisticTasks] = useState(tasks)
+  const [creatingTaskIds, setCreatingTaskIds] = useState<Set<string>>(new Set())
 
   // Sync fetched chores with local state
   useEffect(() => {
     setOptimisticChores(chores)
   }, [chores])
 
-  // Sync fetched tasks with local state
+  // Sync fetched tasks with local state - remove creating IDs that now exist in real data
   useEffect(() => {
     setOptimisticTasks(tasks)
+    // Remove temp IDs from creating set once real tasks load
+    setCreatingTaskIds(prev => {
+      const next = new Set(prev)
+      tasks.forEach(task => {
+        // Remove any temp- IDs when we get real data
+        Array.from(next).forEach(id => {
+          if (id.startsWith('temp-')) {
+            next.delete(id)
+          }
+        })
+      })
+      return next
+    })
   }, [tasks])
 
   // Optimistic chore completion
@@ -60,8 +74,9 @@ export default function DashboardPage() {
   // Optimistic task creation
   const handleTaskCreateOptimistic = (taskData: { budget: string, description: string, dueDate: Date, assignedTo: string }) => {
     console.log("[dashboard] Optimistically creating task:", taskData)
+    const tempId = `temp-${Date.now()}` // Temporary ID
     const optimisticTask = {
-      id: `temp-${Date.now()}`, // Temporary ID
+      id: tempId,
       communeId: commune?.id || "",
       budget: taskData.budget || "0",
       description: taskData.description,
@@ -73,6 +88,7 @@ export default function DashboardPage() {
       isAssignedToUser: taskData.assignedTo.toLowerCase() === address?.toLowerCase(),
     }
     setOptimisticTasks(prev => [...prev, optimisticTask])
+    setCreatingTaskIds(prev => new Set(prev).add(tempId))
   }
 
   if (status === "reconnecting" || status === "connecting") {
@@ -266,6 +282,7 @@ export default function DashboardPage() {
                 tasks={optimisticTasks}
                 communeId={commune.id}
                 onRefresh={refreshTasks}
+                creatingTaskIds={creatingTaskIds}
               />
             )}
           </TabsContent>

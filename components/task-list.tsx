@@ -17,9 +17,10 @@ interface TaskListProps {
   communeId: string
   filterAssignedToMe?: boolean
   onRefresh: () => void
+  creatingTaskIds?: Set<string>
 }
 
-export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefresh }: TaskListProps) {
+export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefresh, creatingTaskIds }: TaskListProps) {
   const { t } = useI18n()
   const { markDone, markingTaskId, confirmedTaskIds } = useMarkTaskDone(communeId, onRefresh)
 
@@ -37,6 +38,7 @@ export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefre
         communeId={communeId}
         onMarkDone={markDone}
         markingTaskId={markingTaskId}
+        creatingTaskIds={creatingTaskIds}
         onRefresh={onRefresh}
         emptyMessage={t("tasks.noTasks")}
       />
@@ -67,6 +69,7 @@ interface TaskColumnProps {
   isDisputed?: boolean
   onMarkDone?: (taskId: string) => void
   markingTaskId?: string | null
+  creatingTaskIds?: Set<string>
   onRefresh?: () => void
   emptyMessage: string
 }
@@ -79,6 +82,7 @@ function TaskColumn({
   isDisputed,
   onMarkDone,
   markingTaskId,
+  creatingTaskIds,
   onRefresh,
   emptyMessage,
 }: TaskColumnProps) {
@@ -104,6 +108,7 @@ function TaskColumn({
               isDisputed={isDisputed}
               onMarkDone={onMarkDone}
               markingTaskId={markingTaskId}
+              isCreating={creatingTaskIds?.has(task.id)}
               onRefresh={onRefresh}
             />
           ))
@@ -120,10 +125,11 @@ interface TaskCardProps {
   isDisputed?: boolean
   onMarkDone?: (taskId: string) => void
   markingTaskId?: string | null
+  isCreating?: boolean
   onRefresh?: () => void
 }
 
-function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, markingTaskId, onRefresh }: TaskCardProps) {
+function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, markingTaskId, isCreating, onRefresh }: TaskCardProps) {
   const { t } = useI18n()
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const { members } = useCommuneData()
@@ -144,6 +150,12 @@ function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, markingTask
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <CardTitle className="text-base font-medium text-charcoal">{task.description}</CardTitle>
+              {isCreating && (
+                <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-700 border-amber-200">
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  {t("tasks.creating")}
+                </Badge>
+              )}
               {isDisputed && (
                 <Badge variant="destructive" className="ml-2">
                   <AlertCircle className="mr-1 h-3 w-3" />
