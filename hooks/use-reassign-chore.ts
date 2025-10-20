@@ -3,12 +3,10 @@
 import { useState } from "react"
 import { useSendTransaction } from "@privy-io/react-auth"
 import { encodeFunctionData } from "viem"
-import { useCommuneData } from "./use-commune-data"
 import { COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
 export function useReassignChore() {
-  const { commune } = useCommuneData()
   const [isReassigning, setIsReassigning] = useState(false)
   const [isConfirmed, setIsConfirmed] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -17,6 +15,7 @@ export function useReassignChore() {
   const { sendTransaction } = useSendTransaction()
 
   const reassignChore = async (
+    communeId: string,
     choreId: string,
     period: string,
     newAssignee: string,
@@ -28,7 +27,7 @@ export function useReassignChore() {
     setError(null)
 
     try {
-      if (!commune) {
+      if (!communeId) {
         const error = new Error("No commune data available")
         setError(error)
         toast({
@@ -56,20 +55,20 @@ export function useReassignChore() {
         period,
         periodType: typeof period,
         newAssignee,
-        communeId: commune.id,
-        communeIdType: typeof commune.id,
+        communeId: communeId,
+        communeIdType: typeof communeId,
         contractAddress: COMMUNE_OS_ADDRESS,
       })
 
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "setChoreAssignee",
-        args: [BigInt(commune.id), BigInt(choreId), BigInt(period), newAssignee as `0x${string}`],
+        args: [BigInt(communeId), BigInt(choreId), BigInt(period), newAssignee as `0x${string}`],
       })
 
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Function args:", {
-        communeId: BigInt(commune.id).toString(),
+        communeId: BigInt(communeId).toString(),
         choreId: BigInt(choreId).toString(),
         period: BigInt(period).toString(),
         assignee: newAssignee,

@@ -361,10 +361,22 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
 
   const handleReassign = useCallback(async (chore: ChoreInstance, newAssignee: string) => {
     const choreKey = `${chore.scheduleId}-${chore.periodNumber}`
+    const currentCommuneId = communeRef.current?.id
+
+    if (!currentCommuneId) {
+      toast({
+        title: t("chores.reassignFailed") || "Failed to reassign chore",
+        description: "No commune data available",
+        variant: "destructive",
+      })
+      return
+    }
+
     setReassigningId(choreKey)
 
     try {
       await reassignChore(
+        currentCommuneId,
         chore.scheduleId,
         chore.periodNumber,
         newAssignee,
@@ -381,7 +393,7 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
     } finally {
       setReassigningId(null)
     }
-  }, [reassignChore, onRefresh, t, toast])
+  }, [reassignChore, onRefresh, t, toast, communeRef])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"
