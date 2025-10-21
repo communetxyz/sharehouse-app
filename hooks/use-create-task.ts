@@ -16,8 +16,8 @@ export function useCreateTask(communeId: string) {
   const createTask = async (budget: string, description: string, dueDate: Date, assignedTo: string) => {
     if (!isConnected || !address) {
       toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to create an task",
+        title: "Account not connected",
+        description: "Please connect your account to create an task",
         variant: "destructive",
       })
       return

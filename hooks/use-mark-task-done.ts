@@ -18,8 +18,8 @@ export function useMarkTaskDone(communeId: string) {
 
     if (!isConnected || !address) {
       toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to mark task as done",
+        title: "Account not connected",
+        description: "Please connect your account to mark task as done",
         variant: "destructive",
       })
       return

@@ -24,7 +24,7 @@ export function useCreateCommune() {
 
   const createCommune = async (input: CreateCommuneInput) => {
     if (!address) {
-      throw new Error("Wallet not connected")
+      throw new Error("Account not connected")
     }
 
     setIsLoading(true)
