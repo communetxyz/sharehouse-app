@@ -11,11 +11,10 @@ export function useMarkTaskDone(communeId: string) {
   const { address, isConnected } = useWallet()
   const { sendTransaction } = useSendTransaction()
   const [markingTaskId, setMarkingTaskId] = useState<string | null>(null)
-  const [confirmedTaskIds, setConfirmedTaskIds] = useState<Set<string>>(new Set())
   const { toast } = useToast()
 
   const markDone = async (taskId: string) => {
-    console.log("[mark-task-done] ✅ NEW VERSION RUNNING - v2024-01-19")
+    console.log("[mark-task-done] ✅ NEW VERSION RUNNING - v2024-01-20")
 
     if (!isConnected || !address) {
       toast({
@@ -27,9 +26,6 @@ export function useMarkTaskDone(communeId: string) {
     }
 
     setMarkingTaskId(taskId)
-
-    // Optimistically mark as confirmed
-    setConfirmedTaskIds(prev => new Set(prev).add(taskId))
 
     try {
       const data = encodeFunctionData({
@@ -52,7 +48,7 @@ export function useMarkTaskDone(communeId: string) {
         // Check if this is an AbortError - transaction might still have been submitted
         if (sendErr.name === "AbortError" || sendErr.message?.includes("aborted")) {
           console.warn("[mark-task-done] AbortError caught, but transaction may have been submitted.")
-          // Don't throw - the transaction likely succeeded, optimistic update stays
+          // Don't throw - the transaction likely succeeded
         } else {
           // This is a real error, re-throw it
           throw sendErr
@@ -65,11 +61,6 @@ export function useMarkTaskDone(communeId: string) {
       })
     } catch (error: any) {
       console.error("Error marking task as done:", error)
-      setConfirmedTaskIds(prev => {
-        const next = new Set(prev)
-        next.delete(taskId)
-        return next
-      })
       toast({
         title: "Failed to mark task as done",
         description: error.message || "An error occurred. Please try again.",
@@ -83,6 +74,5 @@ export function useMarkTaskDone(communeId: string) {
   return {
     markDone,
     markingTaskId,
-    confirmedTaskIds,
   }
 }

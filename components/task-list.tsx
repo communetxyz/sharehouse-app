@@ -22,12 +22,13 @@ interface TaskListProps {
 
 export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefresh, creatingTaskIds }: TaskListProps) {
   const { t } = useI18n()
-  const { markDone, markingTaskId, confirmedTaskIds } = useMarkTaskDone(communeId)
+  const { markDone, markingTaskId } = useMarkTaskDone(communeId)
 
   const filteredTasks = filterAssignedToMe ? tasks.filter((e) => e.isAssignedToUser) : tasks
 
-  const undoneTasks = filteredTasks.filter((e) => !e.done && !e.disputed && !confirmedTaskIds.has(e.id))
-  const doneTasks = filteredTasks.filter((e) => (e.done || confirmedTaskIds.has(e.id)) && !e.disputed)
+  // Don't move tasks to done column while they're being marked (keep them in undone to show spinner)
+  const undoneTasks = filteredTasks.filter((e) => !e.done && !e.disputed)
+  const doneTasks = filteredTasks.filter((e) => e.done && !e.disputed)
   const disputedTasks = filteredTasks.filter((e) => e.disputed)
 
   return (
