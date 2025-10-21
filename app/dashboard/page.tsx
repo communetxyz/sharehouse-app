@@ -49,6 +49,29 @@ export default function DashboardPage() {
     })
   }
 
+  // Optimistic chore reassignment
+  const handleChoreReassignOptimistic = (choreKey: string, newAssignee: string, newAssigneeUsername: string) => {
+    // choreKey format is "scheduleId-periodNumber"
+    console.log("[dashboard] Optimistically reassigning chore:", choreKey, "to:", newAssignee)
+    setOptimisticChores(prev => {
+      const updated = prev.map(chore => {
+        const key = `${chore.scheduleId}-${chore.periodNumber}`
+        const matches = key === choreKey
+        if (matches) {
+          console.log(`[dashboard] Matched chore ${chore.scheduleId}-${chore.periodNumber} (${chore.title})`)
+          console.log(`[dashboard] Reassigning from ${chore.assignedTo} to ${newAssignee}`)
+        }
+        return matches ? {
+          ...chore,
+          assignedTo: newAssignee,
+          assignedToUsername: newAssigneeUsername,
+          isAssignedToUser: newAssignee.toLowerCase() === address?.toLowerCase()
+        } : chore
+      })
+      return updated
+    })
+  }
+
   if (status === "reconnecting" || status === "connecting") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cream via-sage/20 to-cream flex items-center justify-center">
@@ -203,7 +226,9 @@ export default function DashboardPage() {
           <TabsContent value="my-chores" className="space-y-6">
             <ChoreKanban
               chores={optimisticChores}
+              members={members}
               onOptimisticComplete={handleChoreCompleteOptimistic}
+              onOptimisticReassign={handleChoreReassignOptimistic}
               onRefresh={refreshData}
               filterMyChores
             />
@@ -212,7 +237,9 @@ export default function DashboardPage() {
           <TabsContent value="all-chores" className="space-y-6">
             <ChoreKanban
               chores={optimisticChores}
+              members={members}
               onOptimisticComplete={handleChoreCompleteOptimistic}
+              onOptimisticReassign={handleChoreReassignOptimistic}
               onRefresh={refreshData}
             />
           </TabsContent>
