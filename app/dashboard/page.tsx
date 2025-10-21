@@ -36,23 +36,26 @@ export default function DashboardPage() {
     setOptimisticChores(chores)
   }, [chores])
 
-  // Sync fetched tasks with local state - remove creating IDs that now exist in real data
+  // Sync fetched tasks with local state
   useEffect(() => {
     setOptimisticTasks(tasks)
-    // Remove temp IDs from creating set once real tasks load
-    setCreatingTaskIds(prev => {
-      const next = new Set(prev)
-      tasks.forEach(task => {
-        // Remove any temp- IDs when we get real data
-        Array.from(next).forEach(id => {
-          if (id.startsWith('temp-')) {
-            next.delete(id)
-          }
-        })
-      })
-      return next
-    })
   }, [tasks])
+
+  // Clear temp IDs after 10 seconds (transaction should be complete by then)
+  useEffect(() => {
+    creatingTaskIds.forEach(id => {
+      if (id.startsWith('temp-')) {
+        const timeout = setTimeout(() => {
+          setCreatingTaskIds(prev => {
+            const next = new Set(prev)
+            next.delete(id)
+            return next
+          })
+        }, 10000) // 10 seconds
+        return () => clearTimeout(timeout)
+      }
+    })
+  }, [creatingTaskIds])
 
   // Optimistic chore completion
   const handleChoreCompleteOptimistic = (choreKey: string) => {
