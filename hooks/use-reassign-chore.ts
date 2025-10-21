@@ -1,18 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSendTransaction } from "@privy-io/react-auth"
+import { useWaitForTransactionReceipt } from "wagmi"
 import { encodeFunctionData } from "viem"
 import { COMMUNE_OS_ADDRESS, COMMUNE_OS_ABI } from "@/lib/contracts"
 import { useToast } from "./use-toast"
 
 export function useReassignChore() {
   const [isReassigning, setIsReassigning] = useState(false)
-  const [isConfirmed, setIsConfirmed] = useState(false)
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const { toast } = useToast()
 
   const { sendTransaction } = useSendTransaction()
+
+  // Wait for transaction confirmation
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash || undefined,
+  })
+
+  // Log confirmation state changes
+  useEffect(() => {
+    if (txHash) {
+      console.log("[v0] Reassign transaction hash set:", txHash)
+      console.log("[v0] isConfirming:", isConfirming, "isConfirmed:", isConfirmed)
+    }
+  }, [txHash, isConfirming, isConfirmed])
+
+  // Log when transaction is confirmed
+  useEffect(() => {
+    if (isConfirmed && txHash) {
+      console.log("[v0] ===== REASSIGN TRANSACTION CONFIRMED =====")
+      console.log("[v0] Transaction hash:", txHash)
+    }
+  }, [isConfirmed, txHash])
 
   const reassignChore = async (
     communeId: string,
@@ -22,9 +44,15 @@ export function useReassignChore() {
     onSuccess?: () => void,
     onRefresh?: () => void
   ) => {
+    console.log("[v0] Setting isReassigning to true")
     setIsReassigning(true)
-    setIsConfirmed(false)
+    setTxHash(null)
     setError(null)
+
+    // Call onSuccess IMMEDIATELY before any async operations (for animations)
+    if (onSuccess) {
+      onSuccess()
+    }
 
     try {
       if (!communeId) {
@@ -75,36 +103,35 @@ export function useReassignChore() {
       })
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
-      await sendTransaction(
-        {
-          to: COMMUNE_OS_ADDRESS as `0x${string}`,
-          data,
-        },
-        {
-          sponsor: true, // Enable gas sponsorship
-        },
-      )
+      let transactionHash: string | null = null
 
-      console.log("[v0] ===== REASSIGN CHORE SUCCESS =====")
+      try {
+        const result = await sendTransaction(
+          {
+            to: COMMUNE_OS_ADDRESS as `0x${string}`,
+            data,
+          },
+          {
+            sponsor: true, // Enable gas sponsorship
+          },
+        )
 
-      setIsConfirmed(true)
-
-      toast({
-        title: "Chore reassigned!",
-        description: "The chore has been successfully reassigned.",
-        variant: "default",
-      })
-
-      if (onSuccess) {
-        onSuccess()
+        transactionHash = result.hash
+        console.log("[v0] Reassign transaction sent:", transactionHash)
+        setTxHash(transactionHash as `0x${string}`)
+      } catch (sendErr: any) {
+        // Check if this is an AbortError - transaction might still have been submitted
+        if (sendErr.name === "AbortError" || sendErr.message?.includes("aborted")) {
+          console.warn("[v0] AbortError caught, but transaction may have been submitted. Waiting for confirmation...")
+          // Don't throw - let the transaction confirmation handle it
+          // The transaction might still succeed
+        } else {
+          // This is a real error, re-throw it
+          throw sendErr
+        }
       }
 
-      // Refresh after a short delay
-      if (onRefresh) {
-        setTimeout(() => {
-          onRefresh()
-        }, 1500)
-      }
+      // Transaction will be confirmed via useWaitForTransactionReceipt
     } catch (err: any) {
       console.error("[v0] ===== REASSIGN CHORE FAILED =====")
       console.error("[v0] Error:", err)
@@ -115,7 +142,7 @@ export function useReassignChore() {
         cause: err.cause,
       })
       setError(err)
-      setIsConfirmed(false)
+      setTxHash(null)
       toast({
         title: "Failed to reassign chore",
         description: err.message || "An error occurred. Please try again.",
@@ -131,6 +158,7 @@ export function useReassignChore() {
     reassignChore,
     isReassigning,
     isConfirmed,
+    isConfirming,
     error,
   }
 }

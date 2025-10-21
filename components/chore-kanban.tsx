@@ -62,6 +62,7 @@ const ChoreCard = memo(function ChoreCard({
   isCompleting,
   isConfirming,
   isReassigning,
+  isReassignConfirming,
   showCompleteButton,
   showReassignButton,
   isSuccess,
@@ -75,6 +76,7 @@ const ChoreCard = memo(function ChoreCard({
   isCompleting?: boolean
   isConfirming?: boolean
   isReassigning?: boolean
+  isReassignConfirming?: boolean
   showCompleteButton?: boolean
   showReassignButton?: boolean
   isSuccess?: boolean
@@ -225,13 +227,13 @@ const ChoreCard = memo(function ChoreCard({
                   </Select>
                   <Button
                     onClick={handleReassignConfirm}
-                    disabled={!selectedAssignee || isReassigning || selectedAssignee.toLowerCase() === chore.assignedTo.toLowerCase()}
+                    disabled={!selectedAssignee || isReassigning || isReassignConfirming || selectedAssignee.toLowerCase() === chore.assignedTo.toLowerCase()}
                     className="w-full bg-sage hover:bg-sage/90 text-cream"
                   >
-                    {isReassigning ? (
+                    {isReassigning || isReassignConfirming ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t("chores.reassigning")}
+                        {isReassignConfirming ? t("chores.confirming") : t("chores.reassigning")}
                       </>
                     ) : (
                       t("chores.confirmReassign")
@@ -269,8 +271,8 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
 
   console.log("[chore-kanban] Commune ID:", commune?.id)
   const { markComplete, isMarking, isConfirming, isConfirmed, error } = useMarkChoreComplete()
-  const { reassignChore, isReassigning } = useReassignChore()
-  console.log("[chore-kanban-v2] Hook states:", { isMarking, isConfirming, isConfirmed })
+  const { reassignChore, isReassigning, isConfirming: isReassignConfirming } = useReassignChore()
+  console.log("[chore-kanban-v2] Hook states:", { isMarking, isConfirming, isConfirmed, isReassigning, isReassignConfirming })
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [reassigningId, setReassigningId] = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
@@ -425,6 +427,7 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
                         isCompleting={completingId === choreKey && isMarking}
                         isConfirming={completingId === choreKey && isConfirming}
                         isReassigning={reassigningId === choreKey && isReassigning}
+                        isReassignConfirming={reassigningId === choreKey && isReassignConfirming}
                         isSuccess={successId === choreKey}
                         showCompleteButton
                         showReassignButton
@@ -502,6 +505,7 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
                       members={members}
                       onReassign={(newAssignee) => handleReassign(chore, newAssignee)}
                       isReassigning={reassigningId === choreKey && isReassigning}
+                      isReassignConfirming={reassigningId === choreKey && isReassignConfirming}
                       showReassignButton
                       locale={language}
                       t={t}
