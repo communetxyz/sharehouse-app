@@ -148,7 +148,7 @@ export default function JoinPage() {
             )}
 
             <div className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-2 hidden">
                 <Label htmlFor="communeId">{t("join.communeId")}</Label>
                 <Input
                   id="communeId"
@@ -160,7 +160,7 @@ export default function JoinPage() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 hidden">
                 <Label htmlFor="nonce">{t("join.nonce")}</Label>
                 <Input
                   id="nonce"
@@ -172,7 +172,7 @@ export default function JoinPage() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 hidden">
                 <Label htmlFor="signature">{t("join.signature")}</Label>
                 <Input
                   id="signature"
