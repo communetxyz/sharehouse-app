@@ -58,6 +58,7 @@ export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefre
         tasks={doneTasks}
         communeId={communeId}
         isDone
+        markingTaskId={markingTaskId}
         emptyMessage={t("tasks.noDoneTasks")}
       />
       <TaskColumn
