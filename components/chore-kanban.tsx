@@ -34,6 +34,7 @@ interface ChoreKanbanProps {
   chores: ChoreInstance[]
   members: Member[]
   onOptimisticComplete?: (choreId: string) => void
+  onOptimisticReassign?: (choreId: string, newAssignee: string, newAssigneeUsername: string) => void
   onRefresh: () => void
   filterMyChores?: boolean
 }
@@ -259,7 +260,7 @@ const ChoreCard = memo(function ChoreCard({
   )
 })
 
-export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
+export function ChoreKanban({ chores, members, onOptimisticComplete, onOptimisticReassign, onRefresh, filterMyChores = false }: ChoreKanbanProps) {
   const { commune } = useCommuneData()
   const communeRef = useRef<typeof commune>(commune)
 
@@ -374,6 +375,16 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
       return
     }
 
+    // Find the new assignee's username from the members list
+    const newAssigneeMember = members.find(m => m.address.toLowerCase() === newAssignee.toLowerCase())
+    const newAssigneeUsername = newAssigneeMember?.username || newAssignee
+
+    // Optimistically update UI immediately
+    if (onOptimisticReassign) {
+      console.log("[chore-kanban] Calling optimistic reassign for:", choreKey)
+      onOptimisticReassign(choreKey, newAssignee, newAssigneeUsername)
+    }
+
     setReassigningId(choreKey)
 
     try {
@@ -395,7 +406,7 @@ export function ChoreKanban({ chores, members, onOptimisticComplete, onRefresh, 
     } finally {
       setReassigningId(null)
     }
-  }, [reassignChore, onRefresh, t, toast, communeRef])
+  }, [reassignChore, onRefresh, onOptimisticReassign, members, t, toast, communeRef])
 
   if (filterMyChores) {
     // My Chores view: Only show "Assigned to Me" and "Completed"
