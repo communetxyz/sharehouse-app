@@ -43,6 +43,8 @@ export default function DashboardPage() {
 
   // Clear temp IDs after 10 seconds (transaction should be complete by then)
   useEffect(() => {
+    const timeouts: NodeJS.Timeout[] = []
+
     creatingTaskIds.forEach(id => {
       if (id.startsWith('temp-')) {
         const timeout = setTimeout(() => {
@@ -52,9 +54,13 @@ export default function DashboardPage() {
             return next
           })
         }, 10000) // 10 seconds
-        return () => clearTimeout(timeout)
+        timeouts.push(timeout)
       }
     })
+
+    return () => {
+      timeouts.forEach(t => clearTimeout(t))
+    }
   }, [creatingTaskIds])
 
   // Optimistic chore completion

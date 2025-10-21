@@ -193,10 +193,10 @@ function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, markingTask
               </div>
             </div>
 
-            {!isDone && !isDisputed && task.isAssignedToUser && onMarkDone && (
+            {!isDone && !isDisputed && task.isAssignedToUser && onMarkDone && !isCreating && (
               <Button
                 onClick={() => onMarkDone(task.id)}
-                disabled={isThisTaskMarking || isCreating}
+                disabled={isThisTaskMarking}
                 size="sm"
                 className="w-full bg-sage hover:bg-sage/90 text-cream"
               >
