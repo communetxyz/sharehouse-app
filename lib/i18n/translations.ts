@@ -186,7 +186,7 @@ export const translations = {
       no: "いいえ",
       aboutSharehouse: "ShareHouseについて",
       aboutDescription1: "ShareHouseは日本の共同生活の精神をブロックチェーンにもたらします。設定されたスケジュールに基づいて家事が自動的にローテーションし、責任の公平な分担を保証します。",
-      aboutDescription2: "ウォレット接続のシームレスな統合のため、Gnosis Chain上に構築されています。",
+      aboutDescription2: "アカウント接続のシームレスな統合のため、Gnosis Chain上に構築されています。",
       noCommuneData: "コミューンデータが利用できません",
     },
     createSharehouse: {
@@ -247,7 +247,7 @@ export const translations = {
       copy: "コピー",
       copied: "コピー済み",
       generateNew: "新しい招待を生成",
-      securityNote: "各招待には新しいウォレット署名が必要です。生成されたリンクをメッセージまたはメールで共有してください。",
+      securityNote: "各招待には新しいアカウント署名が必要です。生成されたリンクをメッセージまたはメールで共有してください。",
       expiryNote: "注意：招待リンクに有効期限はありません。安全に保管し、信頼できる人にのみ共有してください。",
       notMember: "メンバーではありません",
       notMemberDesc: "このページにアクセスするにはコミューンのメンバーである必要があります。",
