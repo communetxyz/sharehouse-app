@@ -18,11 +18,21 @@ interface TaskListProps {
   filterAssignedToMe?: boolean
   onRefresh: () => void
   creatingTaskIds?: Set<string>
+  onOptimisticMarkDone?: (taskId: string) => void
 }
 
-export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefresh, creatingTaskIds }: TaskListProps) {
+export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefresh, creatingTaskIds, onOptimisticMarkDone }: TaskListProps) {
   const { t } = useI18n()
   const { markDone, markingTaskId } = useMarkTaskDone(communeId)
+
+  const handleMarkDone = async (taskId: string) => {
+    // Optimistically mark as done immediately
+    if (onOptimisticMarkDone) {
+      onOptimisticMarkDone(taskId)
+    }
+    // Then call the actual blockchain transaction
+    await markDone(taskId)
+  }
 
   const filteredTasks = filterAssignedToMe ? tasks.filter((e) => e.isAssignedToUser) : tasks
 
@@ -37,7 +47,7 @@ export function TaskList({ tasks, communeId, filterAssignedToMe = false, onRefre
         title={t("tasks.undone")}
         tasks={undoneTasks}
         communeId={communeId}
-        onMarkDone={markDone}
+        onMarkDone={handleMarkDone}
         markingTaskId={markingTaskId}
         creatingTaskIds={creatingTaskIds}
         onRefresh={onRefresh}
@@ -161,7 +171,7 @@ function TaskCard({ task, communeId, isDone, isDisputed, onMarkDone, markingTask
                 {isThisTaskMarking && (
                   <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                     <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                    {t("tasks.markingDone")}
+                    Pending
                   </Badge>
                 )}
                 {isDisputed && (

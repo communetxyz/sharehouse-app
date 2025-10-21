@@ -100,6 +100,14 @@ export default function DashboardPage() {
     setCreatingTaskIds(prev => new Set(prev).add(tempId))
   }
 
+  // Optimistic task completion
+  const handleTaskDoneOptimistic = (taskId: string) => {
+    console.log("[dashboard] Optimistically marking task as done:", taskId)
+    setOptimisticTasks(prev => prev.map(task =>
+      task.id === taskId ? { ...task, done: true } : task
+    ))
+  }
+
   // Optimistic chore reassignment
   const handleChoreReassignOptimistic = (choreKey: string, newAssignee: string, newAssigneeUsername: string) => {
     // choreKey format is "scheduleId-periodNumber"
@@ -318,6 +326,7 @@ export default function DashboardPage() {
                 communeId={commune.id}
                 onRefresh={refreshTasks}
                 creatingTaskIds={creatingTaskIds}
+                onOptimisticMarkDone={handleTaskDoneOptimistic}
               />
             )}
           </TabsContent>
