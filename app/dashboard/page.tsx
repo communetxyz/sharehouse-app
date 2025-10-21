@@ -27,10 +27,41 @@ export default function DashboardPage() {
   // Local optimistic state for chores
   const [optimisticChores, setOptimisticChores] = useState(chores)
 
+  // Local optimistic state for tasks
+  const [optimisticTasks, setOptimisticTasks] = useState(tasks)
+  const [creatingTaskIds, setCreatingTaskIds] = useState<Set<string>>(new Set())
+
   // Sync fetched chores with local state
   useEffect(() => {
     setOptimisticChores(chores)
   }, [chores])
+
+  // Sync fetched tasks with local state
+  useEffect(() => {
+    setOptimisticTasks(tasks)
+  }, [tasks])
+
+  // Clear temp IDs after 10 seconds (transaction should be complete by then)
+  useEffect(() => {
+    const timeouts: NodeJS.Timeout[] = []
+
+    creatingTaskIds.forEach(id => {
+      if (id.startsWith('temp-')) {
+        const timeout = setTimeout(() => {
+          setCreatingTaskIds(prev => {
+            const next = new Set(prev)
+            next.delete(id)
+            return next
+          })
+        }, 10000) // 10 seconds
+        timeouts.push(timeout)
+      }
+    })
+
+    return () => {
+      timeouts.forEach(t => clearTimeout(t))
+    }
+  }, [creatingTaskIds])
 
   // Optimistic chore completion
   const handleChoreCompleteOptimistic = (choreKey: string) => {
@@ -47,6 +78,34 @@ export default function DashboardPage() {
       })
       return updated
     })
+  }
+
+  // Optimistic task creation
+  const handleTaskCreateOptimistic = (taskData: { budget: string, description: string, dueDate: Date, assignedTo: string }) => {
+    console.log("[dashboard] Optimistically creating task:", taskData)
+    const tempId = `temp-${Date.now()}` // Temporary ID
+    const optimisticTask = {
+      id: tempId,
+      communeId: commune?.id || "",
+      budget: taskData.budget || "0",
+      description: taskData.description,
+      assignedTo: taskData.assignedTo,
+      assignedToUsername: members.find(m => m.address.toLowerCase() === taskData.assignedTo.toLowerCase())?.username || taskData.assignedTo,
+      dueDate: Math.floor(taskData.dueDate.getTime() / 1000),
+      done: false,
+      disputed: false,
+      isAssignedToUser: taskData.assignedTo.toLowerCase() === address?.toLowerCase(),
+    }
+    setOptimisticTasks(prev => [...prev, optimisticTask])
+    setCreatingTaskIds(prev => new Set(prev).add(tempId))
+  }
+
+  // Optimistic task completion
+  const handleTaskDoneOptimistic = (taskId: string) => {
+    console.log("[dashboard] Optimistically marking task as done:", taskId)
+    setOptimisticTasks(prev => prev.map(task =>
+      task.id === taskId ? { ...task, done: true } : task
+    ))
   }
 
   // Optimistic chore reassignment
@@ -254,7 +313,7 @@ export default function DashboardPage() {
               {commune && <CreateTaskDialog
                 communeId={commune.id}
                 members={members}
-                onSuccess={refreshTasks}
+                onOptimisticCreate={handleTaskCreateOptimistic}
               />}
             </div>
             {isLoadingTasks ? (
@@ -263,9 +322,11 @@ export default function DashboardPage() {
               </div>
             ) : (
               commune && <TaskList
-                tasks={tasks}
+                tasks={optimisticTasks}
                 communeId={commune.id}
                 onRefresh={refreshTasks}
+                creatingTaskIds={creatingTaskIds}
+                onOptimisticMarkDone={handleTaskDoneOptimistic}
               />
             )}
           </TabsContent>
