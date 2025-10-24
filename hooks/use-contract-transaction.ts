@@ -53,6 +53,9 @@ export function useContractTransaction() {
       successMessage = "Transaction successful!",
       errorMessage = "Transaction failed",
     }: TransactionParams) => {
+      const startTime = performance.now()
+      console.log(`[⏱️ CONTRACT-TX] Execute transaction START for ${functionName} at ${startTime.toFixed(2)}ms`)
+
       if (!address) {
         const error = new Error("Account not connected")
         toast({
@@ -88,6 +91,7 @@ export function useContractTransaction() {
         }
 
         // 2. Encode function data
+        const encodeStart = performance.now()
         debug.log(`Encoding function: ${functionName}`, args)
 
         const data = encodeFunctionData({
@@ -95,8 +99,11 @@ export function useContractTransaction() {
           functionName,
           args,
         })
+        console.log(`[⏱️ CONTRACT-TX] Encoding took ${(performance.now() - encodeStart).toFixed(2)}ms`)
 
         // 3. Send transaction with gas sponsorship
+        const sendStart = performance.now()
+        console.log(`[⏱️ CONTRACT-TX] Calling sendTransactionAsync at ${(sendStart - startTime).toFixed(2)}ms from start`)
         debug.log("Sending transaction with gas sponsorship...")
 
         const txHash = await sendTransactionAsync({
@@ -109,6 +116,9 @@ export function useContractTransaction() {
           },
         })
 
+        const txSentTime = performance.now()
+        console.log(`[⏱️ CONTRACT-TX] Transaction sent at ${(txSentTime - startTime).toFixed(2)}ms from start`)
+        console.log(`[⏱️ CONTRACT-TX] sendTransactionAsync took ${(txSentTime - sendStart).toFixed(2)}ms`)
         debug.log("Transaction sent:", txHash)
         setHash(txHash)
 

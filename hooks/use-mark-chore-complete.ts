@@ -21,9 +21,15 @@ export function useMarkChoreComplete() {
     pollingInterval: 100, // Poll every 100ms
   })
 
+  // Track timing for confirmation
+  const [confirmStartTime, setConfirmStartTime] = useState<number | null>(null)
+
   // Log confirmation state changes
   useEffect(() => {
     if (txHash) {
+      const now = performance.now()
+      setConfirmStartTime(now)
+      console.log(`[⏱️ TIMING] Transaction hash set at ${now.toFixed(2)}ms, starting confirmation polling`)
       console.log("[v0] Transaction hash set:", txHash)
       console.log("[v0] isConfirming:", isConfirming, "isConfirmed:", isConfirmed)
     }
@@ -31,13 +37,19 @@ export function useMarkChoreComplete() {
 
   // Log when transaction is confirmed
   useEffect(() => {
-    if (isConfirmed && txHash) {
+    if (isConfirmed && txHash && confirmStartTime) {
+      const confirmTime = performance.now()
+      console.log(`[⏱️ TIMING] ===== TRANSACTION CONFIRMED at ${confirmTime.toFixed(2)}ms =====`)
+      console.log(`[⏱️ TIMING] Time from tx sent to confirmed: ${(confirmTime - confirmStartTime).toFixed(2)}ms`)
       console.log("[v0] ===== TRANSACTION CONFIRMED =====")
       console.log("[v0] Transaction hash:", txHash)
     }
-  }, [isConfirmed, txHash])
+  }, [isConfirmed, txHash, confirmStartTime])
 
   const markComplete = async (choreId: string, choreData?: any, onSuccess?: () => void, onRefresh?: () => void, communeId?: string) => {
+    const startTime = performance.now()
+    console.log(`[⏱️ TIMING] Mark complete START at ${startTime.toFixed(2)}ms`)
+
     if (!communeId) {
       console.error("[v0] No commune ID provided. communeId:", communeId)
       throw new Error("No commune data available")
@@ -70,11 +82,13 @@ export function useMarkChoreComplete() {
         contractAddress: COMMUNE_OS_ADDRESS,
       })
 
+      const encodeStart = performance.now()
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "markChoreComplete",
         args: [BigInt(communeId), BigInt(choreId), BigInt(choreData.periodNumber)],
       })
+      console.log(`[⏱️ TIMING] Encoding took ${(performance.now() - encodeStart).toFixed(2)}ms`)
 
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Function args:", {
@@ -82,6 +96,9 @@ export function useMarkChoreComplete() {
         choreId: BigInt(choreId).toString(),
         period: BigInt(choreData.periodNumber).toString(),
       })
+
+      const sendStart = performance.now()
+      console.log(`[⏱️ TIMING] Calling sendTransaction at ${(sendStart - startTime).toFixed(2)}ms from start`)
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
       let transactionHash: string | null = null
@@ -98,6 +115,9 @@ export function useMarkChoreComplete() {
         )
 
         transactionHash = result.hash
+        const txSentTime = performance.now()
+        console.log(`[⏱️ TIMING] Transaction sent at ${(txSentTime - startTime).toFixed(2)}ms from start`)
+        console.log(`[⏱️ TIMING] sendTransaction call took ${(txSentTime - sendStart).toFixed(2)}ms`)
         console.log("[v0] Transaction sent:", transactionHash)
         setTxHash(transactionHash as `0x${string}`)
       } catch (sendErr: any) {
@@ -113,6 +133,7 @@ export function useMarkChoreComplete() {
       }
 
       // Transaction will be confirmed via useWaitForTransactionReceipt
+      console.log(`[⏱️ TIMING] Waiting for confirmation via useWaitForTransactionReceipt...`)
     } catch (err: any) {
       console.error("[v0] ===== MARK CHORE COMPLETE FAILED =====")
       console.error("[v0] Error:", err)
