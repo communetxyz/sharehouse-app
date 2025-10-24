@@ -48,12 +48,12 @@ export function useJoinCommune() {
   useEffect(() => {
     if (justApproved && isConfirmed && !isConfirming) {
       console.log("[v0] Approval confirmed, refetching allowance")
-      // Wait for blockchain state to update
+      // Wait for blockchain state to update (optimized for Arbitrum's 250ms block time)
       setTimeout(() => {
         refetchAllowance()
         setJustApproved(false)
         setIsApproving(false)
-      }, 2000) // Increased delay to 2 seconds
+      }, 500) // Reduced to 500ms for Arbitrum (from 2000ms for Gnosis)
     }
   }, [isConfirmed, isConfirming, justApproved, refetchAllowance])
 
@@ -181,14 +181,14 @@ export function useJoinCommune() {
       // Call joinCommune with correct parameters: communeId, nonce, signature, username
       await executeTransaction("joinCommune", [BigInt(communeId), BigInt(nonce), signature, username])
 
-      // Wait for confirmation
+      // Wait for confirmation (optimized for Arbitrum's 250ms block time)
       await new Promise((resolve) => {
         const checkConfirmation = setInterval(() => {
           if (!isConfirming) {
             clearInterval(checkConfirmation)
             resolve(true)
           }
-        }, 500)
+        }, 250) // Reduced to 250ms to match Arbitrum block time
       })
 
       // Redirect to dashboard after successful join
