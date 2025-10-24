@@ -15,9 +15,10 @@ export function useMarkChoreComplete() {
 
   const { sendTransaction } = useSendTransaction()
 
-  // Wait for transaction confirmation
+  // Wait for transaction confirmation (with aggressive polling for Arbitrum)
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: txHash || undefined,
+    pollingInterval: 100, // Poll every 100ms
   })
 
   // Log confirmation state changes

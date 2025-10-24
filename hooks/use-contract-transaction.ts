@@ -38,9 +38,10 @@ export function useContractTransaction() {
   const [isExecuting, setIsExecuting] = useState(false)
   const [hash, setHash] = useState<`0x${string}` | null>(null)
 
-  // Wait for transaction receipt
+  // Wait for transaction receipt (with aggressive polling for Arbitrum)
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: hash || undefined,
+    pollingInterval: 100, // Poll every 100ms
   })
 
   const executeTransaction = useCallback(
