@@ -15,14 +15,21 @@ export function useReassignChore() {
 
   const { sendTransaction } = useSendTransaction()
 
-  // Wait for transaction confirmation
+  // Wait for transaction confirmation (with aggressive polling for Arbitrum)
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: txHash || undefined,
+    pollingInterval: 100, // Poll every 100ms
   })
+
+  // Track timing for confirmation
+  const [confirmStartTime, setConfirmStartTime] = useState<number | null>(null)
 
   // Log confirmation state changes
   useEffect(() => {
     if (txHash) {
+      const now = performance.now()
+      setConfirmStartTime(now)
+      console.log(`[⏱️ TIMING-REASSIGN] Transaction hash set at ${now.toFixed(2)}ms, starting confirmation polling`)
       console.log("[v0] Reassign transaction hash set:", txHash)
       console.log("[v0] isConfirming:", isConfirming, "isConfirmed:", isConfirmed)
     }
@@ -30,11 +37,14 @@ export function useReassignChore() {
 
   // Log when transaction is confirmed
   useEffect(() => {
-    if (isConfirmed && txHash) {
+    if (isConfirmed && txHash && confirmStartTime) {
+      const confirmTime = performance.now()
+      console.log(`[⏱️ TIMING-REASSIGN] ===== TRANSACTION CONFIRMED at ${confirmTime.toFixed(2)}ms =====`)
+      console.log(`[⏱️ TIMING-REASSIGN] Time from tx sent to confirmed: ${(confirmTime - confirmStartTime).toFixed(2)}ms`)
       console.log("[v0] ===== REASSIGN TRANSACTION CONFIRMED =====")
       console.log("[v0] Transaction hash:", txHash)
     }
-  }, [isConfirmed, txHash])
+  }, [isConfirmed, txHash, confirmStartTime])
 
   const reassignChore = async (
     communeId: string,
@@ -44,6 +54,9 @@ export function useReassignChore() {
     onSuccess?: () => void,
     onRefresh?: () => void
   ) => {
+    const startTime = performance.now()
+    console.log(`[⏱️ TIMING-REASSIGN] Reassign START at ${startTime.toFixed(2)}ms`)
+
     console.log("[v0] Setting isReassigning to true")
     setIsReassigning(true)
     setTxHash(null)
@@ -88,11 +101,13 @@ export function useReassignChore() {
         contractAddress: COMMUNE_OS_ADDRESS,
       })
 
+      const encodeStart = performance.now()
       const data = encodeFunctionData({
         abi: COMMUNE_OS_ABI,
         functionName: "setChoreAssignee",
         args: [BigInt(communeId), BigInt(choreId), BigInt(period), newAssignee as `0x${string}`],
       })
+      console.log(`[⏱️ TIMING-REASSIGN] Encoding took ${(performance.now() - encodeStart).toFixed(2)}ms`)
 
       console.log("[v0] Encoded data:", data)
       console.log("[v0] Function args:", {
@@ -101,6 +116,9 @@ export function useReassignChore() {
         period: BigInt(period).toString(),
         assignee: newAssignee,
       })
+
+      const sendStart = performance.now()
+      console.log(`[⏱️ TIMING-REASSIGN] Calling sendTransaction at ${(sendStart - startTime).toFixed(2)}ms from start`)
       console.log("[v0] Calling sendTransaction with sponsor: true")
 
       let transactionHash: string | null = null
@@ -117,6 +135,9 @@ export function useReassignChore() {
         )
 
         transactionHash = result.hash
+        const txSentTime = performance.now()
+        console.log(`[⏱️ TIMING-REASSIGN] Transaction sent at ${(txSentTime - startTime).toFixed(2)}ms from start`)
+        console.log(`[⏱️ TIMING-REASSIGN] sendTransaction call took ${(txSentTime - sendStart).toFixed(2)}ms`)
         console.log("[v0] Reassign transaction sent:", transactionHash)
         setTxHash(transactionHash as `0x${string}`)
       } catch (sendErr: any) {

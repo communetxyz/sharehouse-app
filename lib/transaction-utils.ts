@@ -2,12 +2,13 @@ import { PublicClient, TransactionReceipt } from 'viem'
 
 /**
  * Wait for transaction receipt with timeout
+ * Optimized for Arbitrum's 250ms block time
  */
 export async function waitForTransactionWithTimeout(
   publicClient: PublicClient,
   hash: `0x${string}`,
-  timeoutMs = 60000, // 60 seconds default
-  pollIntervalMs = 2000
+  timeoutMs = 30000, // 30 seconds (reduced from 60s for Arbitrum)
+  pollIntervalMs = 100 // 100ms for aggressive polling on Arbitrum
 ): Promise<TransactionReceipt> {
   const startTime = Date.now()
 
@@ -52,15 +53,15 @@ export function validateTransactionReceipt(receipt: TransactionReceipt): void {
 }
 
 /**
- * Get transaction explorer URL for Gnosis Chain
+ * Get transaction explorer URL for Arbitrum
  */
 export function getTransactionUrl(hash: `0x${string}`): string {
-  return `https://gnosisscan.io/tx/${hash}`
+  return `https://arbiscan.io/tx/${hash}`
 }
 
 /**
- * Get address explorer URL for Gnosis Chain
+ * Get address explorer URL for Arbitrum
  */
 export function getAddressUrl(address: `0x${string}`): string {
-  return `https://gnosisscan.io/address/${address}`
+  return `https://arbiscan.io/address/${address}`
 }

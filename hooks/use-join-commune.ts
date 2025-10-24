@@ -12,7 +12,7 @@ import {
 } from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
 import { createPublicClient, http } from "viem"
-import { mainnet } from "viem/chains"
+import { arbitrum } from "viem/chains"
 
 export function useJoinCommune() {
   const { address, executeTransaction, approveToken, isConfirming, isConfirmed } = useWallet()
@@ -48,12 +48,12 @@ export function useJoinCommune() {
   useEffect(() => {
     if (justApproved && isConfirmed && !isConfirming) {
       console.log("[v0] Approval confirmed, refetching allowance")
-      // Wait for blockchain state to update
+      // Wait for blockchain state to update (optimized for Arbitrum's 250ms block time)
       setTimeout(() => {
         refetchAllowance()
         setJustApproved(false)
         setIsApproving(false)
-      }, 2000) // Increased delay to 2 seconds
+      }, 300) // 300ms for fast refetch after approval
     }
   }, [isConfirmed, isConfirming, justApproved, refetchAllowance])
 
@@ -96,8 +96,8 @@ export function useJoinCommune() {
 
     try {
       const provider = createPublicClient({
-        chain: mainnet,
-        transport: http("https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"),
+        chain: arbitrum,
+        transport: http(process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc"),
       })
 
       const memberRegistryAddress = (await provider.readContract({
@@ -181,14 +181,14 @@ export function useJoinCommune() {
       // Call joinCommune with correct parameters: communeId, nonce, signature, username
       await executeTransaction("joinCommune", [BigInt(communeId), BigInt(nonce), signature, username])
 
-      // Wait for confirmation
+      // Wait for confirmation (optimized for Arbitrum's 250ms block time)
       await new Promise((resolve) => {
         const checkConfirmation = setInterval(() => {
           if (!isConfirming) {
             clearInterval(checkConfirmation)
             resolve(true)
           }
-        }, 500)
+        }, 100) // 100ms polling for faster confirmation detection
       })
 
       // Redirect to dashboard after successful join

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { encodeFunctionData, type Abi } from "viem"
-import { gnosis } from "viem/chains"
+import { arbitrum } from "viem/chains"
 import { useAccount, useSwitchChain } from "wagmi"
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
@@ -38,9 +38,10 @@ export function useContractTransaction() {
   const [isExecuting, setIsExecuting] = useState(false)
   const [hash, setHash] = useState<`0x${string}` | null>(null)
 
-  // Wait for transaction receipt
+  // Wait for transaction receipt (with aggressive polling for Arbitrum)
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: hash || undefined,
+    pollingInterval: 100, // Poll every 100ms
   })
 
   const executeTransaction = useCallback(
@@ -52,6 +53,9 @@ export function useContractTransaction() {
       successMessage = "Transaction successful!",
       errorMessage = "Transaction failed",
     }: TransactionParams) => {
+      const startTime = performance.now()
+      console.log(`[⏱️ CONTRACT-TX] Execute transaction START for ${functionName} at ${startTime.toFixed(2)}ms`)
+
       if (!address) {
         const error = new Error("Account not connected")
         toast({
@@ -67,18 +71,18 @@ export function useContractTransaction() {
         setIsExecuting(true)
 
         // 1. Validate chain
-        if (chain?.id !== gnosis.id) {
+        if (chain?.id !== arbitrum.id) {
           debug.log("Wrong chain detected, prompting switch...")
 
           toast({
             title: "Wrong Network",
-            description: "Please switch to Gnosis Chain",
+            description: "Please switch to Arbitrum",
             variant: "destructive",
           })
 
           try {
-            await switchChain({ chainId: gnosis.id })
-            debug.log("Switched to Gnosis chain")
+            await switchChain({ chainId: arbitrum.id })
+            debug.log("Switched to Arbitrum chain")
           } catch (switchError) {
             const error = new Error("User rejected network switch")
             onError?.(error)
@@ -87,6 +91,7 @@ export function useContractTransaction() {
         }
 
         // 2. Encode function data
+        const encodeStart = performance.now()
         debug.log(`Encoding function: ${functionName}`, args)
 
         const data = encodeFunctionData({
@@ -94,20 +99,26 @@ export function useContractTransaction() {
           functionName,
           args,
         })
+        console.log(`[⏱️ CONTRACT-TX] Encoding took ${(performance.now() - encodeStart).toFixed(2)}ms`)
 
         // 3. Send transaction with gas sponsorship
+        const sendStart = performance.now()
+        console.log(`[⏱️ CONTRACT-TX] Calling sendTransactionAsync at ${(sendStart - startTime).toFixed(2)}ms from start`)
         debug.log("Sending transaction with gas sponsorship...")
 
         const txHash = await sendTransactionAsync({
           to: COMMUNE_OS_ADDRESS,
           data,
-          chain: gnosis,
+          chain: arbitrum,
           // @ts-ignore - wagmi types don't include gasSponsorship yet
           gasSponsorship: {
             paymasterAddress: PAYMASTER_ADDRESS,
           },
         })
 
+        const txSentTime = performance.now()
+        console.log(`[⏱️ CONTRACT-TX] Transaction sent at ${(txSentTime - startTime).toFixed(2)}ms from start`)
+        console.log(`[⏱️ CONTRACT-TX] sendTransactionAsync took ${(txSentTime - sendStart).toFixed(2)}ms`)
         debug.log("Transaction sent:", txHash)
         setHash(txHash)
 
