@@ -186,7 +186,7 @@ export const translations = {
       no: "いいえ",
       aboutSharehouse: "ShareHouseについて",
       aboutDescription1: "ShareHouseは日本の共同生活の精神をブロックチェーンにもたらします。設定されたスケジュールに基づいて家事が自動的にローテーションし、責任の公平な分担を保証します。",
-      aboutDescription2: "アカウント接続のシームレスな統合のため、Gnosis Chain上に構築されています。",
+      aboutDescription2: "アカウント接続のシームレスな統合のため、Arbitrum上に構築されています。",
       noCommuneData: "コミューンデータが利用できません",
     },
     createSharehouse: {
@@ -489,7 +489,7 @@ export const translations = {
       no: "No",
       aboutSharehouse: "About ShareHouse",
       aboutDescription1: "ShareHouse brings the spirit of Japanese communal living to the blockchain. All chores rotate automatically based on the configured schedule, ensuring fair distribution of responsibilities.",
-      aboutDescription2: "Built on Gnosis Chain with WalletConnect integration for seamless account interactions.",
+      aboutDescription2: "Built on Arbitrum with WalletConnect integration for seamless account interactions.",
       noCommuneData: "No commune data available",
     },
     createSharehouse: {

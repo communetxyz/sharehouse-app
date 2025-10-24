@@ -1,10 +1,10 @@
 import { ethers } from "ethers"
 
-export const COMMUNE_OS_ADDRESS = "0x3b019bcfd1F76906136694D5C52Dbddb82648891" as `0x${string}`
-export const BREAD_TOKEN_ADDRESS = "0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3" as `0x${string}`
-export const COLLATERAL_MANAGER_ADDRESS = "0x61Ba220071184886710A8F2814B7c6eDecbcaA82" as `0x${string}`
+export const COMMUNE_OS_ADDRESS = "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB" as `0x${string}`
+export const BREAD_TOKEN_ADDRESS = "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB" as `0x${string}`
+export const COLLATERAL_MANAGER_ADDRESS = "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB" as `0x${string}`
 
-export const RPC_URL = "https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"
+export const RPC_URL = process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc"
 
 export const ERC20_ABI = [
   {
@@ -1174,33 +1174,33 @@ communeOSContract.collateralManager = async () => {
 // Citizen Wallet Community Config
 export const COMMUNITY_CONFIG = {
   alias: "bread",
-  chain_id: 100,
+  chain_id: 42161,
   json: {
     ipfs: { url: "https://ipfs.internal.citizenwallet.xyz" },
-    scan: { url: "https://gnosisscan.io", name: "Gnosis Explorer" },
+    scan: { url: "https://arbiscan.io", name: "Arbitrum Explorer" },
     cards: {
-      "100:0xBA861e2DABd8316cf11Ae7CdA101d110CF581f28": {
+      "42161:0x8839EFFfe237B882Cf93732B11D79ac89d3326cB": {
         type: "safe",
-        address: "0xBA861e2DABd8316cf11Ae7CdA101d110CF581f28",
-        chain_id: 100,
+        address: "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB",
+        chain_id: 42161,
         instance_id: "cw-discord-1",
       },
     },
     chains: {
-      "100": {
-        id: 100,
+      "42161": {
+        id: 42161,
         node: {
-          url: "https://100.engine.citizenwallet.xyz",
-          ws_url: "wss://100.engine.citizenwallet.xyz",
+          url: process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc",
+          ws_url: "wss://arb1.arbitrum.io/ws",
         },
       },
     },
     tokens: {
-      "100:0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3": {
+      "42161:0x8839EFFfe237B882Cf93732B11D79ac89d3326cB": {
         name: "Breadchain Community Token",
         symbol: "BREAD",
-        address: "0xa555d5344f6fb6c65da19e403cb4c1ec4a1a5ee3",
-        chain_id: 100,
+        address: "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB",
+        chain_id: 42161,
         decimals: 18,
         standard: "erc20",
       },

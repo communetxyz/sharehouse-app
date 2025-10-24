@@ -190,7 +190,7 @@ export default function HomePage() {
               <div className="text-lg font-sans tracking-wide text-cream">ShareHouse</div>
             </div>
             <div className="text-sm text-center md:text-right">
-              <p>Built on Gnosis Chain</p>
+              <p>Built on Arbitrum</p>
               <p className="text-cream/50 mt-1">{t("home.footerTagline")}</p>
             </div>
           </div>

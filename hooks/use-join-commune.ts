@@ -12,7 +12,7 @@ import {
 } from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
 import { createPublicClient, http } from "viem"
-import { mainnet } from "viem/chains"
+import { arbitrum } from "viem/chains"
 
 export function useJoinCommune() {
   const { address, executeTransaction, approveToken, isConfirming, isConfirmed } = useWallet()
@@ -96,8 +96,8 @@ export function useJoinCommune() {
 
     try {
       const provider = createPublicClient({
-        chain: mainnet,
-        transport: http("https://gnosis-mainnet.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"),
+        chain: arbitrum,
+        transport: http(process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc"),
       })
 
       const memberRegistryAddress = (await provider.readContract({

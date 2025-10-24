@@ -52,15 +52,15 @@ export function validateTransactionReceipt(receipt: TransactionReceipt): void {
 }
 
 /**
- * Get transaction explorer URL for Gnosis Chain
+ * Get transaction explorer URL for Arbitrum
  */
 export function getTransactionUrl(hash: `0x${string}`): string {
-  return `https://gnosisscan.io/tx/${hash}`
+  return `https://arbiscan.io/tx/${hash}`
 }
 
 /**
- * Get address explorer URL for Gnosis Chain
+ * Get address explorer URL for Arbitrum
  */
 export function getAddressUrl(address: `0x${string}`): string {
-  return `https://gnosisscan.io/address/${address}`
+  return `https://arbiscan.io/address/${address}`
 }
