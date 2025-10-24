@@ -10,11 +10,11 @@ export const config = createConfig({
     [arbitrum.id]: http(process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL, {
       // Optimize polling for Arbitrum's 250ms block time
       batch: {
-        wait: 250, // Batch calls within 250ms
+        wait: 100, // Batch calls within 100ms
       },
       retryCount: 3,
-      retryDelay: 250, // Retry after 250ms
+      retryDelay: 100, // Retry after 100ms
     }),
   },
-  pollingInterval: 250, // Poll every 250ms to match Arbitrum block time (vs 4000ms default)
+  pollingInterval: 100, // Poll every 100ms for faster confirmations (vs 4000ms default)
 })

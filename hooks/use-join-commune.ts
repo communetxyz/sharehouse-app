@@ -53,7 +53,7 @@ export function useJoinCommune() {
         refetchAllowance()
         setJustApproved(false)
         setIsApproving(false)
-      }, 500) // Reduced to 500ms for Arbitrum (from 2000ms for Gnosis)
+      }, 300) // 300ms for fast refetch after approval
     }
   }, [isConfirmed, isConfirming, justApproved, refetchAllowance])
 
@@ -188,7 +188,7 @@ export function useJoinCommune() {
             clearInterval(checkConfirmation)
             resolve(true)
           }
-        }, 250) // Reduced to 250ms to match Arbitrum block time
+        }, 100) // 100ms polling for faster confirmation detection
       })
 
       // Redirect to dashboard after successful join

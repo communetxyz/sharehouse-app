@@ -8,7 +8,7 @@ export async function waitForTransactionWithTimeout(
   publicClient: PublicClient,
   hash: `0x${string}`,
   timeoutMs = 30000, // 30 seconds (reduced from 60s for Arbitrum)
-  pollIntervalMs = 500 // 500ms (reduced from 2000ms for Arbitrum's 250ms block time)
+  pollIntervalMs = 100 // 100ms for aggressive polling on Arbitrum
 ): Promise<TransactionReceipt> {
   const startTime = Date.now()
 
