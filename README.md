@@ -22,6 +22,20 @@ Continue building your app on:
 
 **[https://v0.app/chat/projects/ho1yN6MlZke](https://v0.app/chat/projects/ho1yN6MlZke)**
 
+## Environment Setup
+
+Before running the application, copy `.env.example` to `.env.local` and configure your environment variables:
+
+```bash
+cp .env.example .env.local
+```
+
+Required environment variables:
+- `NEXT_PUBLIC_PRIVY_APP_ID` - Your Privy application ID for wallet authentication
+- `NEXT_PUBLIC_ARBITRUM_RPC_URL` - Arbitrum RPC endpoint (defaults to public RPC)
+
+**Important:** Never commit `.env.local` or any files containing sensitive keys to version control.
+
 ## How It Works
 
 1. Create and modify your project using [v0.app](https://v0.app)

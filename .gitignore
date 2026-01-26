@@ -16,8 +16,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files (includes .env, .env.local, .env.development, etc.)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -25,3 +26,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# secrets and keys
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
