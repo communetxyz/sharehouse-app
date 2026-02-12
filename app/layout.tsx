@@ -1,5 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
+
+// Force dynamic rendering — PrivyProvider needs a valid app ID at render time
+export const dynamic = "force-dynamic"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Noto_Serif_JP } from "next/font/google"
@@ -8,6 +11,7 @@ import { Suspense } from "react"
 import { Web3Provider } from "@/lib/web3-provider"
 import { I18nProvider } from "@/lib/i18n/context"
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as Sonner } from "sonner"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { NotificationProvider } from "@/lib/notifications/context"
 import "./globals.css"
@@ -38,6 +42,7 @@ export default function RootLayout({
               <Web3Provider>
                 <Suspense fallback={null}>{children}</Suspense>
                 <Toaster />
+                <Sonner />
               </Web3Provider>
             </NotificationProvider>
           </I18nProvider>

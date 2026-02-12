@@ -23,6 +23,11 @@ import { GoogleCalendarSync } from "@/components/google-calendar-sync"
 import { DisputeResolution } from "@/components/dispute-resolution"
 
 export default function DashboardPage() {
+  // SSR safety check
+  if (typeof window === 'undefined') {
+    return null
+  }
+
   const { t } = useI18n()
   const { address, isConnected, status } = useWallet()
   const { commune, members, chores, isLoading, error, refreshData } = useCommuneData()

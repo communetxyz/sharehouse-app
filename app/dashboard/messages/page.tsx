@@ -19,6 +19,11 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 export default function MessagesPage() {
+  // SSR safety check
+  if (typeof window === 'undefined') {
+    return null
+  }
+
   const { t } = useI18n()
   const { address, isConnected } = useWallet()
   const { commune, members, isLoading: communeLoading } = useCommuneData()

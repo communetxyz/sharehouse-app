@@ -16,9 +16,14 @@ import { useExpenses, useCreateExpense, useMarkExpensePaid, useSetExpenseAmount 
 import { useWallet } from "@/hooks/use-wallet"
 import { Loader2, Plus, Receipt, DollarSign, Check, Edit, ArrowLeft, Calendar } from "lucide-react"
 import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 export default function ExpensesPage() {
+  // SSR safety check
+  if (typeof window === 'undefined') {
+    return null
+  }
+
   const { t } = useI18n()
   const { address, isConnected } = useWallet()
   const { commune, members, isLoading: communeLoading } = useCommuneData()
