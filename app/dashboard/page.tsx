@@ -15,7 +15,7 @@ import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import { useTaskData } from "@/hooks/use-task-data"
 import { useWallet } from "@/hooks/use-wallet"
-import { Loader2, Plus, Mail, CalendarPlus, Settings } from "lucide-react"
+import { Loader2, Plus, Mail, CalendarPlus, Settings, Receipt, Users, MessageSquare } from "lucide-react"
 import { useState, useEffect } from "react"
 import { NotificationCenter } from "@/components/notification-center"
 import { ChatbotPanel } from "@/components/chatbot-panel"
@@ -245,6 +245,24 @@ export default function DashboardPage() {
                 </Link>
               </>
             )}
+            <Link href="/dashboard/expenses">
+              <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                <Receipt className="w-4 h-4 mr-2" />
+                Expenses
+              </Button>
+            </Link>
+            <Link href="/dashboard/guests">
+              <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                <Users className="w-4 h-4 mr-2" />
+                Guests
+              </Button>
+            </Link>
+            <Link href="/dashboard/messages">
+              <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Messages
+              </Button>
+            </Link>
             <Link href="/create-sharehouse">
               <Button variant="outline" size="sm" className="border-sage text-sage hover:bg-sage/10 bg-transparent">
                 <Plus className="w-4 h-4 mr-2" />
@@ -284,6 +302,9 @@ export default function DashboardPage() {
             <TabsTrigger value="calendar">{t("dashboard.calendar")}</TabsTrigger>
             <TabsTrigger value="tasks">{t("dashboard.tasks")}</TabsTrigger>
             <TabsTrigger value="disputes">Disputes</TabsTrigger>
+            <TabsTrigger value="expenses">Expenses</TabsTrigger>
+            <TabsTrigger value="guests">Guests</TabsTrigger>
+            <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="members">{t("dashboard.members")}</TabsTrigger>
             <TabsTrigger value="info">{t("dashboard.info")}</TabsTrigger>
           </TabsList>
@@ -340,6 +361,63 @@ export default function DashboardPage() {
 
           <TabsContent value="disputes" className="space-y-6">
             <DisputeResolution />
+          </TabsContent>
+
+          <TabsContent value="expenses" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-serif">Expense Management</CardTitle>
+                <CardDescription>Track and split expenses with commune members</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center py-8">
+                <Receipt className="w-16 h-16 text-charcoal/30 mx-auto mb-4" />
+                <p className="text-charcoal/70 mb-4">Manage commune expenses and bill splitting</p>
+                <Link href="/dashboard/expenses">
+                  <Button className="bg-sage hover:bg-sage/90 text-cream">
+                    <Receipt className="w-4 h-4 mr-2" />
+                    Go to Expenses
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="guests" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-serif">Guest Management</CardTitle>
+                <CardDescription>Invite and manage temporary guests</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center py-8">
+                <Users className="w-16 h-16 text-charcoal/30 mx-auto mb-4" />
+                <p className="text-charcoal/70 mb-4">Handle guest invitations, approvals, and check-ins</p>
+                <Link href="/dashboard/guests">
+                  <Button className="bg-sage hover:bg-sage/90 text-cream">
+                    <Users className="w-4 h-4 mr-2" />
+                    Manage Guests
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="messages" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-serif">Message Board</CardTitle>
+                <CardDescription>Communicate with commune members</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center py-8">
+                <MessageSquare className="w-16 h-16 text-charcoal/30 mx-auto mb-4" />
+                <p className="text-charcoal/70 mb-4">Share announcements and have discussions</p>
+                <Link href="/dashboard/messages">
+                  <Button className="bg-sage hover:bg-sage/90 text-cream">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Open Messages
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="members" className="space-y-6">
