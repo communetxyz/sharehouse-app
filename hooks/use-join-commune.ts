@@ -12,7 +12,7 @@ import {
 } from "@/lib/contracts"
 import type { CommuneStatistics } from "@/types/commune"
 import { createPublicClient, http } from "viem"
-import { arbitrum } from "viem/chains"
+import { sepolia } from "viem/chains"
 
 export function useJoinCommune() {
   const { address, executeTransaction, approveToken, isConfirming, isConfirmed } = useWallet()
@@ -96,8 +96,8 @@ export function useJoinCommune() {
 
     try {
       const provider = createPublicClient({
-        chain: arbitrum,
-        transport: http(process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc"),
+        chain: sepolia,
+        transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://eth-sepolia.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"),
       })
 
       const memberRegistryAddress = (await provider.readContract({

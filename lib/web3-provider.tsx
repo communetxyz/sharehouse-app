@@ -4,7 +4,7 @@ import { PrivyProvider } from "@privy-io/react-auth"
 import { WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type { ReactNode } from "react"
-import { arbitrum } from "wagmi/chains"
+import { sepolia } from "wagmi/chains"
 import { config } from "./wagmi-config"
 
 const queryClient = new QueryClient()
@@ -40,7 +40,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         externalWallets: {
           showWalletUIs: false,
         },
-        supportedChains: [arbitrum],
+        supportedChains: [sepolia],
       }}
     >
       <QueryClientProvider client={queryClient}>

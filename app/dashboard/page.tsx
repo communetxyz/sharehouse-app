@@ -17,6 +17,10 @@ import { useTaskData } from "@/hooks/use-task-data"
 import { useWallet } from "@/hooks/use-wallet"
 import { Loader2, Plus, Mail, CalendarPlus, Settings } from "lucide-react"
 import { useState, useEffect } from "react"
+import { NotificationCenter } from "@/components/notification-center"
+import { ChatbotPanel } from "@/components/chatbot-panel"
+import { GoogleCalendarSync } from "@/components/google-calendar-sync"
+import { DisputeResolution } from "@/components/dispute-resolution"
 
 export default function DashboardPage() {
   const { t } = useI18n()
@@ -258,6 +262,7 @@ export default function DashboardPage() {
             >
               {t("common.refresh")}
             </Button>
+            <NotificationCenter />
             <AccountButton />
           </div>
         </div>
@@ -278,6 +283,7 @@ export default function DashboardPage() {
             <TabsTrigger value="all-chores">{t("dashboard.allChores")}</TabsTrigger>
             <TabsTrigger value="calendar">{t("dashboard.calendar")}</TabsTrigger>
             <TabsTrigger value="tasks">{t("dashboard.tasks")}</TabsTrigger>
+            <TabsTrigger value="disputes">Disputes</TabsTrigger>
             <TabsTrigger value="members">{t("dashboard.members")}</TabsTrigger>
             <TabsTrigger value="info">{t("dashboard.info")}</TabsTrigger>
           </TabsList>
@@ -305,6 +311,7 @@ export default function DashboardPage() {
 
           <TabsContent value="calendar" className="space-y-6">
             <ChoreCalendar chores={optimisticChores} />
+            <GoogleCalendarSync />
           </TabsContent>
 
           <TabsContent value="tasks" className="space-y-6">
@@ -331,6 +338,10 @@ export default function DashboardPage() {
             )}
           </TabsContent>
 
+          <TabsContent value="disputes" className="space-y-6">
+            <DisputeResolution />
+          </TabsContent>
+
           <TabsContent value="members" className="space-y-6">
             <MemberList members={members} commune={commune} onMemberRemoved={refreshData} />
           </TabsContent>
@@ -340,6 +351,9 @@ export default function DashboardPage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Chatbot */}
+      <ChatbotPanel />
     </div>
   )
 }

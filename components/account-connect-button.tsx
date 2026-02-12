@@ -3,7 +3,7 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Wallet, LogOut, Copy, Check } from "lucide-react"
+import { User, LogOut, Copy, Check } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { useEnsNameOrAddress } from "@/hooks/use-ens-name"
 
@@ -43,7 +43,7 @@ export function AccountConnectButton() {
   if (!ready) {
     return (
       <Button disabled className="bg-sage/50 text-cream gap-2">
-        <Wallet className="w-4 h-4" />
+        <User className="w-4 h-4" />
         Loading...
       </Button>
     )
@@ -56,7 +56,7 @@ export function AccountConnectButton() {
         className="bg-sage hover:bg-sage/90 text-cream gap-2"
         aria-label="Connect your account"
       >
-        <Wallet className="w-4 h-4" />
+        <User className="w-4 h-4" />
         Connect Account
       </Button>
     )
@@ -70,7 +70,7 @@ export function AccountConnectButton() {
           className="border-charcoal/20 hover:bg-charcoal/5 bg-transparent gap-2"
           aria-label={`Account menu for ${displayName}`}
         >
-          <Wallet className="w-4 h-4" />
+          <User className="w-4 h-4" />
           {displayName}
         </Button>
       </DropdownMenuTrigger>

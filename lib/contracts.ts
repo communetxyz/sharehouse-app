@@ -1,10 +1,17 @@
 import { ethers } from "ethers"
 
-export const COMMUNE_OS_ADDRESS = "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB" as `0x${string}`
-export const BREAD_TOKEN_ADDRESS = "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB" as `0x${string}`
-export const COLLATERAL_MANAGER_ADDRESS = "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB" as `0x${string}`
+export const COMMUNE_OS_ADDRESS = "0xA671868B72Bf51073c2289caDb37Eb19Df1E75F3" as `0x${string}`
+export const BREAD_TOKEN_ADDRESS = "0x2D2A6aC7f8ab2029b002808266bCCF1eEbF13Bde" as `0x${string}`
+export const COLLATERAL_MANAGER_ADDRESS = "0x349dC4c2544C14257b32101e23cc53E6690F1f7E" as `0x${string}`
 
-export const RPC_URL = process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc"
+// Additional deployed contract addresses
+export const COMMUNE_REGISTRY_ADDRESS = "0x48B011fe8a315c800a8E6FaE2A59aEeb13eb923F" as `0x${string}`
+export const MEMBER_REGISTRY_ADDRESS = "0xE20d79DcA4734378f3e3d79b20D3398184809d93" as `0x${string}`
+export const CHORE_SCHEDULER_ADDRESS = "0xd721d197B8b070a5626274B1290c7ba112342611" as `0x${string}`
+export const TASK_MANAGER_ADDRESS = "0x7036cdA9764C6A99Ad141D1DC157d000d483C24c" as `0x${string}`
+export const VOTING_MODULE_ADDRESS = "0xC838cA57036d48DCe2111b9E236560648DECB4aF" as `0x${string}`
+
+export const RPC_URL = process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://eth-sepolia.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE"
 
 export const ERC20_ABI = [
   {
@@ -1173,34 +1180,34 @@ communeOSContract.collateralManager = async () => {
 
 // Citizen Wallet Community Config
 export const COMMUNITY_CONFIG = {
-  alias: "bread",
-  chain_id: 42161,
+  alias: "communeos",
+  chain_id: 11155111,
   json: {
     ipfs: { url: "https://ipfs.internal.citizenwallet.xyz" },
-    scan: { url: "https://arbiscan.io", name: "Arbitrum Explorer" },
+    scan: { url: "https://sepolia.etherscan.io", name: "Sepolia Explorer" },
     cards: {
-      "42161:0x8839EFFfe237B882Cf93732B11D79ac89d3326cB": {
+      "11155111:0xA671868B72Bf51073c2289caDb37Eb19Df1E75F3": {
         type: "safe",
-        address: "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB",
-        chain_id: 42161,
+        address: "0xA671868B72Bf51073c2289caDb37Eb19Df1E75F3",
+        chain_id: 11155111,
         instance_id: "cw-discord-1",
       },
     },
     chains: {
-      "42161": {
-        id: 42161,
+      "11155111": {
+        id: 11155111,
         node: {
-          url: process.env.NEXT_PUBLIC_ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc",
-          ws_url: "wss://arb1.arbitrum.io/ws",
+          url: process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL || "https://eth-sepolia.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE",
+          ws_url: "wss://eth-sepolia.g.alchemy.com/v2/Rr57Q41YGfkxYkx0kZp3EOQs86HatGGE",
         },
       },
     },
     tokens: {
-      "42161:0x8839EFFfe237B882Cf93732B11D79ac89d3326cB": {
-        name: "Breadchain Community Token",
-        symbol: "BREAD",
-        address: "0x8839EFFfe237B882Cf93732B11D79ac89d3326cB",
-        chain_id: 42161,
+      "11155111:0x2D2A6aC7f8ab2029b002808266bCCF1eEbF13Bde": {
+        name: "Mock Collateral Token",
+        symbol: "MCT",
+        address: "0x2D2A6aC7f8ab2029b002808266bCCF1eEbF13Bde",
+        chain_id: 11155111,
         decimals: 18,
         standard: "erc20",
       },
