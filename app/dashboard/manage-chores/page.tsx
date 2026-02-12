@@ -25,6 +25,11 @@ import { AccountButton } from "@/components/account-button"
 import { LanguageToggle } from "@/components/language-toggle"
 
 export default function ManageChoresPage() {
+  // SSR safety check
+  if (typeof window === 'undefined') {
+    return null
+  }
+
   const router = useRouter()
   const { t } = useLanguage()
   const { address, isConnected } = useWallet()

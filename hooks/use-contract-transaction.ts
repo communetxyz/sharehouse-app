@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { encodeFunctionData, type Abi } from "viem"
-import { arbitrum } from "viem/chains"
+import { sepolia } from "viem/chains"
 import { useAccount, useSwitchChain } from "wagmi"
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
 import { COMMUNE_OS_ABI, COMMUNE_OS_ADDRESS } from "@/lib/contracts"
@@ -71,7 +71,7 @@ export function useContractTransaction() {
         setIsExecuting(true)
 
         // 1. Validate chain
-        if (chain?.id !== arbitrum.id) {
+        if (chain?.id !== sepolia.id) {
           debug.log("Wrong chain detected, prompting switch...")
 
           toast({
@@ -81,7 +81,7 @@ export function useContractTransaction() {
           })
 
           try {
-            await switchChain({ chainId: arbitrum.id })
+            await switchChain({ chainId: sepolia.id })
             debug.log("Switched to Arbitrum chain")
           } catch (switchError) {
             const error = new Error("User rejected network switch")
@@ -109,7 +109,7 @@ export function useContractTransaction() {
         const txHash = await sendTransactionAsync({
           to: COMMUNE_OS_ADDRESS,
           data,
-          chain: arbitrum,
+          chain: sepolia,
           // @ts-ignore - wagmi types don't include gasSponsorship yet
           gasSponsorship: {
             paymasterAddress: PAYMASTER_ADDRESS,

@@ -13,15 +13,19 @@ import {
 import { useState } from "react"
 
 export function useWallet() {
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
+  const [isConfirming, setIsConfirming] = useState(false)
+  const [isConfirmed, setIsConfirmed] = useState(false)
+
+  // SSR safety check
+  const isSSR = typeof window === 'undefined'
+  
   const { wallets } = useWallets()
   const privyAddress = wallets[0]?.address as `0x${string}` | undefined
 
   const { address: wagmiAddress, isConnected: wagmiConnected, status } = useAccount()
   const { disconnect } = useDisconnect()
   const { sendTransaction } = useSendTransaction()
-  const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
-  const [isConfirming, setIsConfirming] = useState(false)
-  const [isConfirmed, setIsConfirmed] = useState(false)
 
   const address = privyAddress || wagmiAddress
   const isConnected = !!privyAddress || wagmiAddress
@@ -31,6 +35,7 @@ export function useWallet() {
     abi: ERC20_ABI,
     functionName: "allowance",
     args: address ? [address, COLLATERAL_MANAGER_ADDRESS] : undefined,
+    enabled: !isSSR && !!address,
   })
 
   const executeTransaction = async (functionName: string, args: any[]) => {

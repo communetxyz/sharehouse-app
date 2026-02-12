@@ -4,15 +4,23 @@ import { PrivyProvider } from "@privy-io/react-auth"
 import { WagmiProvider } from "@privy-io/wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type { ReactNode } from "react"
-import { arbitrum } from "wagmi/chains"
+import { sepolia } from "wagmi/chains"
 import { config } from "./wagmi-config"
 
 const queryClient = new QueryClient()
 
 export function Web3Provider({ children }: { children: ReactNode }) {
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""
+  
+  if (!appId) {
+    // Use a placeholder app ID for build-time prerendering
+    // The real app ID should be set via NEXT_PUBLIC_PRIVY_APP_ID env var in production
+    console.warn("NEXT_PUBLIC_PRIVY_APP_ID is not set")
+  }
+  
   return (
     <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
+      appId={appId}
       config={{
         loginMethods: [
           "email",
@@ -40,7 +48,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         externalWallets: {
           showWalletUIs: false,
         },
-        supportedChains: [arbitrum],
+        supportedChains: [sepolia],
       }}
     >
       <QueryClientProvider client={queryClient}>
