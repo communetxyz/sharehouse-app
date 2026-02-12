@@ -14,9 +14,10 @@ import { useI18n } from "@/lib/i18n/context"
 import { useCommuneData } from "@/hooks/use-commune-data"
 import { useExpenses, useCreateExpense, useMarkExpensePaid, useSetExpenseAmount } from "@/hooks/use-expenses"
 import { useWallet } from "@/hooks/use-wallet"
-import { Loader2, Plus, Receipt, DollarSign, Check, Edit, ArrowLeft, Calendar } from "lucide-react"
+import { Loader2, Plus, Receipt, DollarSign, Check, Edit, ArrowLeft, Calendar, ShoppingCart } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { ShoppingList } from "@/components/shopping-list"
 
 export default function ExpensesPage() {
   // SSR safety check
@@ -269,7 +270,17 @@ export default function ExpensesPage() {
           </Dialog>
         </div>
 
+        {/* Shopping List */}
+        <div className="mb-8">
+          <ShoppingList />
+        </div>
+
         {/* Expenses List */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-serif text-charcoal mb-2">All Expenses</h2>
+          <p className="text-charcoal/70">Complete expense history and management</p>
+        </div>
+        
         {expensesLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-sage" />

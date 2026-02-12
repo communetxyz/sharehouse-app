@@ -21,6 +21,7 @@ import { NotificationCenter } from "@/components/notification-center"
 import { ChatbotPanel } from "@/components/chatbot-panel"
 import { GoogleCalendarSync } from "@/components/google-calendar-sync"
 import { DisputeResolution } from "@/components/dispute-resolution"
+import { ShoppingList } from "@/components/shopping-list"
 
 export default function DashboardPage() {
   // SSR safety check
@@ -369,22 +370,25 @@ export default function DashboardPage() {
           </TabsContent>
 
           <TabsContent value="expenses" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-serif">Expense Management</CardTitle>
-                <CardDescription>Track and split expenses with commune members</CardDescription>
-              </CardHeader>
-              <CardContent className="text-center py-8">
-                <Receipt className="w-16 h-16 text-charcoal/30 mx-auto mb-4" />
-                <p className="text-charcoal/70 mb-4">Manage commune expenses and bill splitting</p>
-                <Link href="/dashboard/expenses">
-                  <Button className="bg-sage hover:bg-sage/90 text-cream">
-                    <Receipt className="w-4 h-4 mr-2" />
-                    Go to Expenses
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-serif">Expense Management</CardTitle>
+                  <CardDescription>Track and split expenses with commune members</CardDescription>
+                </CardHeader>
+                <CardContent className="text-center py-8">
+                  <Receipt className="w-16 h-16 text-charcoal/30 mx-auto mb-4" />
+                  <p className="text-charcoal/70 mb-4">Manage commune expenses and bill splitting</p>
+                  <Link href="/dashboard/expenses">
+                    <Button className="bg-sage hover:bg-sage/90 text-cream">
+                      <Receipt className="w-4 h-4 mr-2" />
+                      Go to Expenses
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+              <ShoppingList />
+            </div>
           </TabsContent>
 
           <TabsContent value="guests" className="space-y-6">

@@ -240,12 +240,12 @@ export function useApproveGuest() {
     hash,
   })
 
-  const approveGuest = (inviteId: string) => {
+  const approveGuest = (communeId: string, inviteId: string) => {
     writeContract({
       address: COMMUNE_OS_ADDRESS,
       abi: COMMUNE_OS_ABI,
       functionName: "approveGuest",
-      args: [BigInt(inviteId)],
+      args: [BigInt(communeId), BigInt(inviteId)],
     })
   }
 
@@ -266,12 +266,12 @@ export function useCheckInGuest() {
     hash,
   })
 
-  const checkInGuest = (inviteId: string) => {
+  const checkInGuest = (communeId: string, inviteId: string) => {
     writeContract({
       address: COMMUNE_OS_ADDRESS,
       abi: COMMUNE_OS_ABI,
       functionName: "checkInGuest",
-      args: [BigInt(inviteId)],
+      args: [BigInt(communeId), BigInt(inviteId)],
     })
   }
 
@@ -292,12 +292,12 @@ export function useCheckOutGuest() {
     hash,
   })
 
-  const checkOutGuest = (inviteId: string) => {
+  const checkOutGuest = (communeId: string, inviteId: string) => {
     writeContract({
       address: COMMUNE_OS_ADDRESS,
       abi: COMMUNE_OS_ABI,
       functionName: "checkOutGuest",
-      args: [BigInt(inviteId)],
+      args: [BigInt(communeId), BigInt(inviteId)],
     })
   }
 

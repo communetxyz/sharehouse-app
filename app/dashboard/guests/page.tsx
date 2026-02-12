@@ -76,21 +76,24 @@ export default function GuestsPage() {
   }
 
   const handleApprove = (inviteId: string) => {
-    approveGuest(inviteId)
+    if (!commune) return
+    approveGuest(commune.id, inviteId)
     setTimeout(() => {
       refreshGuests()
     }, 3000)
   }
 
   const handleCheckIn = (inviteId: string) => {
-    checkInGuest(inviteId)
+    if (!commune) return
+    checkInGuest(commune.id, inviteId)
     setTimeout(() => {
       refreshGuests()
     }, 3000)
   }
 
   const handleCheckOut = (inviteId: string) => {
-    checkOutGuest(inviteId)
+    if (!commune) return
+    checkOutGuest(commune.id, inviteId)
     setTimeout(() => {
       refreshGuests()
     }, 3000)
